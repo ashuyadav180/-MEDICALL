@@ -1,24 +1,42 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { fetchMedicineById } from '../api/medicineApi'; 
-import { useCart } from '../store/CartContext'; 
+import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
+import { fetchMedicineById, getCachedMedicineById, primeMedicineCache } from '../api/medicineApi';
+import { useCart } from '../store/CartContext';
 
 function MedicineDetails() {
-  const { id } = useParams(); 
+  const { id } = useParams();
   const navigate = useNavigate();
-  const [medicine, setMedicine] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const { addItem, items } = useCart(); 
+  const location = useLocation();
+  const initialMedicine = location.state?.medicine || getCachedMedicineById(id);
+  const [medicine, setMedicine] = useState(initialMedicine || null);
+  const [isLoading, setIsLoading] = useState(!initialMedicine);
+  const { addItem, items } = useCart();
 
   useEffect(() => {
     const getMedicine = async () => {
-      setIsLoading(true);
-      const data = await fetchMedicineById(id);
-      setMedicine(data);
-      setIsLoading(false);
+      const cachedMedicine = location.state?.medicine || getCachedMedicineById(id);
+      if (cachedMedicine) {
+        setMedicine(cachedMedicine);
+        setIsLoading(false);
+      } else {
+        setIsLoading(true);
+      }
+
+      try {
+        const data = await fetchMedicineById(id);
+        setMedicine(data);
+        primeMedicineCache(data);
+      } catch (error) {
+        console.error('Failed to load medicine details:', error);
+        if (!cachedMedicine) {
+          setMedicine(null);
+        }
+      } finally {
+        setIsLoading(false);
+      }
     };
     getMedicine();
-  }, [id]);
+  }, [id, location.state]);
 
   const handleAddToCart = () => {
     if (!medicine) return;
@@ -26,7 +44,7 @@ function MedicineDetails() {
       id: medicine.id,
       name: medicine.name,
       price: medicine.price,
-      quantity: 1, 
+      quantity: 1,
     });
   };
 
@@ -37,34 +55,53 @@ function MedicineDetails() {
         <h1 style={{ fontSize: '4rem', color: 'var(--green)' }}>404</h1>
         <h2 style={{ marginBottom: '20px' }}>Medicine Not Found</h2>
         <button onClick={() => navigate('/')} className="add-btn" style={{ padding: '12px 30px' }}>
-            Back to Shop
+          Back to Shop
         </button>
       </div>
     );
   }
 
-  const cartItem = items.find(i => i.id === medicine.id);
+  const cartItem = items.find((i) => i.id === medicine.id);
   const getBadgeClass = (category) => `med-badge badge-${category || 'other'}`;
 
   return (
     <div className="main-content">
-      <button className="back-btn" onClick={() => navigate(-1)}>← Back</button>
-      
+      <button className="back-btn" onClick={() => navigate(-1)}>Back</button>
+
       <div className="med-detail-card" style={{ background: 'var(--card)', border: '1.5px solid var(--border)', borderRadius: '20px', padding: '30px', display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '40px', marginTop: '20px', boxShadow: 'var(--shadow)' }}>
-        
         <div style={{ background: 'var(--bg)', borderRadius: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '5rem' }}>
-          💊
+          Pill
         </div>
 
         <div>
-           <span className={getBadgeClass(medicine.category)} style={{ fontSize: '0.8rem' }}>
+          <span className={getBadgeClass(medicine.category)} style={{ fontSize: '0.8rem' }}>
             {medicine.category}
           </span>
           <h1 style={{ color: 'var(--green)', fontSize: '2rem', fontWeight: 800, margin: '10px 0' }}>{medicine.name}</h1>
           <p style={{ color: 'var(--muted)', fontSize: '1.1rem', marginBottom: '20px' }}>{medicine.description}</p>
-          
+
+          {(medicine.manufacturer || medicine.sourceName) && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '20px' }}>
+              {medicine.manufacturer && (
+                <span style={{ background: '#eef6ff', color: '#175ea8', padding: '6px 12px', borderRadius: '999px', fontWeight: 700, fontSize: '0.85rem' }}>
+                  Maker: {medicine.manufacturer}
+                </span>
+              )}
+              {medicine.sourceName && medicine.sourceUrl && (
+                <a
+                  href={medicine.sourceUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{ background: '#f4f8ef', color: 'var(--green)', padding: '6px 12px', borderRadius: '999px', fontWeight: 700, fontSize: '0.85rem', textDecoration: 'none' }}
+                >
+                  Source: {medicine.sourceName}
+                </a>
+              )}
+            </div>
+          )}
+
           <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '30px', padding: '20px 0', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
-            <span style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--text)' }}>₹{medicine.price.toFixed(2)}</span>
+            <span style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--text)' }}>Rs.{medicine.price.toFixed(2)}</span>
             <span style={{ background: 'var(--green-pale)', color: 'var(--green)', padding: '5px 15px', borderRadius: '20px', fontWeight: 700, fontSize: '0.9rem' }}>
               {medicine.stock > 0 ? 'In Stock' : 'Out of Stock'}
             </span>
@@ -76,8 +113,8 @@ function MedicineDetails() {
                 View in Cart ({cartItem.quantity})
               </Link>
             ) : (
-              <button 
-                onClick={handleAddToCart} 
+              <button
+                onClick={handleAddToCart}
                 disabled={medicine.stock === 0}
                 className="checkout-btn"
                 style={{ flex: 1, margin: 0 }}
@@ -92,8 +129,8 @@ function MedicineDetails() {
       <div style={{ marginTop: '40px', padding: '30px', background: 'var(--card)', border: '1.5px solid var(--border)', borderRadius: '20px' }}>
         <h3 className="section-title" style={{ border: 'none', padding: 0 }}>Product Information & Usage</h3>
         <p style={{ color: 'var(--muted)', lineHeight: '1.8' }}>
-          This medicine ({medicine.name}) is primarily used for {medicine.description.toLowerCase()}. 
-          As with all healthcare products, please ensure you follow the prescribed dosage or consult with a healthcare professional before use. 
+          This medicine ({medicine.name}) is primarily used for {medicine.description.toLowerCase()}.
+          As with all healthcare products, please ensure you follow the prescribed dosage or consult with a healthcare professional before use.
           Keep out of reach of children and store in a cool, dry place.
         </p>
       </div>

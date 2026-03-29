@@ -6,6 +6,7 @@ dist/
 .env.*.local
 backend/.env
 backend/uploads/
+backend/*.log
 medical-shop/dist/
 medical-shop/.env
 medical-shop/.env.local

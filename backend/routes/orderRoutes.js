@@ -5,6 +5,7 @@ const {
   getOrderById,
   updateOrderStatus,
   getOrders,
+  getMyOrders,
   getAnalytics,
   assignOrder,
   getPartnerOrders,
@@ -15,7 +16,8 @@ const { upload } = require('../config/cloudinary');
 // Protected order placement
 router.post('/', protect, upload.single('prescription'), addOrderItems); 
 
-// Delivery / Admin views
+// Customer / Delivery / Admin views
+router.get('/my', protect, getMyOrders);
 router.get('/my/tasks', protect, allowRoles('delivery_person', 'admin'), getPartnerOrders);
 
 // Admin only

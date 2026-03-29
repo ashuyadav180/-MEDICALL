@@ -1,4 +1,7 @@
 const Order = require('../models/Order');
+const Medicine = require('../models/Medicine');
+const { sendNewOrderWhatsApp } = require('../services/whatsappService');
+const { sendOrderNotificationEmail } = require('../services/emailService');
 
 const getBackendBaseUrl = (req) =>
   process.env.BACKEND_PUBLIC_URL || `${req.protocol}://${req.get('host')}`;
@@ -36,6 +39,25 @@ const addOrderItems = async (req, res) => {
       });
     }
 
+    const medicines = await Medicine.find({
+      _id: { $in: parsedOrderItems.map((item) => item.medicine) },
+    });
+    const medicineMap = new Map(medicines.map((medicine) => [String(medicine._id), medicine]));
+
+    for (const item of parsedOrderItems) {
+      const medicine = medicineMap.get(String(item.medicine));
+
+      if (!medicine) {
+        return res.status(400).json({ message: `Medicine not found for item ${item.name}` });
+      }
+
+      if (medicine.stock < item.quantity) {
+        return res.status(400).json({
+          message: `${medicine.name} only has ${medicine.stock} item(s) left in stock.`,
+        });
+      }
+    }
+
     const order = new Order({
       user: req.user ? req.user._id : null,
       customerName,
@@ -49,7 +71,14 @@ const addOrderItems = async (req, res) => {
       prescriptionImage,
     });
 
+    for (const item of parsedOrderItems) {
+      const medicine = medicineMap.get(String(item.medicine));
+      medicine.stock -= item.quantity;
+      await medicine.save();
+    }
+
     const createdOrder = await order.save();
+    const backendBaseUrl = getBackendBaseUrl(req);
 
     const io = req.app.get('io');
     if (io) {
@@ -61,6 +90,21 @@ const addOrderItems = async (req, res) => {
         status: createdOrder.status,
       });
     }
+
+    sendNewOrderWhatsApp({
+      order: createdOrder,
+      backendBaseUrl,
+    }).catch((error) => {
+      console.error(`WhatsApp notification failed for order ${createdOrder._id}: ${error.message}`);
+    });
+
+    sendOrderNotificationEmail({
+      to: process.env.ORDER_NOTIFICATION_EMAIL,
+      order: createdOrder,
+      backendBaseUrl,
+    }).catch((error) => {
+      console.error(`Email notification failed for order ${createdOrder._id}: ${error.message}`);
+    });
 
     res.status(201).json(createdOrder);
   } catch (error) {
@@ -75,6 +119,13 @@ const getOrderById = async (req, res) => {
     const order = await Order.findById(req.params.id).populate('user', 'name email');
 
     if (order) {
+      const isAdmin = req.user?.role === 'admin';
+      const isOwner = req.user && order.user && String(order.user._id) === String(req.user._id);
+
+      if (req.user && !isAdmin && !isOwner) {
+        return res.status(403).json({ message: 'Not authorized to view this order' });
+      }
+
       res.json(order);
     } else {
       res.status(404).json({ message: 'Order not found' });
@@ -132,6 +183,17 @@ const updateOrderStatus = async (req, res) => {
 const getOrders = async (req, res) => {
   try {
     const orders = await Order.find({}).sort({ createdAt: -1 });
+    res.json(orders);
+  } catch (error) {
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+// @desc    Get logged in user orders
+// @route   GET /api/orders/my
+const getMyOrders = async (req, res) => {
+  try {
+    const orders = await Order.find({ user: req.user._id }).sort({ createdAt: -1 });
     res.json(orders);
   } catch (error) {
     res.status(500).json({ message: 'Server Error' });
@@ -234,6 +296,7 @@ module.exports = {
   getOrderById,
   updateOrderStatus,
   getOrders,
+  getMyOrders,
   getAnalytics,
   assignOrder,
   getPartnerOrders,

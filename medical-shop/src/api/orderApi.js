@@ -38,6 +38,30 @@ export const fetchOrders = async () => {
     }
 };
 
+export const fetchMyOrders = async () => {
+    try {
+        const response = await axios.get(`${API_URL}/my`, {
+            headers: getAuthHeaders()
+        });
+        return response.data.map(o => ({ ...o, id: o._id }));
+    } catch (error) {
+        console.error('Error fetching my orders:', error);
+        throw error;
+    }
+};
+
+export const fetchOrderById = async (orderId) => {
+    try {
+        const response = await axios.get(`${API_URL}/${orderId}`, {
+            headers: getAuthHeaders()
+        });
+        return { ...response.data, id: response.data._id };
+    } catch (error) {
+        console.error('Error fetching order details:', error);
+        throw error;
+    }
+};
+
 // Update order status (Admin / Delivery Partner)
 export const updateOrderStatus = async (orderId, status) => {
     try {

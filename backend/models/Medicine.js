@@ -14,6 +14,21 @@ const medicineSchema = mongoose.Schema(
       type: String,
       required: [true, 'Please add a description'],
     },
+    manufacturer: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    sourceName: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    sourceUrl: {
+      type: String,
+      default: '',
+      trim: true,
+    },
     category: {
       type: String,
       required: [true, 'Please select a category'],

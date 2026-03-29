@@ -5,7 +5,8 @@ const Medicine = require('../models/Medicine');
 // @access  Public
 const getMedicines = async (req, res) => {
   try {
-    const medicines = await Medicine.find({});
+    const medicines = await Medicine.find({}).sort({ name: 1 }).lean();
+    res.set('Cache-Control', 'public, max-age=60');
     res.json(medicines);
   } catch (error) {
     res.status(500).json({ message: 'Server Error' });
@@ -17,9 +18,10 @@ const getMedicines = async (req, res) => {
 // @access  Public
 const getMedicineById = async (req, res) => {
   try {
-    const medicine = await Medicine.findById(req.params.id);
+    const medicine = await Medicine.findById(req.params.id).lean();
 
     if (medicine) {
+      res.set('Cache-Control', 'public, max-age=60');
       res.json(medicine);
     } else {
       res.status(404).json({ message: 'Medicine not found' });

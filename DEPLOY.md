@@ -17,6 +17,14 @@
    - `FIREBASE_PROJECT_ID`
    - `FIREBASE_CLIENT_EMAIL`
    - `FIREBASE_PRIVATE_KEY`
+   - `BREVO_API_KEY`
+   - `BREVO_SENDER_EMAIL`
+   - `BREVO_SENDER_NAME`
+   - `ORDER_NOTIFICATION_EMAIL`
+   - `WHATSAPP_ACCESS_TOKEN`
+   - `WHATSAPP_PHONE_NUMBER_ID`
+   - `WHATSAPP_NOTIFY_TO`
+   - `WHATSAPP_GRAPH_VERSION`
 
 ## Frontend on Vercel
 
@@ -39,3 +47,6 @@
 - `VITE_API_URL` and `VITE_SOCKET_URL` should point to your Render backend URL.
 - `CLIENT_URLS` should include your Vercel frontend URL, comma-separated if more than one.
 - `BACKEND_PUBLIC_URL` should be your Render backend URL.
+- `BREVO_SENDER_EMAIL` must be a verified Brevo sender email.
+- `ORDER_NOTIFICATION_EMAIL` is where new-order email alerts should be sent.
+- WhatsApp vars are optional until you activate Meta Cloud API credentials.
