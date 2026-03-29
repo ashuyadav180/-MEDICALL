@@ -3,6 +3,7 @@ import { auth, firebase, FIREBASE_IS_CONFIGURED } from '../firebase';
 import { API_BASE_URL } from '../config';
 
 const API_URL = `${API_BASE_URL}/api/auth`;
+const credentialConfig = { withCredentials: true };
 let confirmationResult = null;
 
 const formatPhoneNumber = (phone) => {
@@ -53,7 +54,7 @@ const getAuthHeaders = () => {
  */
 export const loginUser = async ({ email, password }) => {
     try {
-        const response = await axios.post(`${API_URL}/login`, { email, password });
+        const response = await axios.post(`${API_URL}/login`, { email, password }, credentialConfig);
         return {
             token: response.data.token,
             user: response.data, 
@@ -68,7 +69,11 @@ export const loginUser = async ({ email, password }) => {
  */
 export const registerUser = async ({ email, name, mobile, password }) => {
     try {
-        const response = await axios.post(`${API_URL}/register`, { email, name, mobile, password });
+        const response = await axios.post(
+            `${API_URL}/register`,
+            { email, name, mobile, password },
+            credentialConfig
+        );
         return {
             token: response.data.token,
             user: response.data,
@@ -93,7 +98,7 @@ export const sendOTP = async (phone) => {
     }
 
     try {
-        const response = await axios.post(`${API_URL}/send-otp`, { phone });
+        const response = await axios.post(`${API_URL}/send-otp`, { phone }, credentialConfig);
         return response.data;
     } catch (error) {
         throw new Error(error.response?.data?.message || "Failed to send OTP.");
@@ -114,10 +119,14 @@ export const verifyOTP = async ({ phone, otp, profile }) => {
             const idToken = await firebaseUser.user.getIdToken();
             confirmationResult = null;
 
-            const response = await axios.post(`${API_URL}/firebase-phone`, {
-                idToken,
-                profile,
-            });
+            const response = await axios.post(
+                `${API_URL}/firebase-phone`,
+                {
+                    idToken,
+                    profile,
+                },
+                credentialConfig
+            );
 
             return {
                 token: response.data.token,
@@ -129,7 +138,7 @@ export const verifyOTP = async ({ phone, otp, profile }) => {
     }
 
     try {
-        const response = await axios.post(`${API_URL}/verify-otp`, { phone, otp });
+        const response = await axios.post(`${API_URL}/verify-otp`, { phone, otp }, credentialConfig);
         return {
             token: response.data.token,
             user: response.data,
@@ -147,7 +156,8 @@ export const isFirebasePhoneAuthEnabled = () => FIREBASE_IS_CONFIGURED;
 export const fetchDeliveryPartners = async () => {
     try {
         const response = await axios.get(`${API_URL}/partners`, {
-            headers: getAuthHeaders()
+            headers: getAuthHeaders(),
+            withCredentials: true,
         });
         return response.data;
     } catch (error) {

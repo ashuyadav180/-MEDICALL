@@ -6,13 +6,16 @@ const generateAccessToken = (id) => jwt.sign({ id }, process.env.JWT_SECRET, { e
 const generateRefreshToken = (id) =>
   jwt.sign({ id }, process.env.JWT_REFRESH_SECRET || 'fallback_refresh_secret', { expiresIn: '7d' });
 
+const isProduction = process.env.NODE_ENV === 'production';
+const refreshCookieOptions = {
+  httpOnly: true,
+  secure: isProduction,
+  sameSite: isProduction ? 'none' : 'lax',
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+};
+
 const setRefreshCookie = (res, refreshToken) => {
-  res.cookie('refreshToken', refreshToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-  });
+  res.cookie('refreshToken', refreshToken, refreshCookieOptions);
 };
 
 const buildAuthResponse = (res, user, statusCode = 200) => {
@@ -98,7 +101,11 @@ const refreshAccessToken = async (req, res) => {
 };
 
 const logoutUser = (req, res) => {
-  res.clearCookie('refreshToken');
+  res.clearCookie('refreshToken', {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
+  });
   res.json({ message: 'Logged out successfully' });
 };
 

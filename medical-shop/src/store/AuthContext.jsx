@@ -43,7 +43,9 @@ export const AuthProvider = ({ children }) => {
 
     const logoutHandler = async () => {
         try {
-            await axios.post(`${API_BASE_URL}/api/auth/logout`);
+            await axios.post(`${API_BASE_URL}/api/auth/logout`, {}, {
+                withCredentials: true
+            });
         } catch (err) {
             console.error("Logout error", err);
         }
