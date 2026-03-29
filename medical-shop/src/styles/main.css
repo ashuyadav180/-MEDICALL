@@ -1,0 +1,145 @@
+body {
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  background-color: #f8f9fa;
+}
+
+.navbar {
+  background: #0d6efd;
+  color: white;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navbar h2 {
+  margin: 0;
+}
+
+.nav-links a {
+  color: white;
+  margin-left: 1rem;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.hero {
+  text-align: center;
+  background: linear-gradient(135deg, #0d6efd, #60a5fa);
+  color: white;
+  padding: 3rem 1rem;
+  border-radius: 0 0 20px 20px;
+}
+
+.hero input.search-bar {
+  width: 60%;
+  padding: 0.8rem;
+  margin-top: 1rem;
+  border-radius: 10px;
+  border: none;
+  font-size: 1rem;
+}
+
+.medicine-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+  padding: 2rem;
+}
+
+.medicine-card {
+  background: white;
+  border-radius: 15px;
+  padding: 1rem;
+  text-align: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.medicine-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+}
+
+.medicine-card img {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+}
+
+.medicine-card h3 {
+  margin: 0.8rem 0 0.3rem;
+}
+
+.medicine-card button {
+  background: #0d6efd;
+  border: none;
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.medicine-card button:hover {
+  background: #0b5ed7;
+}
+
+.footer {
+  background: #f1f1f1;
+  text-align: center;
+  padding: 1rem;
+  color: #555;
+  margin-top: 2rem;
+}
+/* Add this to your main CSS file (e.g., src/index.css or src/App.css) */
+.search-bar-container {
+    margin-bottom: 30px;
+}
+
+.medicine-search-input {
+    width: 100%;
+    max-width: 600px;
+    padding: 12px 15px;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    font-size: 1rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: border-color 0.2s;
+}
+
+.medicine-search-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+}
+
+.no-results {
+    text-align: center;
+    padding: 40px;
+    font-size: 1.2rem;
+    color: var(--color-text-subtle);
+}
+.navbar nav li .active-link {
+    color: var(--color-primary) !important; /* Forces the primary brand color */
+    font-weight: 700; /* Makes it bold */
+    border-bottom: 2px solid var(--color-primary); /* Underline effect */
+    padding-bottom: 3px;
+}
+/* --- CRITICAL MODAL POSITIONING --- */
+
+.modal-backdrop {
+    /* Ensures it covers the ENTIRE browser window */
+    position: fixed !important; 
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7); 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; 
+}

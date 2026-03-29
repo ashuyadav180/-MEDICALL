@@ -1,0 +1,40 @@
+{
+  "header": {
+    "title": "Bablu Medical Store",
+    "delivery_banner": "🚚 Fast village delivery! Order over ₹200 for FREE delivery.",
+    "home": "Home",
+    "medicines": "Medicines",
+    "cart": "Cart",
+    "dashboard": "Owner Dash"
+  },
+  "hero": {
+    "title": "Order Medicine, Get Delivered at Home! 🏠",
+    "subtitle": "No need to go to town. We bring original medicines to your village.",
+    "cta": "See Medicines 💊"
+  },
+  "medicines": {
+    "search_placeholder": "Search medicine (e.g. Paracetamol)...",
+    "add_to_cart": "Add to Cart",
+    "category_all": "All",
+    "category_tablet": "Tablets",
+    "category_syrup": "Syrups",
+    "category_capsule": "Capsules"
+  },
+  "cart": {
+    "title": "Your Cart 🛒",
+    "empty": "Your cart is empty.",
+    "subtotal": "Subtotal",
+    "delivery": "Delivery Fee",
+    "total": "Total",
+    "checkout": "Place Order 📦"
+  },
+  "checkout": {
+    "title": "Place Your Order 📦",
+    "details": "Your Details",
+    "full_name": "Full Name",
+    "mobile": "Mobile Number",
+    "address": "Village / Address",
+    "payment": "Payment Method",
+    "place_order": "Place Order"
+  }
+}

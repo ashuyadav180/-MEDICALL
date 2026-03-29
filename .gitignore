@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.vercel/
+.env
+.env.local
+.env.*.local
+backend/.env
+backend/uploads/
+medical-shop/dist/
+medical-shop/.env
+medical-shop/.env.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
