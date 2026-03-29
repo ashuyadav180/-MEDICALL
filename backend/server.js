@@ -12,13 +12,20 @@ connectDB();
 
 const app = express();
 const server = http.createServer(app);
+const fallbackOrigins = [
+  'http://localhost:5173',
+  'https://medicall-aw84.vercel.app',
+];
 const allowedOrigins = (process.env.CLIENT_URLS || '')
   .split(',')
   .map((origin) => origin.trim())
   .filter(Boolean);
+const corsOrigins = allowedOrigins.length
+  ? [...new Set([...allowedOrigins, ...fallbackOrigins])]
+  : fallbackOrigins;
 const io = new Server(server, {
   cors: {
-    origin: allowedOrigins.length ? allowedOrigins : true,
+    origin: corsOrigins,
     methods: ['GET', 'POST'],
     credentials: true,
   },
@@ -28,7 +35,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
-    origin: allowedOrigins.length ? allowedOrigins : true,
+    origin: corsOrigins,
     credentials: true,
   })
 );
