@@ -383,6 +383,45 @@ const getDeliveryPartners = async (_req, res) => {
   }
 };
 
+const setupDeliveryUser = async (req, res) => {
+  const setupSecret = process.env.SETUP_SECRET;
+  const providedSecret =
+    req.headers['x-setup-secret'] || req.body?.setupSecret || req.query?.setupSecret;
+
+  if (!setupSecret || providedSecret !== setupSecret) {
+    return res.status(403).json({ message: 'Invalid setup secret' });
+  }
+
+  try {
+    const email = 'delivery@bablu.com';
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      user = await User.create({
+        name: 'Delivery Partner',
+        email,
+        password: 'AMIT@937149',
+        role: 'delivery_person',
+        phone: '9876543210',
+      });
+    } else {
+      user.name = 'Delivery Partner';
+      user.password = 'AMIT@937149';
+      user.role = 'delivery_person';
+      user.phone = user.phone || '9876543210';
+      await user.save();
+    }
+
+    return res.json({
+      message: 'Delivery user created or updated successfully',
+      email: user.email,
+      role: user.role,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: 'Failed to setup delivery user' });
+  }
+};
+
 module.exports = {
   registerUser,
   authUser,
@@ -395,4 +434,5 @@ module.exports = {
   verifyOTP,
   forgotPassword,
   resetPassword,
+  setupDeliveryUser,
 };

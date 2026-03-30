@@ -12,6 +12,7 @@ const {
   verifyOTP,
   forgotPassword,
   resetPassword,
+  setupDeliveryUser,
 } = require('../controllers/authController');
 const { protect, admin } = require('../middleware/authMiddleware');
 
@@ -23,6 +24,7 @@ router.post('/forgot-password', forgotPassword);
 router.post('/reset-password', resetPassword);
 router.post('/refresh', refreshAccessToken);
 router.post('/logout', logoutUser);
+router.post('/setup-delivery-user', setupDeliveryUser);
 
 router.get('/profile', protect, getUserProfile);
 router.put('/profile', protect, updateUserProfile);
