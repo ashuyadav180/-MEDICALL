@@ -14,6 +14,7 @@ const app = express();
 const server = http.createServer(app);
 const fallbackOrigins = [
   'http://localhost:5173',
+  'http://localhost:5174',
   'https://medicall-aw84.vercel.app',
 ];
 const allowedOrigins = (process.env.CLIENT_URLS || '')

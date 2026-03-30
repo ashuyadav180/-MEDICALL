@@ -33,6 +33,95 @@ const formatMedicineCardData = (medicine) => {
   };
 };
 
+function MedicineCard({ medicine, addItem, t }) {
+  const [isAdded, setIsAdded] = useState(false);
+  const display = formatMedicineCardData(medicine);
+
+  const handleAdd = () => {
+    addItem({ ...medicine, quantity: 1 });
+    setIsAdded(true);
+    setTimeout(() => setIsAdded(false), 2000);
+  };
+
+  return (
+    <div key={medicine.id} className="medicine-card medicine-card-shop">
+      <div
+        className="medicine-visual"
+        style={{ background: `linear-gradient(180deg, #ffffff 0%, ${display.theme.glow} 100%)` }}
+      >
+        <span className="medicine-badge-shop">{medicine.category}</span>
+        <img
+          src={getMedicineImage(medicine)}
+          alt={medicine.name}
+          className="medicine-photo"
+          loading="lazy"
+          onError={(e) => {
+            e.target.onerror = null; 
+            e.target.src = getMedicineImage({ ...medicine, imageUrl: '' });
+          }}
+        />
+      </div>
+
+      <h3 className="med-name med-name-shop">{medicine.name}</h3>
+      <p className="medicine-subcopy">{display.packLabel}</p>
+      {medicine.dosage && (
+        <p className="medicine-subcopy medicine-subcopy-dose">{medicine.dosage}</p>
+      )}
+      <p className="medicine-subcopy medicine-subcopy-muted">{display.manufacturer}</p>
+
+      <div className="medicine-rating-row">
+        <span className="medicine-stars">★★★★★</span>
+        <span className="medicine-rating-text">{display.rating}</span>
+        <span className="medicine-rating-count">({display.reviewCount})</span>
+      </div>
+
+      <div className="medicine-delivery">{display.deliveryText}</div>
+      <div
+        className={`medicine-stock-note ${medicine.stock > 0 ? 'is-available' : 'is-empty'}`}
+      >
+        {display.stockText}
+      </div>
+
+      <div className="medicine-price-block">
+        <span className="medicine-price-shop">{formatPrice(medicine.price)}</span>
+        {display.discountPercent > 0 && (
+          <>
+            <span className="medicine-mrp-shop">{formatPrice(display.mrp)}</span>
+            <span className="medicine-discount-shop">{display.discountPercent}% off</span>
+          </>
+        )}
+      </div>
+
+      <div className="med-foot med-foot-shop">
+        <Link
+          to={`/medicine/${medicine.id}`}
+          state={{ medicine }}
+          className="med-link-btn"
+          onMouseEnter={() => primeMedicineCache(medicine)}
+          onFocus={() => primeMedicineCache(medicine)}
+        >
+          View
+        </Link>
+        <button
+          className={`add-to-cart-btn ${isAdded ? 'added' : ''}`}
+          disabled={medicine.stock === 0}
+          onClick={handleAdd}
+        >
+          {isAdded ? (
+            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              ✓ Added
+            </span>
+          ) : medicine.stock > 0 ? (
+            t('medicines.add_to_cart')
+          ) : (
+            'Unavailable'
+          )}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function Medicines() {
   const { t } = useTranslation();
   const { addItem } = useCart();
@@ -137,68 +226,9 @@ function Medicines() {
         {filteredMedicines.length === 0 ? (
           <div className="no-results">No medicines found "{searchQuery}"</div>
         ) : (
-          filteredMedicines.map((medicine) => {
-            const display = formatMedicineCardData(medicine);
-
-            return (
-              <div key={medicine.id} className="medicine-card medicine-card-shop">
-                <div className="medicine-visual" style={{ background: `linear-gradient(180deg, #ffffff 0%, ${display.theme.glow} 100%)` }}>
-                  <span className="medicine-badge-shop">{medicine.category}</span>
-                  <img
-                    src={getMedicineImage(medicine)}
-                    alt={medicine.name}
-                    className="medicine-photo"
-                    loading="lazy"
-                  />
-                </div>
-
-                <h3 className="med-name med-name-shop">{medicine.name}</h3>
-                <p className="medicine-subcopy">{display.packLabel}</p>
-                {medicine.dosage && <p className="medicine-subcopy medicine-subcopy-dose">{medicine.dosage}</p>}
-                <p className="medicine-subcopy medicine-subcopy-muted">{display.manufacturer}</p>
-
-                <div className="medicine-rating-row">
-                  <span className="medicine-stars">★★★★★</span>
-                  <span className="medicine-rating-text">{display.rating}</span>
-                  <span className="medicine-rating-count">({display.reviewCount})</span>
-                </div>
-
-                <div className="medicine-delivery">{display.deliveryText}</div>
-                <div className={`medicine-stock-note ${medicine.stock > 0 ? 'is-available' : 'is-empty'}`}>
-                  {display.stockText}
-                </div>
-
-                <div className="medicine-price-block">
-                  <span className="medicine-price-shop">{formatPrice(medicine.price)}</span>
-                  {display.discountPercent > 0 && (
-                    <>
-                      <span className="medicine-mrp-shop">{formatPrice(display.mrp)}</span>
-                      <span className="medicine-discount-shop">{display.discountPercent}% off</span>
-                    </>
-                  )}
-                </div>
-
-                <div className="med-foot med-foot-shop">
-                  <Link
-                    to={`/medicine/${medicine.id}`}
-                    state={{ medicine }}
-                    className="med-link-btn"
-                    onMouseEnter={() => primeMedicineCache(medicine)}
-                    onFocus={() => primeMedicineCache(medicine)}
-                  >
-                    View
-                  </Link>
-                  <button
-                    className="add-to-cart-btn"
-                    disabled={medicine.stock === 0}
-                    onClick={() => addItem({ ...medicine, quantity: 1 })}
-                  >
-                    {medicine.stock > 0 ? t('medicines.add_to_cart') : 'Unavailable'}
-                  </button>
-                </div>
-              </div>
-            );
-          })
+          filteredMedicines.map((medicine) => (
+            <MedicineCard key={medicine.id} medicine={medicine} addItem={addItem} t={t} />
+          ))
         )}
       </div>
     </div>
