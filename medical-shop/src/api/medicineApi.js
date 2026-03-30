@@ -164,9 +164,9 @@ export const fetchMedicineById = async (id) => {
 };
 
 // Add a new medicine (Admin only)
-export const addMedicine = async (newMedicine) => {
+export const addMedicine = async (medicineData) => {
     try {
-        const response = await axios.post(API_URL, newMedicine, {
+        const response = await axios.post(API_URL, medicineData, {
             headers: getAuthHeaders()
         });
         const medicine = normalizeMedicine(response.data);
@@ -180,9 +180,9 @@ export const addMedicine = async (newMedicine) => {
 };
 
 // Update an existing medicine (Admin only)
-export const updateMedicine = async (updatedMedicine) => {
+export const updateMedicine = async (id, medicineData) => {
     try {
-        const response = await axios.put(`${API_URL}/${updatedMedicine.id}`, updatedMedicine, {
+        const response = await axios.put(`${API_URL}/${id}`, medicineData, {
             headers: getAuthHeaders()
         });
         const medicine = normalizeMedicine(response.data);

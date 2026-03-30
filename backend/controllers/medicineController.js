@@ -67,13 +67,14 @@ const createMedicine = async (req, res) => {
       manufacturer,
       sourceName,
       sourceUrl,
-      imageUrl,
       dosage,
       packQuantity,
       packUnit,
       category,
       stock,
     } = req.body;
+
+    const imageUrl = req.file ? req.file.path : req.body.imageUrl;
 
     const medicine = new Medicine({
       name,
@@ -121,13 +122,18 @@ const updateMedicine = async (req, res) => {
     const medicine = await Medicine.findById(req.params.id);
 
     if (medicine) {
+      if (req.file) {
+        medicine.imageUrl = req.file.path;
+      } else if (req.body.imageUrl !== undefined) {
+        medicine.imageUrl = req.body.imageUrl;
+      }
+      
       medicine.name = name ?? medicine.name;
       medicine.price = price ?? medicine.price;
       medicine.description = description ?? medicine.description;
       medicine.manufacturer = manufacturer ?? medicine.manufacturer;
       medicine.sourceName = sourceName ?? medicine.sourceName;
       medicine.sourceUrl = sourceUrl ?? medicine.sourceUrl;
-      medicine.imageUrl = imageUrl ?? medicine.imageUrl;
       medicine.dosage = dosage ?? medicine.dosage;
       medicine.packQuantity = packQuantity ?? medicine.packQuantity;
       medicine.packUnit = packUnit ?? medicine.packUnit;

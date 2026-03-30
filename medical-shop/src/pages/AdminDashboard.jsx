@@ -189,6 +189,8 @@ const ManageOrders = ({ orders, setOrders, partners }) => {
 const ManageProductsLayout = ({ products, setProducts }) => {
     const [isEditing, setIsEditing] = useState(null); 
     const [form, setForm] = useState({});
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [previewUrl, setPreviewUrl] = useState(null);
 
     const normalizeForm = (value) => ({
         ...value,
@@ -201,7 +203,22 @@ const ManageProductsLayout = ({ products, setProducts }) => {
     });
 
     const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
-    const handleEdit = (p) => { setForm(normalizeForm(p)); setIsEditing(p.id); window.scrollTo({top: 0, behavior: 'smooth'}); };
+    
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setSelectedFile(file);
+            setPreviewUrl(URL.createObjectURL(file));
+        }
+    };
+
+    const handleEdit = (p) => { 
+        setForm(normalizeForm(p)); 
+        setIsEditing(p.id); 
+        setSelectedFile(null);
+        setPreviewUrl(p.imageUrl);
+        window.scrollTo({top: 0, behavior: 'smooth'}); 
+    };
 
     const buildPayload = () => ({
         ...form,
@@ -213,17 +230,30 @@ const ManageProductsLayout = ({ products, setProducts }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const payload = buildPayload();
+            const formData = new FormData();
+            Object.keys(form).forEach(key => {
+                if (form[key] !== undefined && form[key] !== null) {
+                    formData.append(key, form[key]);
+                }
+            });
+            
+            if (selectedFile) {
+                formData.append('image', selectedFile);
+            }
+
             if (isEditing) {
-                const updated = await updateMedicine(payload);
+                const updated = await updateMedicine(isEditing, formData);
                 setProducts(products.map(p => p.id === updated.id ? updated : p));
             } else {
-                const added = await addMedicine(payload);
+                const added = await addMedicine(formData);
                 setProducts([...products, added]);
             }
             setIsEditing(null);
             setForm(normalizeForm({}));
-        } catch {
+            setSelectedFile(null);
+            setPreviewUrl(null);
+        } catch (err) {
+            console.error(err);
             alert("Error saving medicine.");
         }
     };
@@ -256,7 +286,28 @@ const ManageProductsLayout = ({ products, setProducts }) => {
                     <option value="other">Other</option>
                 </select>
                 <input name="dosage" placeholder="Strength / Dosage (e.g. 500 mg, 100 ml)" value={form.dosage || ''} onChange={handleChange} style={{ padding: '12px', borderRadius: '10px', border: '1.5px solid var(--border)' }} />
-                <input name="imageUrl" placeholder="Medicine Image URL" value={form.imageUrl || ''} onChange={handleChange} style={{ padding: '12px', borderRadius: '10px', border: '1.5px solid var(--border)' }} />
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--muted)' }}>Medicine Image</label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div style={{ position: 'relative', width: '60px', height: '60px', borderRadius: '10px', overflow: 'hidden', border: '1.5px solid var(--border)', background: '#f7fbf8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            {previewUrl ? (
+                                <img src={previewUrl} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            ) : (
+                                <span style={{ fontSize: '1.2rem' }}>🖼️</span>
+                            )}
+                        </div>
+                        <label style={{ 
+                            flex: 1, padding: '10px', borderRadius: '10px', border: '1.5px dashed var(--green)', 
+                            textAlign: 'center', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 700, color: 'var(--green)',
+                            background: 'var(--green-pale)'
+                        }}>
+                            {selectedFile ? 'Change Image' : 'Upload Image'}
+                            <input type="file" accept="image/*" onChange={handleFileChange} style={{ display: 'none' }} />
+                        </label>
+                    </div>
+                </div>
+
                 <input name="packQuantity" type="number" min="0" placeholder="Pack Quantity (e.g. 10)" value={form.packQuantity || ''} onChange={handleChange} style={{ padding: '12px', borderRadius: '10px', border: '1.5px solid var(--border)' }} />
                 <input name="packUnit" placeholder="Pack Unit (e.g. tablets, capsules, ml, g)" value={form.packUnit || ''} onChange={handleChange} style={{ padding: '12px', borderRadius: '10px', border: '1.5px solid var(--border)' }} />
                 <textarea name="description" placeholder="Description / Use" value={form.description || ''} onChange={handleChange} required style={{ gridColumn: 'span 2', padding: '12px', borderRadius: '10px', border: '1.5px solid var(--border)', minHeight: '80px' }} />
