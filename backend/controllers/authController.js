@@ -24,6 +24,22 @@ const normalizePhone = (phone) => {
 
 const isPhone = (value) => /^\d{10}$/.test(normalizePhone(value));
 
+const getSafeErrorMessage = (error, fallbackMessage = 'Server Error') => {
+  if (!error?.message) {
+    return fallbackMessage;
+  }
+
+  if (
+    error.message.includes('Brevo API error') ||
+    error.message.includes('A valid email is required') ||
+    error.message.includes('missing API key')
+  ) {
+    return error.message;
+  }
+
+  return fallbackMessage;
+};
+
 const setRefreshCookie = (res, refreshToken) => {
   res.cookie('refreshToken', refreshToken, refreshCookieOptions);
 };
@@ -256,7 +272,7 @@ const requestOTP = async (req, res) => {
     console.log(`OTP for ${normalizedPhone}: Your Bablu Medical OTP is ${otp}`);
     return res.json({ message: 'OTP generated for mobile login', channel: 'phone' });
   } catch (error) {
-    return res.status(500).json({ message: 'Server Error' });
+    return res.status(500).json({ message: getSafeErrorMessage(error) });
   }
 };
 
@@ -327,7 +343,7 @@ const forgotPassword = async (req, res) => {
     await sendOtpEmail({ email, name: user.name, otp });
     return res.json({ message: 'Password reset OTP sent to email' });
   } catch (error) {
-    return res.status(500).json({ message: 'Server Error' });
+    return res.status(500).json({ message: getSafeErrorMessage(error) });
   }
 };
 
