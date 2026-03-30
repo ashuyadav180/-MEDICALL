@@ -6,7 +6,7 @@ function OrderConfirmation() {
   const order = location.state?.order;
   const whatsappMsg = location.state?.whatsappMsg;
 
-  const OWNER_WHATSAPP = '919876543210';
+  const OWNER_WHATSAPP = '919371493956';
 
   const sendWhatsApp = () => {
     if (whatsappMsg) {

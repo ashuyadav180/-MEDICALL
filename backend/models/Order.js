@@ -19,6 +19,15 @@ const orderSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    customerAddressDetails: {
+      addressLine1: { type: String, default: '' },
+      area: { type: String, default: '' },
+      city: { type: String, default: '' },
+      state: { type: String, default: '' },
+      pincode: { type: String, default: '' },
+      landmark: { type: String, default: '' },
+      nearby: { type: String, default: '' },
+    },
     orderItems: [
       {
         name: { type: String, required: true },

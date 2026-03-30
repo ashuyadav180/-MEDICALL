@@ -6,6 +6,22 @@ const { sendOrderNotificationEmail } = require('../services/emailService');
 const getBackendBaseUrl = (req) =>
   process.env.BACKEND_PUBLIC_URL || `${req.protocol}://${req.get('host')}`;
 
+const parseAddressDetails = (value) => {
+  if (!value) {
+    return null;
+  }
+
+  if (typeof value === 'object') {
+    return value;
+  }
+
+  try {
+    return JSON.parse(value);
+  } catch {
+    return null;
+  }
+};
+
 // @desc    Create new order
 // @route   POST /api/orders
 const addOrderItems = async (req, res) => {
@@ -14,6 +30,7 @@ const addOrderItems = async (req, res) => {
       customerName,
       customerPhone,
       customerAddress,
+      customerAddressDetails,
       orderItems,
       paymentMethod,
       itemsPrice,
@@ -23,6 +40,7 @@ const addOrderItems = async (req, res) => {
 
     const parsedOrderItems =
       typeof orderItems === 'string' ? JSON.parse(orderItems) : orderItems;
+    const parsedAddressDetails = parseAddressDetails(customerAddressDetails);
     const prescriptionImage = req.file
       ? req.file.path?.startsWith('http')
         ? req.file.path
@@ -63,6 +81,7 @@ const addOrderItems = async (req, res) => {
       customerName,
       customerPhone,
       customerAddress,
+      customerAddressDetails: parsedAddressDetails,
       orderItems: parsedOrderItems,
       paymentMethod,
       itemsPrice,

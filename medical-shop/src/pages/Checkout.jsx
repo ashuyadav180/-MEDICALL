@@ -13,7 +13,13 @@ function Checkout() {
   const [shippingDetails, setShippingDetails] = useState({ 
     fullName: user?.name || '', 
     mobile: '',
-    address: '',
+    addressLine1: '',
+    area: '',
+    city: '',
+    state: '',
+    pincode: '',
+    landmark: '',
+    nearby: '',
   });
 
   const [paymentMethod, setPaymentMethod] = useState('cod');
@@ -27,6 +33,19 @@ function Checkout() {
 
   const handleFileChange = (e) => {
     setPrescriptionFile(e.target.files[0]);
+  };
+
+  const buildFullAddress = (details) => {
+    const parts = [
+      details.addressLine1,
+      details.area,
+      details.city,
+      details.state && details.pincode ? `${details.state} - ${details.pincode}` : details.state || details.pincode,
+      details.landmark ? `Landmark: ${details.landmark}` : '',
+      details.nearby ? `Nearby: ${details.nearby}` : '',
+    ];
+
+    return parts.filter(Boolean).join(', ');
   };
 
   const subtotal = totalAmount;
@@ -58,7 +77,14 @@ function Checkout() {
         return;
     }
 
-    if (!shippingDetails.fullName || !shippingDetails.mobile || !shippingDetails.address) {
+    if (
+      !shippingDetails.fullName ||
+      !shippingDetails.mobile ||
+      !shippingDetails.addressLine1 ||
+      !shippingDetails.city ||
+      !shippingDetails.state ||
+      !shippingDetails.pincode
+    ) {
       setValidationError('Please fill in all required fields.');
       return;
     }
@@ -72,9 +98,19 @@ function Checkout() {
 
       // 1. Prepare FormData for multi-part (File + Data)
       const formData = new FormData();
+      const fullAddress = buildFullAddress(shippingDetails);
       formData.append('customerName', shippingDetails.fullName);
       formData.append('customerPhone', shippingDetails.mobile);
-      formData.append('customerAddress', shippingDetails.address);
+      formData.append('customerAddress', fullAddress);
+      formData.append('customerAddressDetails', JSON.stringify({
+        addressLine1: shippingDetails.addressLine1,
+        area: shippingDetails.area,
+        city: shippingDetails.city,
+        state: shippingDetails.state,
+        pincode: shippingDetails.pincode,
+        landmark: shippingDetails.landmark,
+        nearby: shippingDetails.nearby,
+      }));
       formData.append('paymentMethod', paymentMethod);
       formData.append('itemsPrice', subtotal.toString());
       formData.append('shippingPrice', delivery.toString());
@@ -131,8 +167,36 @@ function Checkout() {
             <input type="tel" name="mobile" placeholder="10-digit mobile number" maxLength="10" value={shippingDetails.mobile} onChange={handleInputChange} required style={{ padding: '12px', border: '1.5px solid var(--border)', borderRadius: '10px', width: '100%' }} />
           </div>
           <div className="form-group" style={{ marginTop: '15px' }}>
-            <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--green)' }}>Village / Address *</label>
-            <textarea name="address" placeholder="Your village name" value={shippingDetails.address} onChange={handleInputChange} required style={{ padding: '12px', border: '1.5px solid var(--border)', borderRadius: '10px', width: '100%', minHeight: '80px' }} />
+            <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--green)' }}>House No / Street / Village *</label>
+            <textarea name="addressLine1" placeholder="House no, street, village or mohalla" value={shippingDetails.addressLine1} onChange={handleInputChange} required style={{ padding: '12px', border: '1.5px solid var(--border)', borderRadius: '10px', width: '100%', minHeight: '80px' }} />
+          </div>
+          <div className="form-group" style={{ marginTop: '15px' }}>
+            <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--green)' }}>Area / Locality</label>
+            <input type="text" name="area" placeholder="Colony, locality, area" value={shippingDetails.area} onChange={handleInputChange} style={{ padding: '12px', border: '1.5px solid var(--border)', borderRadius: '10px', width: '100%' }} />
+          </div>
+          <div className="form-group" style={{ marginTop: '15px', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
+            <div>
+              <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--green)' }}>City / District *</label>
+              <input type="text" name="city" placeholder="City or district" value={shippingDetails.city} onChange={handleInputChange} required style={{ padding: '12px', border: '1.5px solid var(--border)', borderRadius: '10px', width: '100%' }} />
+            </div>
+            <div>
+              <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--green)' }}>State *</label>
+              <input type="text" name="state" placeholder="State" value={shippingDetails.state} onChange={handleInputChange} required style={{ padding: '12px', border: '1.5px solid var(--border)', borderRadius: '10px', width: '100%' }} />
+            </div>
+          </div>
+          <div className="form-group" style={{ marginTop: '15px', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
+            <div>
+              <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--green)' }}>Pincode *</label>
+              <input type="text" name="pincode" placeholder="6-digit pincode" maxLength="6" value={shippingDetails.pincode} onChange={(e) => setShippingDetails({ ...shippingDetails, pincode: e.target.value.replace(/\D/g, '').slice(0, 6) })} required style={{ padding: '12px', border: '1.5px solid var(--border)', borderRadius: '10px', width: '100%' }} />
+            </div>
+            <div>
+              <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--green)' }}>Landmark</label>
+              <input type="text" name="landmark" placeholder="School, temple, chowk" value={shippingDetails.landmark} onChange={handleInputChange} style={{ padding: '12px', border: '1.5px solid var(--border)', borderRadius: '10px', width: '100%' }} />
+            </div>
+          </div>
+          <div className="form-group" style={{ marginTop: '15px' }}>
+            <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--green)' }}>Nearby Place / Extra Direction</label>
+            <input type="text" name="nearby" placeholder="Nearby shop, turn, road, extra direction" value={shippingDetails.nearby} onChange={handleInputChange} style={{ padding: '12px', border: '1.5px solid var(--border)', borderRadius: '10px', width: '100%' }} />
           </div>
         </div>
 

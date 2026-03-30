@@ -7,7 +7,7 @@ const { getSeedMedicines } = require('./data/fdaMedicines');
 dotenv.config();
 
 const users = [
-  { name: 'Bablu Owner', email: 'admin@bablu.com', password: 'admin123', role: 'admin' },
+  { name: 'Bablu Owner', email: 'admin@bablu.com', password: 'AMIT@937149', role: 'admin' },
   { name: 'Ashu Yadav', email: 'ashu@test.com', password: 'password123', role: 'customer' },
 ];
 

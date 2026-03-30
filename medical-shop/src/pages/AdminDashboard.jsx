@@ -73,7 +73,7 @@ const ManageOrders = ({ orders, setOrders, partners }) => {
     };
 
     const sendWhatsApp = (order) => {
-        const OWNER_WHATSAPP = '919876543210';
+        const OWNER_WHATSAPP = '919371493956';
         const itemLines = order.orderItems.map(i => `  • ${i.name} x${i.quantity}`).join('\n');
         const msg = encodeURIComponent(`📋 *Order ID: ${order.id}*\n👤 Name: ${order.customerName}\n📍 Addr: ${order.customerAddress}\n💊 Items:\n${itemLines}\n💰 Total: ₹${order.totalPrice.toFixed(2)}`);
         window.open(`https://wa.me/${OWNER_WHATSAPP}?text=${msg}`, '_blank');
