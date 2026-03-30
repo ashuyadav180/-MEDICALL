@@ -29,6 +29,26 @@ const medicineSchema = mongoose.Schema(
       default: '',
       trim: true,
     },
+    imageUrl: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    dosage: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    packQuantity: {
+      type: Number,
+      default: null,
+      min: 0,
+    },
+    packUnit: {
+      type: String,
+      default: '',
+      trim: true,
+    },
     category: {
       type: String,
       required: [true, 'Please select a category'],
@@ -44,5 +64,8 @@ const medicineSchema = mongoose.Schema(
     timestamps: true,
   }
 );
+
+medicineSchema.index({ name: 1 });
+medicineSchema.index({ category: 1, stock: -1 });
 
 module.exports = mongoose.model('Medicine', medicineSchema);

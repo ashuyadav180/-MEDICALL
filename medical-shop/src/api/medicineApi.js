@@ -28,7 +28,7 @@ const readCache = (key) => {
         }
 
         return parsedValue.data ?? null;
-    } catch (error) {
+    } catch {
         return null;
     }
 };
@@ -46,7 +46,7 @@ const writeCache = (key, data) => {
                 data,
             })
         );
-    } catch (error) {
+    } catch {
         // Ignore cache write failures so the network request still succeeds.
     }
 };
@@ -93,6 +93,19 @@ export const getCachedMedicineById = (id) => {
     return medicineMemoryCache.get(id) || readCache(`${MEDICINE_CACHE_PREFIX}${id}`) || null;
 };
 
+export const getCachedMedicines = () => {
+    const cachedMedicines = medicinesMemoryCache || readCache(MEDICINES_CACHE_KEY);
+    if (cachedMedicines?.length) {
+        medicinesMemoryCache = cachedMedicines;
+        cachedMedicines.forEach((medicine) => {
+            medicineMemoryCache.set(medicine.id, medicine);
+        });
+        return cachedMedicines;
+    }
+
+    return [];
+};
+
 export const primeMedicineCache = (medicine) => {
     if (!medicine?.id) {
         return;
@@ -114,13 +127,10 @@ const getAuthHeaders = () => {
 };
 
 // Fetch all medicines
-export const fetchMedicines = async () => {
-    const cachedMedicines = medicinesMemoryCache || readCache(MEDICINES_CACHE_KEY);
-    if (cachedMedicines?.length) {
-        medicinesMemoryCache = cachedMedicines;
-        cachedMedicines.forEach((medicine) => {
-            medicineMemoryCache.set(medicine.id, medicine);
-        });
+export const fetchMedicines = async (options = {}) => {
+    const { forceRefresh = false } = options;
+    const cachedMedicines = getCachedMedicines();
+    if (!forceRefresh && cachedMedicines.length) {
         return cachedMedicines;
     }
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import { fetchMedicineById, getCachedMedicineById, primeMedicineCache } from '../api/medicineApi';
 import { useCart } from '../store/CartContext';
+import { buildPackLabel, getMedicineImage } from '../utils/medicineDisplay';
 
 function MedicineDetails() {
   const { id } = useParams();
@@ -63,14 +64,19 @@ function MedicineDetails() {
 
   const cartItem = items.find((i) => i.id === medicine.id);
   const getBadgeClass = (category) => `med-badge badge-${category || 'other'}`;
+  const packLabel = buildPackLabel(medicine);
 
   return (
     <div className="main-content">
       <button className="back-btn" onClick={() => navigate(-1)}>Back</button>
 
       <div className="med-detail-card" style={{ background: 'var(--card)', border: '1.5px solid var(--border)', borderRadius: '20px', padding: '30px', display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '40px', marginTop: '20px', boxShadow: 'var(--shadow)' }}>
-        <div style={{ background: 'var(--bg)', borderRadius: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '5rem' }}>
-          Pill
+        <div style={{ background: 'var(--bg)', borderRadius: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+          <img
+            src={getMedicineImage(medicine)}
+            alt={medicine.name}
+            style={{ width: '100%', maxWidth: '320px', maxHeight: '280px', objectFit: 'contain' }}
+          />
         </div>
 
         <div>
@@ -79,6 +85,17 @@ function MedicineDetails() {
           </span>
           <h1 style={{ color: 'var(--green)', fontSize: '2rem', fontWeight: 800, margin: '10px 0' }}>{medicine.name}</h1>
           <p style={{ color: 'var(--muted)', fontSize: '1.1rem', marginBottom: '20px' }}>{medicine.description}</p>
+
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '20px' }}>
+            <span style={{ background: '#eef6ff', color: '#175ea8', padding: '6px 12px', borderRadius: '999px', fontWeight: 700, fontSize: '0.85rem' }}>
+              Pack: {packLabel}
+            </span>
+            {medicine.dosage && (
+              <span style={{ background: '#f5f3ff', color: '#5b21b6', padding: '6px 12px', borderRadius: '999px', fontWeight: 700, fontSize: '0.85rem' }}>
+                Strength: {medicine.dosage}
+              </span>
+            )}
+          </div>
 
           {(medicine.manufacturer || medicine.sourceName) && (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '20px' }}>

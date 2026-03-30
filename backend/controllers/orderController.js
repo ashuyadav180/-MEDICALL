@@ -91,20 +91,27 @@ const addOrderItems = async (req, res) => {
       });
     }
 
-    sendNewOrderWhatsApp({
-      order: createdOrder,
-      backendBaseUrl,
-    }).catch((error) => {
-      console.error(`WhatsApp notification failed for order ${createdOrder._id}: ${error.message}`);
-    });
+    const notificationTasks = [
+      sendNewOrderWhatsApp({
+        order: createdOrder,
+        backendBaseUrl,
+      }),
+      sendOrderNotificationEmail({
+        to: process.env.ORDER_NOTIFICATION_EMAIL,
+        order: createdOrder,
+        backendBaseUrl,
+      }),
+    ];
 
-    sendOrderNotificationEmail({
-      to: process.env.ORDER_NOTIFICATION_EMAIL,
-      order: createdOrder,
-      backendBaseUrl,
-    }).catch((error) => {
-      console.error(`Email notification failed for order ${createdOrder._id}: ${error.message}`);
-    });
+    const [whatsAppResult, emailResult] = await Promise.allSettled(notificationTasks);
+
+    if (whatsAppResult.status === 'rejected') {
+      console.error(`WhatsApp notification failed for order ${createdOrder._id}: ${whatsAppResult.reason.message}`);
+    }
+
+    if (emailResult.status === 'rejected') {
+      console.error(`Email notification failed for order ${createdOrder._id}: ${emailResult.reason.message}`);
+    }
 
     res.status(201).json(createdOrder);
   } catch (error) {

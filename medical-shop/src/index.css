@@ -399,6 +399,13 @@ form select:focus {
   border: 1px solid #eef3ef;
 }
 
+.medicine-photo {
+  width: calc(100% - 28px);
+  height: calc(100% - 28px);
+  object-fit: contain;
+  filter: drop-shadow(0 14px 18px rgba(22, 49, 36, 0.12));
+}
+
 .medicine-badge-shop {
   position: absolute;
   top: 12px;
@@ -492,6 +499,11 @@ form select:focus {
 .medicine-subcopy-muted {
   margin-bottom: 12px;
   color: #7a8798;
+}
+
+.medicine-subcopy-dose {
+  color: var(--blue);
+  font-weight: 700;
 }
 
 .medicine-rating-row {

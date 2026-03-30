@@ -1,31 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { fetchMedicines, primeMedicineCache } from '../api/medicineApi';
+import { fetchMedicines, getCachedMedicines, primeMedicineCache } from '../api/medicineApi';
 import { useCart } from '../store/CartContext';
-
-const CATEGORY_THEMES = {
-  tablet: { accent: '#24458c', glow: '#dbe5ff', label: 'TABLET' },
-  capsule: { accent: '#0f766e', glow: '#d4f6ef', label: 'CAPSULE' },
-  syrup: { accent: '#1d4ed8', glow: '#dbe8ff', label: 'SYRUP' },
-  cream: { accent: '#b42318', glow: '#ffe0de', label: 'CREAM' },
-  drops: { accent: '#7c3aed', glow: '#eadcff', label: 'DROPS' },
-  injection: { accent: '#9a3412', glow: '#ffe6d7', label: 'INJECTION' },
-  default: { accent: '#1a7a4a', glow: '#dff5e7', label: 'MEDICINE' },
-};
+import { buildPackLabel, getMedicineImage, getMedicineTheme } from '../utils/medicineDisplay';
 
 const formatPrice = (value) => `Rs.${Number(value || 0).toFixed(2)}`;
 
 const formatMedicineCardData = (medicine) => {
   const price = Number(medicine.price || 0);
   const stock = Number(medicine.stock || 0);
-  const categoryKey = (medicine.category || '').toLowerCase();
-  const theme = CATEGORY_THEMES[categoryKey] || CATEGORY_THEMES.default;
+  const theme = getMedicineTheme(medicine.category);
   const discountPercent = stock > 20 ? 18 : stock > 10 ? 14 : stock > 0 ? 9 : 0;
   const mrp = discountPercent > 0 ? price / (1 - discountPercent / 100) : price;
   const rating = (4.1 + ((medicine.name?.length || 0) % 8) * 0.1).toFixed(1);
   const reviewCount = 120 + ((medicine.name?.length || 1) * 37) % 2300;
-  const packLabel = medicine.packSize || medicine.pack || medicine.description || 'Standard pack';
+  const packLabel = buildPackLabel(medicine);
   const manufacturer = medicine.manufacturer || 'Trusted healthcare brand';
   const headlineWord = (medicine.name || 'Care').split(' ')[0];
 
@@ -46,8 +36,8 @@ const formatMedicineCardData = (medicine) => {
 function Medicines() {
   const { t } = useTranslation();
   const { addItem } = useCart();
-  const [medicines, setMedicines] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [medicines, setMedicines] = useState(() => getCachedMedicines());
+  const [loading, setLoading] = useState(() => getCachedMedicines().length === 0);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('all');
   const [sortBy, setSortBy] = useState('name');
@@ -55,8 +45,14 @@ function Medicines() {
 
   useEffect(() => {
     const loadMedicines = async () => {
+      const cachedMedicines = getCachedMedicines();
+      if (cachedMedicines.length) {
+        setMedicines(cachedMedicines);
+        setLoading(false);
+      }
+
       try {
-        const data = await fetchMedicines();
+        const data = await fetchMedicines({ forceRefresh: cachedMedicines.length > 0 });
         setMedicines(data);
       } catch (err) {
         console.error('Failed to load medicines:', err);
@@ -148,18 +144,17 @@ function Medicines() {
               <div key={medicine.id} className="medicine-card medicine-card-shop">
                 <div className="medicine-visual" style={{ background: `linear-gradient(180deg, #ffffff 0%, ${display.theme.glow} 100%)` }}>
                   <span className="medicine-badge-shop">{medicine.category}</span>
-                  <div className="medicine-pack-shadow" />
-                  <div
-                    className="medicine-pack"
-                    style={{ '--pack-accent': display.theme.accent, '--pack-glow': display.theme.glow }}
-                  >
-                    <span className="medicine-pack-label">{display.theme.label}</span>
-                    <span className="medicine-pack-name">{display.headlineWord}</span>
-                  </div>
+                  <img
+                    src={getMedicineImage(medicine)}
+                    alt={medicine.name}
+                    className="medicine-photo"
+                    loading="lazy"
+                  />
                 </div>
 
                 <h3 className="med-name med-name-shop">{medicine.name}</h3>
                 <p className="medicine-subcopy">{display.packLabel}</p>
+                {medicine.dosage && <p className="medicine-subcopy medicine-subcopy-dose">{medicine.dosage}</p>}
                 <p className="medicine-subcopy medicine-subcopy-muted">{display.manufacturer}</p>
 
                 <div className="medicine-rating-row">

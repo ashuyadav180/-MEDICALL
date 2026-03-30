@@ -56,7 +56,7 @@ const ManageOrders = ({ orders, setOrders, partners }) => {
         try {
             const updated = await updateOrderStatus(id, newStatus);
             setOrders(prev => prev.map(o => o.id === id ? { ...o, status: updated.status } : o));
-        } catch (err) {
+        } catch {
             alert("Failed to update status.");
         }
     };
@@ -67,7 +67,7 @@ const ManageOrders = ({ orders, setOrders, partners }) => {
             const updated = await assignOrder(orderId, partnerId);
             setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: updated.status, deliveryPartner: updated.deliveryPartner } : o));
             alert("Delivery Partner Assigned!");
-        } catch (err) {
+        } catch {
             alert("Failed to assign partner.");
         }
     };
@@ -190,22 +190,40 @@ const ManageProductsLayout = ({ products, setProducts }) => {
     const [isEditing, setIsEditing] = useState(null); 
     const [form, setForm] = useState({});
 
+    const normalizeForm = (value) => ({
+        ...value,
+        price: value.price ?? '',
+        stock: value.stock ?? '',
+        imageUrl: value.imageUrl ?? '',
+        dosage: value.dosage ?? '',
+        packQuantity: value.packQuantity ?? '',
+        packUnit: value.packUnit ?? '',
+    });
+
     const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
-    const handleEdit = (p) => { setForm(p); setIsEditing(p.id); window.scrollTo({top: 0, behavior: 'smooth'}); };
+    const handleEdit = (p) => { setForm(normalizeForm(p)); setIsEditing(p.id); window.scrollTo({top: 0, behavior: 'smooth'}); };
+
+    const buildPayload = () => ({
+        ...form,
+        price: Number(form.price),
+        stock: Number(form.stock),
+        packQuantity: form.packQuantity === '' ? null : Number(form.packQuantity),
+    });
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
+            const payload = buildPayload();
             if (isEditing) {
-                const updated = await updateMedicine(form);
+                const updated = await updateMedicine(payload);
                 setProducts(products.map(p => p.id === updated.id ? updated : p));
             } else {
-                const added = await addMedicine(form);
+                const added = await addMedicine(payload);
                 setProducts([...products, added]);
             }
             setIsEditing(null);
-            setForm({});
-        } catch (err) {
+            setForm(normalizeForm({}));
+        } catch {
             alert("Error saving medicine.");
         }
     };
@@ -215,7 +233,7 @@ const ManageProductsLayout = ({ products, setProducts }) => {
         try {
             await deleteMedicine(id);
             setProducts(products.filter(p => p.id !== id));
-        } catch (err) {
+        } catch {
             alert("Error deleting medicine.");
         }
     };
@@ -237,9 +255,36 @@ const ManageProductsLayout = ({ products, setProducts }) => {
                     <option value="injection">Injection</option>
                     <option value="other">Other</option>
                 </select>
+                <input name="dosage" placeholder="Strength / Dosage (e.g. 500 mg, 100 ml)" value={form.dosage || ''} onChange={handleChange} style={{ padding: '12px', borderRadius: '10px', border: '1.5px solid var(--border)' }} />
+                <input name="imageUrl" placeholder="Medicine Image URL" value={form.imageUrl || ''} onChange={handleChange} style={{ padding: '12px', borderRadius: '10px', border: '1.5px solid var(--border)' }} />
+                <input name="packQuantity" type="number" min="0" placeholder="Pack Quantity (e.g. 10)" value={form.packQuantity || ''} onChange={handleChange} style={{ padding: '12px', borderRadius: '10px', border: '1.5px solid var(--border)' }} />
+                <input name="packUnit" placeholder="Pack Unit (e.g. tablets, capsules, ml, g)" value={form.packUnit || ''} onChange={handleChange} style={{ padding: '12px', borderRadius: '10px', border: '1.5px solid var(--border)' }} />
                 <textarea name="description" placeholder="Description / Use" value={form.description || ''} onChange={handleChange} required style={{ gridColumn: 'span 2', padding: '12px', borderRadius: '10px', border: '1.5px solid var(--border)', minHeight: '80px' }} />
                 <button type="submit" className="add-btn" style={{ gridColumn: 'span 2', padding: '15px' }}>{isEditing ? 'Save Changes' : 'Add Product'}</button>
             </form>
+
+            <div style={{ marginTop: '24px', display: 'grid', gap: '14px' }}>
+                {products.map((product) => (
+                    <div key={product.id} style={{ display: 'grid', gridTemplateColumns: '96px 1fr auto', gap: '16px', alignItems: 'center', background: '#fff', border: '1px solid var(--border)', borderRadius: '16px', padding: '14px' }}>
+                        <img
+                            src={product.imageUrl || `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120"><rect width="120" height="120" rx="20" fill="#eaf7f0"/><text x="60" y="70" font-size="44" text-anchor="middle">${product.category === 'syrup' ? '🧴' : product.category === 'capsule' ? '🟡' : product.category === 'injection' ? '💉' : '💊'}</text></svg>`)}`}
+                            alt={product.name}
+                            style={{ width: '96px', height: '96px', objectFit: 'cover', borderRadius: '14px', background: '#f7fbf8', border: '1px solid var(--border)' }}
+                        />
+                        <div>
+                            <div style={{ fontWeight: 800, color: 'var(--green-dark)' }}>{product.name}</div>
+                            <div style={{ fontSize: '0.88rem', color: 'var(--muted)', marginTop: '4px' }}>
+                                {product.packQuantity ? `${product.packQuantity} ${product.packUnit || (product.category === 'capsule' ? 'capsules' : product.category === 'tablet' ? 'tablets' : 'units')}` : (product.dosage || product.category)}
+                            </div>
+                            {product.dosage && <div style={{ fontSize: '0.82rem', color: '#6b7280', marginTop: '4px' }}>Strength: {product.dosage}</div>}
+                        </div>
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                            <button type="button" onClick={() => handleEdit(product)} className="med-link-btn">Edit</button>
+                            <button type="button" onClick={() => handleDelete(product.id)} style={{ background: '#fee2e2', color: '#b91c1c', border: 'none', borderRadius: '14px', padding: '10px 14px', fontWeight: 800 }}>Delete</button>
+                        </div>
+                    </div>
+                ))}
+            </div>
         </div>
     );
 };
@@ -280,7 +325,7 @@ function AdminDashboard() {
 
         socket.on('new_order', (order) => {
             // 1. Play sound
-            audioRef.current.play().catch(e => console.log('Sound blocked by browser'));
+            audioRef.current.play().catch(() => console.log('Sound blocked by browser'));
             // 2. Add to list
             setOrders(prev => [{...order, id: order.id, status: 'pending'}, ...prev]);
             // 3. Show notification
