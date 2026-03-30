@@ -28,6 +28,14 @@ const importData = async () => {
       role: 'customer',
     });
 
+    await User.create({
+      name: 'Delivery Partner',
+      email: 'delivery@bablu.com',
+      password: 'AMIT@937149',
+      role: 'delivery_person',
+      phone: '9876543210',
+    });
+
     await Medicine.insertMany(medicines);
 
     console.log('Data imported successfully from openFDA-backed seed data.');

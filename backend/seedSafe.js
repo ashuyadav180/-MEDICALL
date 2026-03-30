@@ -9,6 +9,7 @@ dotenv.config();
 const users = [
   { name: 'Bablu Owner', email: 'admin@bablu.com', password: 'AMIT@937149', role: 'admin' },
   { name: 'Ashu Yadav', email: 'ashu@test.com', password: 'password123', role: 'customer' },
+  { name: 'Delivery Partner', email: 'delivery@bablu.com', password: 'AMIT@937149', role: 'delivery_person', phone: '9876543210' },
 ];
 
 async function seed() {

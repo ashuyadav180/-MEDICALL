@@ -37,7 +37,7 @@ function Home() {
           <div className="usp-card" style={{ background: '#fff', padding: '20px', borderRadius: '15px', textAlign: 'center', border: '1.5px solid var(--border)' }}>
              <div style={{ fontSize: '2rem', marginBottom: '10px' }}>📦</div>
              <h3 style={{ fontSize: '1.1rem', marginBottom: '10px' }}>Doorstep Delivery</h3>
-             <p style={{ fontSize: '0.85rem', color: 'var(--muted)' }}>Delivery available in Aman Vihar and nearby villages.</p>
+             <p style={{ fontSize: '0.85rem', color: 'var(--muted)' }}>Delivery available in Attrasand and nearby villages.</p>
           </div>
           <div className="usp-card" style={{ background: '#fff', padding: '20px', borderRadius: '15px', textAlign: 'center', border: '1.5px solid var(--border)' }}>
              <div style={{ fontSize: '2rem', marginBottom: '10px' }}>💰</div>

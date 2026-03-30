@@ -32,7 +32,7 @@ function Navbar() {
           <div className="logo-circle">💊</div>
           <div className="logo-text">
             <span className="logo-name">{t('header.title')}</span>
-            <span className="logo-tag">Aman Vihar Colony</span>
+            <span className="logo-tag">Attrasand</span>
           </div>
         </Link>
 
