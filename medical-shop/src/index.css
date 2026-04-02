@@ -1244,21 +1244,29 @@ form select {
 @media (max-width: 960px) {
   .header-inner {
     flex-wrap: wrap;
+    align-items: center;
     justify-content: space-between;
-    gap: 10px;
+    gap: 12px;
     padding: 12px 0;
+  }
+
+  .logo-container {
+    flex: 1 1 auto;
+    min-width: 0;
   }
 
   .lang-switcher {
     order: 2;
     margin-left: auto !important;
     margin-right: 0 !important;
+    flex-wrap: wrap;
+    justify-content: flex-end;
   }
 
   .nav-links {
     width: 100%;
-    gap: 8px;
-    margin: 4px 0 0;
+    gap: 10px;
+    margin: 2px 0 0;
     flex-wrap: wrap;
     justify-content: flex-start;
     order: 3;
@@ -1362,8 +1370,11 @@ form select {
   }
 
   .header-inner {
-    gap: 12px;
-    padding: 10px 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px 10px;
+    padding: 12px 0;
   }
 
   .recent-order-container {
@@ -1379,67 +1390,68 @@ form select {
   }
 
   .logo-container {
-    width: auto;
+    width: 100%;
+    min-width: 0;
+    gap: 10px;
   }
 
   .logo-circle {
-    width: 42px;
-    height: 42px;
+    width: 40px;
+    height: 40px;
     border-radius: 14px;
-    font-size: 1.3rem;
+    font-size: 1.2rem;
   }
 
   .logo-name {
-    font-size: 1.1rem;
+    font-size: 1.05rem;
+  }
+
+  .logo-tag {
+    font-size: 0.78rem;
+  }
+
+  .lang-switcher {
+    order: initial;
+    margin-left: 0 !important;
+    justify-content: flex-end;
   }
 
   .nav-links {
-    gap: 6px;
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+    margin: 0;
   }
 
   .nav-links li,
+  .user-nav-box,
+  .cart-link {
+    width: 100%;
+  }
+
   .nav-links a,
   .login-link,
   .admin-btn,
-  .logout-btn,
-  .cart-link {
-    width: auto;
+  .logout-btn {
+    width: 100%;
+    min-height: 42px;
     padding: 8px 10px;
     font-size: 0.8rem;
+    justify-content: center;
+    gap: 6px;
   }
 
-  @media (max-width: 420px) {
-    .header-inner {
-      justify-content: center;
-    }
+  .cart-link a {
+    width: 100%;
+  }
 
-    .logo-container {
-      width: 100%;
-      justify-content: center;
-    }
-
-    .lang-switcher {
-      width: 100%;
-      justify-content: center;
-      margin-left: 0 !important;
-    }
-
-    .nav-links {
-      justify-content: center;
-    }
-
-    .nav-links a,
-    .login-link,
-    .admin-btn,
-    .logout-btn {
-      padding: 8px 10px;
-    }
+  .nav-label {
+    white-space: nowrap;
   }
 
   .user-nav-box {
-    width: auto;
-    display: flex;
-    gap: 4px;
+    display: block;
   }
 
   .checkout-page .place-btn,
@@ -1578,6 +1590,34 @@ form select {
 
   .user-nav-box {
     flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 420px) {
+  .header-inner {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .logo-container {
+    justify-content: flex-start;
+  }
+
+  .lang-switcher {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .nav-links {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .nav-links a,
+  .login-link,
+  .admin-btn,
+  .logout-btn {
+    padding: 9px 8px;
+    font-size: 0.79rem;
   }
 }
 
