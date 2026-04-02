@@ -6,9 +6,9 @@ import { useAuth } from '../store/AuthContext';
 
 function Navbar() {
   const { items } = useCart();
-  const { isLoggedIn, user, logout } = useAuth();
+  const { isLoggedIn, logout } = useAuth();
   const navigate = useNavigate();
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
 
   const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -32,12 +32,6 @@ function Navbar() {
           </div>
         </Link>
 
-        <div className="lang-switcher" style={{ display: 'flex', gap: '5px', marginLeft: 'auto', marginRight: '20px' }}>
-          <button onClick={() => i18n.changeLanguage('en')} style={{ background: i18n.language === 'en' ? 'var(--green)' : 'var(--green-light)', color: i18n.language === 'en' ? '#fff' : 'var(--green)', border: 'none', padding: '4px 8px', borderRadius: '5px', fontSize: '0.7rem', fontWeight: 800, cursor: 'pointer' }}>ENG</button>
-          <button onClick={() => i18n.changeLanguage('hi')} style={{ background: i18n.language === 'hi' ? 'var(--green)' : 'var(--green-light)', color: i18n.language === 'hi' ? '#fff' : 'var(--green)', border: 'none', padding: '4px 8px', borderRadius: '5px', fontSize: '0.7rem', fontWeight: 800, cursor: 'pointer' }}>HIN</button>
-          <button onClick={() => i18n.changeLanguage('mr')} style={{ background: i18n.language === 'mr' ? 'var(--green)' : 'var(--green-light)', color: i18n.language === 'mr' ? '#fff' : 'var(--green)', border: 'none', padding: '4px 8px', borderRadius: '5px', fontSize: '0.7rem', fontWeight: 800, cursor: 'pointer' }}>MAR</button>
-        </div>
-
         <ul className="nav-links">
           <li>
             <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -45,15 +39,6 @@ function Navbar() {
               <span className="nav-label">{t('header.home')}</span>
             </Link>
           </li>
-          
-          {isLoggedIn && user?.role === 'customer' && (
-            <li>
-              <Link to="/profile" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                <span className="nav-label">Profile</span>
-              </Link>
-            </li>
-          )}
 
           <li className="cart-link">
             <Link to="/cart" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>

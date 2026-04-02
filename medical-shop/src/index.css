@@ -181,6 +181,7 @@ h4,
   min-height: 84px;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 18px;
 }
 
@@ -206,7 +207,8 @@ h4,
 .logo-text {
   display: flex;
   flex-direction: column;
-  line-height: 1;
+  line-height: 1.1;
+  min-width: 0;
 }
 
 .logo-name {
@@ -226,6 +228,8 @@ h4,
   list-style: none;
   display: flex;
   align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
   gap: 10px;
   margin: 0 0 0 auto;
   padding: 0;
@@ -241,6 +245,7 @@ h4,
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  min-height: 42px;
   padding: 10px 14px;
   border-radius: 999px;
   text-decoration: none;
@@ -333,6 +338,9 @@ h4,
 }
 
 .logout-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-width: 88px;
   height: 42px;
   padding: 0 16px;
@@ -1255,14 +1263,6 @@ form select {
     min-width: 0;
   }
 
-  .lang-switcher {
-    order: 2;
-    margin-left: auto !important;
-    margin-right: 0 !important;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-  }
-
   .nav-links {
     width: 100%;
     gap: 10px;
@@ -1371,9 +1371,9 @@ form select {
 
   .header-inner {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: 1fr;
     align-items: center;
-    gap: 12px 10px;
+    gap: 10px;
     padding: 12px 0;
   }
 
@@ -1410,16 +1410,10 @@ form select {
     font-size: 0.78rem;
   }
 
-  .lang-switcher {
-    order: initial;
-    margin-left: 0 !important;
-    justify-content: flex-end;
-  }
-
   .nav-links {
     grid-column: 1 / -1;
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 8px;
     margin: 0;
   }
@@ -1435,11 +1429,12 @@ form select {
   .admin-btn,
   .logout-btn {
     width: 100%;
-    min-height: 42px;
-    padding: 8px 10px;
-    font-size: 0.8rem;
+    min-height: 44px;
+    padding: 8px 12px;
+    font-size: 0.82rem;
     justify-content: center;
     gap: 6px;
+    border-radius: 16px;
   }
 
   .cart-link a {
@@ -1595,7 +1590,6 @@ form select {
 
 @media (max-width: 420px) {
   .header-inner {
-    grid-template-columns: 1fr;
     gap: 10px;
   }
 
@@ -1603,21 +1597,26 @@ form select {
     justify-content: flex-start;
   }
 
-  .lang-switcher {
-    width: 100%;
-    justify-content: flex-start;
-  }
-
   .nav-links {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
   }
 
   .nav-links a,
   .login-link,
   .admin-btn,
   .logout-btn {
-    padding: 9px 8px;
-    font-size: 0.79rem;
+    min-height: 42px;
+    padding: 8px 6px;
+    font-size: 0.75rem;
+    gap: 4px;
+  }
+
+  .cart-badge {
+    min-width: 18px;
+    height: 18px;
+    margin-left: 4px;
+    font-size: 0.68rem;
   }
 }
 

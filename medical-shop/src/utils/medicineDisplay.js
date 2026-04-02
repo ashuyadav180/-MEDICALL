@@ -1,3 +1,5 @@
+import { API_BASE_URL } from '../config';
+
 const CATEGORY_FALLBACKS = {
   tablet: { label: 'TABLET', unit: 'tablets', accent: '#24458c', glow: '#dbe5ff' },
   capsule: { label: 'CAPSULE', unit: 'capsules', accent: '#0f766e', glow: '#d4f6ef' },
@@ -102,8 +104,18 @@ const buildFallbackSvg = (medicine) => {
 };
 
 export const getMedicineImage = (medicine) => {
-  if (medicine?.imageUrl && /^https?:\/\//i.test(medicine.imageUrl)) {
-    return medicine.imageUrl;
+  const imageUrl = String(medicine?.imageUrl || '').trim();
+
+  if (imageUrl) {
+    if (/^(https?:)?\/\//i.test(imageUrl) || /^(data|blob):/i.test(imageUrl)) {
+      return imageUrl;
+    }
+
+    if (imageUrl.startsWith('/')) {
+      return `${API_BASE_URL}${imageUrl}`;
+    }
+
+    return `${API_BASE_URL}/${imageUrl.replace(/^\/+/, '')}`;
   }
 
   const svg = buildFallbackSvg(medicine || {});

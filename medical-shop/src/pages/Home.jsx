@@ -4,7 +4,6 @@ import { fetchMyOrders } from '../api/orderApi';
 import Medicines from './Medicines';
 import { useAuth } from '../store/AuthContext';
 import { useCart } from '../store/CartContext';
-import { getMedicineImage } from '../utils/medicineDisplay';
 import { getOrderReference, getPaymentStatusMeta, getShortOrderReference, getStatusMeta, reorderOrderItems } from '../utils/orderDisplay';
 function RecentOrderPanel() {
   const { isLoggedIn, user } = useAuth();
@@ -60,7 +59,7 @@ function RecentOrderPanel() {
           <div>
             <h2 className="section-title" style={{ marginBottom: '8px' }}>Your Latest Order</h2>
             <p style={{ margin: 0, color: 'var(--muted)' }}>
-              See what you ordered, where your order is, and open the full details quickly.
+              Track your latest order here and open the full details when you want to see ordered items.
             </p>
           </div>
           <Link to="/profile" className="med-link-btn" style={{ textDecoration: 'none' }}>
@@ -107,6 +106,9 @@ function RecentOrderPanel() {
               <div style={{ marginTop: '14px', padding: '12px 14px', background: 'var(--green-soft)', borderRadius: '12px', color: 'var(--green-dark)', fontSize: '0.9rem' }}>
                 {getStatusMeta(latestOrder.status).helper}
               </div>
+              <div style={{ marginTop: '12px', color: 'var(--muted)', fontSize: '0.92rem' }}>
+                Ordered items are shown inside the order details page.
+              </div>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '18px' }}>
                 <Link to={`/orders/${encodeURIComponent(latestOrder.id)}`} className="cta-button" style={{ textDecoration: 'none', marginTop: 0 }}>
                   Open Order
@@ -118,35 +120,6 @@ function RecentOrderPanel() {
                   Track Status
                 </Link>
               </div>
-            </div>
-
-            <div className="card recent-order-card">
-              <h3 style={{ marginTop: 0, marginBottom: '14px', color: 'var(--green-dark)' }}>What You Ordered</h3>
-              <div style={{ display: 'grid', gap: '12px' }}>
-                {latestOrder.orderItems.slice(0, 4).map((item, index) => (
-                  <div key={`${item.name}-${index}`} style={{ display: 'grid', gridTemplateColumns: '56px 1fr auto', gap: '12px', alignItems: 'center', paddingBottom: '12px', borderBottom: index === Math.min(latestOrder.orderItems.length, 4) - 1 ? 'none' : '1px solid var(--border)' }}>
-                    <img
-                      src={getMedicineImage(item)}
-                      alt={item.name}
-                      style={{ width: '56px', height: '56px', objectFit: 'cover', borderRadius: '12px', border: '1px solid var(--border)', background: '#f7fbf8' }}
-                      onError={(event) => {
-                        event.currentTarget.onerror = null;
-                        event.currentTarget.src = getMedicineImage({ ...item, imageUrl: '' });
-                      }}
-                    />
-                    <div>
-                      <div style={{ fontWeight: 700 }}>{item.name}</div>
-                      <div style={{ color: 'var(--muted)', fontSize: '0.86rem' }}>Qty {item.quantity}</div>
-                    </div>
-                    <div style={{ fontWeight: 800 }}>Rs.{Number((item.price || 0) * (item.quantity || 0)).toFixed(2)}</div>
-                  </div>
-                ))}
-              </div>
-              {latestOrder.orderItems.length > 4 && (
-                <div style={{ marginTop: '10px', color: 'var(--muted)', fontSize: '0.88rem' }}>
-                  +{latestOrder.orderItems.length - 4} more item(s)
-                </div>
-              )}
             </div>
           </div>
         )}
