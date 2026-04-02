@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { useAuth } from '../store/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { fetchMyOrders } from '../api/orderApi';
 import { updateProfile } from '../api/authApi';
+import { fetchMyOrders } from '../api/orderApi';
+import { useAuth } from '../store/AuthContext';
+import { useCart } from '../store/CartContext';
+import { getPaymentStatusMeta, getShortOrderReference, getStatusMeta, reorderOrderItems } from '../utils/orderDisplay';
 
 function Profile() {
   const { user, isLoggedIn, login } = useAuth();
+  const { addItem } = useCart();
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(true);
@@ -30,13 +33,15 @@ function Profile() {
 
   useEffect(() => {
     const loadOrders = async () => {
-      if (!isLoggedIn) return;
+      if (!isLoggedIn) {
+        return;
+      }
 
       try {
         const data = await fetchMyOrders();
         setOrders(data);
-      } catch (err) {
-        setError(err.response?.data?.message || 'Failed to load order history.');
+      } catch (loadError) {
+        setError(loadError.response?.data?.message || 'Failed to load order history.');
       } finally {
         setLoadingOrders(false);
       }
@@ -49,12 +54,12 @@ function Profile() {
     return <div className="text-center p-20">Please log in to view your profile.</div>;
   }
 
-  const handleChange = (e) => {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleChange = (event) => {
+    setForm((prev) => ({ ...prev, [event.target.name]: event.target.value }));
   };
 
-  const handleUpdate = async (e) => {
-    e.preventDefault();
+  const handleUpdate = async (event) => {
+    event.preventDefault();
     setSaving(true);
     setError('');
     setMessage('');
@@ -64,16 +69,46 @@ function Profile() {
       login(token, updatedUser);
       setForm((prev) => ({ ...prev, password: '' }));
       setMessage('Profile updated successfully.');
-    } catch (err) {
-      setError(err.message);
+    } catch (updateError) {
+      setError(updateError.message);
     } finally {
       setSaving(false);
     }
   };
 
+  const handleReorder = (order) => {
+    const reorderedQuantity = reorderOrderItems(order, addItem);
+    navigate('/cart', {
+      state: {
+        message: `${reorderedQuantity} item(s) from ${getShortOrderReference(order)} were added to your cart.`,
+      },
+    });
+  };
+
+  const latestOrder = orders[0] || null;
+
   return (
     <div className="profile-page">
-      <h1>Welcome Back, {user?.name || 'Customer'}</h1>
+      <div className="profile-hero">
+        <div>
+          <p className="profile-eyebrow">My Account</p>
+          <h1>Welcome Back, {user?.name || 'Customer'}</h1>
+          <p className="profile-subtitle">
+            Manage your details and keep track of every medicine order in one place.
+          </p>
+        </div>
+
+        <div className="profile-stats">
+          <div className="profile-stat-card">
+            <span className="profile-stat-label">Total orders</span>
+            <strong>{orders.length}</strong>
+          </div>
+          <div className="profile-stat-card">
+            <span className="profile-stat-label">Latest order</span>
+            <strong>{latestOrder ? getShortOrderReference(latestOrder) : 'None yet'}</strong>
+          </div>
+        </div>
+      </div>
 
       <div className="profile-grid">
         <div className="profile-details card">
@@ -93,37 +128,96 @@ function Profile() {
         </div>
 
         <div className="order-history card">
-          <h2>Order History ({orders.length})</h2>
+          <div className="profile-section-head">
+            <div>
+              <h2>Order History ({orders.length})</h2>
+              <p className="profile-section-copy">
+                Open any order, check payment progress, or reorder the same medicines quickly.
+              </p>
+            </div>
+          </div>
 
           {loadingOrders ? (
             <div style={{ marginTop: '15px' }}>Loading orders...</div>
           ) : orders.length === 0 ? (
             <div style={{ marginTop: '15px', color: 'var(--muted)' }}>No orders yet.</div>
           ) : (
-            <table className="admin-table" style={{ marginTop: '15px' }}>
-              <thead>
-                <tr>
-                  <th>Order ID</th>
-                  <th>Date</th>
-                  <th>Total</th>
-                  <th>Status</th>
-                  <th>Details</th>
-                </tr>
-              </thead>
-              <tbody>
+            <>
+              <div className="order-history-table-wrap">
+                <table className="admin-table" style={{ marginTop: '15px' }}>
+                  <thead>
+                    <tr>
+                      <th>Order Ref</th>
+                      <th>Date</th>
+                      <th>Total</th>
+                      <th>Status</th>
+                      <th>Payment</th>
+                      <th>Details</th>
+                      <th>Reorder</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {orders.map((order) => (
+                      <tr key={order.id}>
+                        <td>{getShortOrderReference(order)}</td>
+                        <td>{new Date(order.createdAt).toLocaleDateString()}</td>
+                        <td>Rs.{Number(order.totalPrice || 0).toFixed(2)}</td>
+                        <td><span className={`status-${order.status.toLowerCase()}`}>{getStatusMeta(order.status).label}</span></td>
+                        <td style={{ color: order.paymentStatus === 'received' ? 'var(--green)' : '#8a5a00', fontWeight: 700 }}>
+                          {getPaymentStatusMeta(order.paymentStatus).label}
+                        </td>
+                        <td style={{ width: '10%' }}>
+                          <button onClick={() => navigate(`/orders/${encodeURIComponent(order.id)}`)} className="detail-button">View</button>
+                        </td>
+                        <td style={{ width: '12%' }}>
+                          <button onClick={() => handleReorder(order)} className="detail-button" style={{ backgroundColor: '#0f766e', color: '#fff' }}>Reorder</button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="profile-order-cards">
                 {orders.map((order) => (
-                  <tr key={order.id}>
-                    <td>{order.id.slice(-6).toUpperCase()}</td>
-                    <td>{new Date(order.createdAt).toLocaleDateString()}</td>
-                    <td>Rs.{order.totalPrice.toFixed(2)}</td>
-                    <td><span className={`status-${order.status.toLowerCase()}`}>{order.status}</span></td>
-                    <td style={{ width: '10%' }}>
-                      <button onClick={() => navigate(`/orders/${order.id}`)} className="detail-button">View</button>
-                    </td>
-                  </tr>
+                  <article key={order.id} className="profile-order-card">
+                    <div className="profile-order-card-top">
+                      <div>
+                        <div className="profile-order-label">Order reference</div>
+                        <div className="profile-order-ref">{getShortOrderReference(order)}</div>
+                      </div>
+                      <div className="profile-order-date">{new Date(order.createdAt).toLocaleDateString()}</div>
+                    </div>
+
+                    <div className="profile-order-meta-grid">
+                      <div className="profile-order-meta">
+                        <span className="profile-order-label">Total</span>
+                        <strong>Rs.{Number(order.totalPrice || 0).toFixed(2)}</strong>
+                      </div>
+                      <div className="profile-order-meta">
+                        <span className="profile-order-label">Status</span>
+                        <span className={`status-${order.status.toLowerCase()}`}>{getStatusMeta(order.status).label}</span>
+                      </div>
+                      <div className="profile-order-meta profile-order-meta-full">
+                        <span className="profile-order-label">Payment</span>
+                        <strong style={{ color: order.paymentStatus === 'received' ? 'var(--green)' : '#8a5a00' }}>
+                          {getPaymentStatusMeta(order.paymentStatus).label}
+                        </strong>
+                      </div>
+                    </div>
+
+                    <div className="profile-order-actions">
+                      <button onClick={() => navigate(`/orders/${encodeURIComponent(order.id)}`)} className="detail-button">
+                        View Details
+                      </button>
+                      <button onClick={() => handleReorder(order)} className="detail-button profile-reorder-btn">
+                        Reorder
+                      </button>
+                    </div>
+                  </article>
                 ))}
-              </tbody>
-            </table>
+              </div>
+            </>
           )}
 
           <button

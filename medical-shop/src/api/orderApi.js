@@ -2,6 +2,11 @@ import axios from 'axios';
 import { API_BASE_URL } from '../config';
 
 const API_URL = `${API_BASE_URL}/api/orders`;
+const normalizeOrder = (order) => ({
+    ...order,
+    id: order._id || order.id,
+    reference: order.reference || order.orderNumber || order._id || order.id,
+});
 
 // Helper to get headers with token
 const getAuthHeaders = () => {
@@ -17,8 +22,11 @@ const getAuthHeaders = () => {
 // Create a new order
 export const placeOrder = async (orderData) => {
     try {
-        const response = await axios.post(API_URL, orderData);
-        return { ...response.data, id: response.data._id };
+        const response = await axios.post(API_URL, orderData, {
+            headers: getAuthHeaders(),
+            withCredentials: true,
+        });
+        return normalizeOrder(response.data);
     } catch (error) {
         console.error('Error placing order:', error);
         throw error;
@@ -31,7 +39,7 @@ export const fetchOrders = async () => {
         const response = await axios.get(API_URL, {
             headers: getAuthHeaders()
         });
-        return response.data.map(o => ({ ...o, id: o._id }));
+        return response.data.map(normalizeOrder);
     } catch (error) {
         console.error('Error fetching orders:', error);
         throw error;
@@ -43,7 +51,7 @@ export const fetchMyOrders = async () => {
         const response = await axios.get(`${API_URL}/my`, {
             headers: getAuthHeaders()
         });
-        return response.data.map(o => ({ ...o, id: o._id }));
+        return response.data.map(normalizeOrder);
     } catch (error) {
         console.error('Error fetching my orders:', error);
         throw error;
@@ -55,7 +63,17 @@ export const fetchOrderById = async (orderId) => {
         const response = await axios.get(`${API_URL}/${orderId}`, {
             headers: getAuthHeaders()
         });
-        return { ...response.data, id: response.data._id };
+        return normalizeOrder(response.data);
+    } catch (error) {
+        console.error('Error fetching order details:', error);
+        throw error;
+    }
+};
+
+export const fetchTrackOrder = async (reference) => {
+    try {
+        const response = await axios.get(`${API_URL}/track/${encodeURIComponent(reference)}`);
+        return normalizeOrder(response.data);
     } catch (error) {
         console.error('Error fetching order details:', error);
         throw error;
@@ -68,9 +86,21 @@ export const updateOrderStatus = async (orderId, status) => {
         const response = await axios.put(`${API_URL}/${orderId}/status`, { status }, {
             headers: getAuthHeaders()
         });
-        return { ...response.data, id: response.data._id };
+        return normalizeOrder(response.data);
     } catch (error) {
         console.error('Error updating order status:', error);
+        throw error;
+    }
+};
+
+export const updateOrderPaymentStatus = async (orderId, paymentStatus) => {
+    try {
+        const response = await axios.put(`${API_URL}/${orderId}/payment-status`, { paymentStatus }, {
+            headers: getAuthHeaders(),
+        });
+        return normalizeOrder(response.data);
+    } catch (error) {
+        console.error('Error updating payment status:', error);
         throw error;
     }
 };
@@ -81,7 +111,7 @@ export const assignOrder = async (orderId, deliveryPartnerId) => {
         const response = await axios.put(`${API_URL}/${orderId}/assign`, { deliveryPartnerId }, {
             headers: getAuthHeaders()
         });
-        return { ...response.data, id: response.data._id };
+        return normalizeOrder(response.data);
     } catch (error) {
         console.error('Error assigning order:', error);
         throw error;
@@ -94,7 +124,7 @@ export const fetchMyTasks = async () => {
         const response = await axios.get(`${API_URL}/my/tasks`, {
             headers: getAuthHeaders()
         });
-        return response.data.map(o => ({ ...o, id: o._id }));
+        return response.data.map(normalizeOrder);
     } catch (error) {
         console.error('Error fetching partner tasks:', error);
         throw error;

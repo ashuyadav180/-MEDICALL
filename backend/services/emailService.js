@@ -84,25 +84,33 @@ const sendOrderNotificationEmail = async ({ to, order, backendBaseUrl }) => {
     subject: `New order received: ${order.customerName}`,
     textContent: [
       'New order received',
-      `Order ID: ${order._id}`,
+      `Order ID: ${order.orderNumber || order._id}`,
       `Customer: ${order.customerName}`,
       `Phone: ${order.customerPhone}`,
       `Address: ${order.customerAddress}`,
+      `Payment: ${String(order.paymentMethod || '').toUpperCase()}`,
+      `Payment status: ${String(order.paymentStatus || 'pending').toUpperCase()}`,
+      `${order.paymentReference ? `Payment ref: ${order.paymentReference}` : ''}`,
       `Total: Rs.${Number(order.totalPrice || 0).toFixed(2)}`,
-      `Track: ${backendBaseUrl}/api/orders/${order._id}`,
+      `Track: ${backendBaseUrl}/api/orders/track/${order.orderNumber || order._id}`,
+      `${order.paymentScreenshot ? `Payment proof: ${order.paymentScreenshot}` : ''}`,
     ].join('\n'),
     htmlContent: `
       <html>
         <body style="font-family: Arial, sans-serif; color: #1c2d1f;">
           <h2>New order received</h2>
-          <p><strong>Order ID:</strong> ${order._id}</p>
+          <p><strong>Order ID:</strong> ${order.orderNumber || order._id}</p>
           <p><strong>Customer:</strong> ${order.customerName}</p>
           <p><strong>Phone:</strong> ${order.customerPhone}</p>
           <p><strong>Address:</strong> ${order.customerAddress}</p>
+          <p><strong>Payment:</strong> ${String(order.paymentMethod || '').toUpperCase()}</p>
+          <p><strong>Payment Status:</strong> ${String(order.paymentStatus || 'pending').toUpperCase()}</p>
+          ${order.paymentReference ? `<p><strong>Payment Ref:</strong> ${order.paymentReference}</p>` : ''}
           <p><strong>Total:</strong> Rs.${Number(order.totalPrice || 0).toFixed(2)}</p>
           <h3>Items</h3>
           <ul>${itemsMarkup}</ul>
-          <p><a href="${backendBaseUrl}/api/orders/${order._id}">Open tracking link</a></p>
+          ${order.paymentScreenshot ? `<p><a href="${order.paymentScreenshot}">Open payment proof</a></p>` : ''}
+          <p><a href="${backendBaseUrl}/api/orders/track/${order.orderNumber || order._id}">Open tracking link</a></p>
         </body>
       </html>
     `,

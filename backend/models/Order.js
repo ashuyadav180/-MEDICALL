@@ -1,7 +1,19 @@
 const mongoose = require('mongoose');
 
+const generateOrderNumber = () => {
+  const datePart = new Date().toISOString().slice(2, 10).replace(/-/g, '');
+  const randomPart = Math.random().toString(36).slice(2, 6).toUpperCase();
+  return `BMS-${datePart}-${randomPart}`;
+};
+
 const orderSchema = mongoose.Schema(
   {
+    orderNumber: {
+      type: String,
+      required: true,
+      unique: true,
+      index: true,
+    },
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
@@ -33,6 +45,12 @@ const orderSchema = mongoose.Schema(
         name: { type: String, required: true },
         quantity: { type: Number, required: true },
         price: { type: Number, required: true },
+        imageUrl: { type: String, default: '' },
+        manufacturer: { type: String, default: '' },
+        dosage: { type: String, default: '' },
+        packQuantity: { type: Number, default: null },
+        packUnit: { type: String, default: '' },
+        category: { type: String, default: 'other' },
         medicine: {
           type: mongoose.Schema.Types.ObjectId,
           ref: 'Medicine',
@@ -60,6 +78,24 @@ const orderSchema = mongoose.Schema(
       required: true,
       enum: ['cod', 'upi'],
     },
+    paymentStatus: {
+      type: String,
+      required: true,
+      enum: ['pending', 'received'],
+      default: 'pending',
+    },
+    paymentScreenshot: {
+      type: String,
+      default: '',
+    },
+    paymentReference: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    paymentProofSubmittedAt: {
+      type: Date,
+    },
     prescriptionImage: {
       type: String, // Cloudinary URL
       required: false,
@@ -86,5 +122,27 @@ const orderSchema = mongoose.Schema(
     timestamps: true,
   }
 );
+
+orderSchema.pre('validate', async function attachOrderNumber() {
+  if (this.orderNumber) {
+    return;
+  }
+
+  let candidate = generateOrderNumber();
+  let exists = await this.constructor.exists({
+    orderNumber: candidate,
+    _id: { $ne: this._id },
+  });
+
+  while (exists) {
+    candidate = generateOrderNumber();
+    exists = await this.constructor.exists({
+      orderNumber: candidate,
+      _id: { $ne: this._id },
+    });
+  }
+
+  this.orderNumber = candidate;
+});
 
 module.exports = mongoose.model('Order', orderSchema);

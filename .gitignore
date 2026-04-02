@@ -13,3 +13,5 @@ medical-shop/.env.local
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+run-logs/
+bablu qr.jpeg

@@ -21,10 +21,11 @@ if (isCloudinaryConfigured) {
 
   storage = new CloudinaryStorage({
     cloudinary,
-    params: {
-      folder: 'bablu_prescriptions',
-      allowed_formats: ['jpg', 'png', 'jpeg'],
-    },
+    params: async (_req, file) => ({
+      folder: 'bablu_order_uploads',
+      public_id: `${file.fieldname}-${Date.now()}`,
+      allowed_formats: ['jpg', 'png', 'jpeg', 'webp'],
+    }),
   });
 } else {
   const uploadDir = path.join(__dirname, '..', 'uploads', 'prescriptions');
@@ -34,7 +35,7 @@ if (isCloudinaryConfigured) {
     destination: (_req, _file, cb) => cb(null, uploadDir),
     filename: (_req, file, cb) => {
       const extension = path.extname(file.originalname) || '.jpg';
-      cb(null, `prescription-${Date.now()}${extension}`);
+      cb(null, `${file.fieldname}-${Date.now()}${extension}`);
     },
   });
 }

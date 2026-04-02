@@ -7,6 +7,7 @@ function DeliveryDashboard() {
     const [tasks, setTasks] = useState([]);
     const [loading, setLoading] = useState(true);
     const { user } = useAuth();
+    const userRoomId = user?._id || user?.id;
 
     useEffect(() => {
         const loadTasks = async () => {
@@ -23,7 +24,9 @@ function DeliveryDashboard() {
 
         // Socket for real-time task notifications
         socket.connect();
-        socket.emit('join_user_room', user?._id || user?.id); 
+        if (userRoomId) {
+            socket.emit('join_user_room', userRoomId);
+        }
         socket.on(`new_task_assigned`, (task) => {
             setTasks(prev => [task, ...prev]);
             alert(`New task assigned: ${task.customerName}`);
@@ -32,13 +35,13 @@ function DeliveryDashboard() {
         return () => {
             socket.off('new_task_assigned');
         };
-    }, []);
+    }, [userRoomId]);
 
     const handleStatusUpdate = async (id, newStatus) => {
         try {
             await updateOrderStatus(id, newStatus);
             setTasks(prev => prev.map(t => t.id === id ? { ...t, status: newStatus } : t));
-        } catch (err) {
+        } catch {
             alert("Failed to update status.");
         }
     };

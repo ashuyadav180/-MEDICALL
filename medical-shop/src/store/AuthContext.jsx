@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { useState, createContext, useEffect } from 'react';
 import axios from 'axios';
 import { API_BASE_URL } from '../config';
@@ -24,7 +25,7 @@ export const AuthContext = createContext({
     isLoggedIn: !!data.token, 
     token: data.token,
     user: data.user,
-    login: (token, userData) => {},
+    login: () => {},
     logout: () => {},
 });
 
@@ -66,7 +67,7 @@ export const AuthProvider = ({ children }) => {
                 const newToken = response.data.token;
                 setToken(newToken);
                 localStorage.setItem('token', newToken);
-            } catch (err) {
+            } catch {
                 console.log("No valid refresh token found.");
                 // If refresh fails, we might want to log the user out
                 // logoutHandler();

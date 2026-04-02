@@ -17,11 +17,12 @@ const buildOrderMessage = ({ order, backendBaseUrl }) => {
   const lines = [
     'New medicine order received',
     '',
-    `Order ID: ${order._id}`,
+    `Order ID: ${order.orderNumber || order._id}`,
     `Customer: ${order.customerName}`,
     `Phone: ${order.customerPhone}`,
     `Address: ${order.customerAddress}`,
     `Payment: ${String(order.paymentMethod || '').toUpperCase()}`,
+    `Payment status: ${String(order.paymentStatus || 'pending').toUpperCase()}`,
     `Items total: ${formatCurrency(order.itemsPrice)}`,
     `Delivery: ${formatCurrency(order.shippingPrice)}`,
     `Grand total: ${formatCurrency(order.totalPrice)}`,
@@ -34,8 +35,16 @@ const buildOrderMessage = ({ order, backendBaseUrl }) => {
     lines.push('', `Prescription: ${order.prescriptionImage}`);
   }
 
+  if (order.paymentScreenshot) {
+    lines.push('', `Payment proof: ${order.paymentScreenshot}`);
+  }
+
+  if (order.paymentReference) {
+    lines.push(`Payment ref: ${order.paymentReference}`);
+  }
+
   if (backendBaseUrl) {
-    lines.push('', `Track order: ${backendBaseUrl}/api/orders/${order._id}`);
+    lines.push('', `Track order: ${backendBaseUrl}/api/orders/track/${order.orderNumber || order._id}`);
   }
 
   return lines.join('\n');
