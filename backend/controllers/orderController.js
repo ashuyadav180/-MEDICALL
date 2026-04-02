@@ -13,11 +13,23 @@ const getUploadedFileUrl = (req, fieldName) => {
     return null;
   }
 
+  if (file.secure_url?.startsWith('http')) {
+    return file.secure_url;
+  }
+
+  if (file.url?.startsWith('http')) {
+    return file.url;
+  }
+
   if (file.path?.startsWith('http')) {
     return file.path;
   }
 
-  return `${getBackendBaseUrl(req)}/uploads/prescriptions/${file.filename}`;
+  if (file.filename) {
+    return `${getBackendBaseUrl(req)}/uploads/prescriptions/${file.filename}`;
+  }
+
+  return file.path || null;
 };
 
 const parseAddressDetails = (value) => {
@@ -40,6 +52,21 @@ const generateOrderNumber = () => {
   const datePart = new Date().toISOString().slice(2, 10).replace(/-/g, '');
   const randomPart = Math.random().toString(36).slice(2, 6).toUpperCase();
   return `BMS-${datePart}-${randomPart}`;
+};
+
+const parseOrderItems = (value) => {
+  const parsedValue = typeof value === 'string' ? JSON.parse(value) : value;
+
+  if (!Array.isArray(parsedValue)) {
+    throw new Error('Order items must be a valid list.');
+  }
+
+  return parsedValue.map((item) => ({
+    medicine: String(item?.medicine || '').trim(),
+    name: String(item?.name || '').trim(),
+    quantity: Number(item?.quantity || 0),
+    price: Number(item?.price || 0),
+  }));
 };
 
 const createUniqueOrderNumber = async () => {
@@ -136,32 +163,47 @@ const addOrderItems = async (req, res) => {
       totalPrice,
     } = req.body;
 
-    const parsedOrderItems =
-      typeof orderItems === 'string' ? JSON.parse(orderItems) : orderItems;
+    const normalizedPaymentMethod = String(paymentMethod || 'cod').trim().toLowerCase();
+    const parsedOrderItems = parseOrderItems(orderItems);
     const parsedAddressDetails = parseAddressDetails(customerAddressDetails);
     const prescriptionImage = getUploadedFileUrl(req, 'prescription');
     const paymentScreenshot = getUploadedFileUrl(req, 'paymentScreenshot');
 
-    if (parsedOrderItems && parsedOrderItems.length === 0 && !prescriptionImage) {
+    if (!['cod', 'upi'].includes(normalizedPaymentMethod)) {
+      return res.status(400).json({ message: 'Invalid payment method selected.' });
+    }
+
+    if (parsedOrderItems.length === 0 && !prescriptionImage) {
       return res.status(400).json({ message: 'No order items' });
     }
 
-    if (paymentMethod === 'upi' && !paymentScreenshot) {
+    if (normalizedPaymentMethod === 'upi' && !paymentScreenshot) {
       return res.status(400).json({ message: 'Please upload your UPI payment screenshot.' });
     }
 
     if (Number(itemsPrice) < 100) {
       return res.status(400).json({
-        message: 'Minimum order amount is ₹100 (excluding delivery charges).',
+        message: 'Minimum order amount is Rs.100 (excluding delivery charges).',
       });
     }
 
-    const medicines = await Medicine.find({
-      _id: { $in: parsedOrderItems.map((item) => item.medicine) },
-    });
+    const medicineIds = [...new Set(parsedOrderItems.map((item) => item.medicine).filter(Boolean))];
+    const medicines = medicineIds.length
+      ? await Medicine.find({
+          _id: { $in: medicineIds },
+        })
+      : [];
     const medicineMap = new Map(medicines.map((medicine) => [String(medicine._id), medicine]));
 
     for (const item of parsedOrderItems) {
+      if (!item.medicine) {
+        return res.status(400).json({ message: 'Each order item must include a medicine id.' });
+      }
+
+      if (!Number.isFinite(item.quantity) || item.quantity <= 0) {
+        return res.status(400).json({ message: `Invalid quantity for ${item.name || 'an item'}.` });
+      }
+
       const medicine = medicineMap.get(String(item.medicine));
 
       if (!medicine) {
@@ -188,7 +230,7 @@ const addOrderItems = async (req, res) => {
       customerAddress,
       customerAddressDetails: parsedAddressDetails,
       orderItems: enrichedOrderItems,
-      paymentMethod,
+      paymentMethod: normalizedPaymentMethod,
       paymentStatus: 'pending',
       paymentScreenshot,
       paymentReference,

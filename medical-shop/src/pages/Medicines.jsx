@@ -17,7 +17,6 @@ const formatMedicineCardData = (medicine) => {
   const reviewCount = 120 + ((medicine.name?.length || 1) * 37) % 2300;
   const packLabel = buildPackLabel(medicine);
   const manufacturer = medicine.manufacturer || 'Trusted healthcare brand';
-  const headlineWord = (medicine.name || 'Care').split(' ')[0];
 
   return {
     theme,
@@ -27,7 +26,6 @@ const formatMedicineCardData = (medicine) => {
     mrp,
     packLabel,
     manufacturer,
-    headlineWord,
     deliveryText: stock > 0 ? (stock > 15 ? 'Get by Tomorrow' : 'Get by Tue, 31 Mar') : 'Currently unavailable',
     stockText: stock > 0 ? `${stock} units in stock` : 'Out of stock',
   };
@@ -55,30 +53,26 @@ function MedicineCard({ medicine, addItem, t }) {
           alt={medicine.name}
           className="medicine-photo"
           loading="lazy"
-          onError={(e) => {
-            e.target.onerror = null; 
-            e.target.src = getMedicineImage({ ...medicine, imageUrl: '' });
+          onError={(event) => {
+            event.target.onerror = null;
+            event.target.src = getMedicineImage({ ...medicine, imageUrl: '' });
           }}
         />
       </div>
 
       <h3 className="med-name med-name-shop">{medicine.name}</h3>
       <p className="medicine-subcopy">{display.packLabel}</p>
-      {medicine.dosage && (
-        <p className="medicine-subcopy medicine-subcopy-dose">{medicine.dosage}</p>
-      )}
+      {medicine.dosage && <p className="medicine-subcopy medicine-subcopy-dose">{medicine.dosage}</p>}
       <p className="medicine-subcopy medicine-subcopy-muted">{display.manufacturer}</p>
 
       <div className="medicine-rating-row">
-        <span className="medicine-stars">★★★★★</span>
+        <span className="medicine-stars">5-star</span>
         <span className="medicine-rating-text">{display.rating}</span>
         <span className="medicine-rating-count">({display.reviewCount})</span>
       </div>
 
       <div className="medicine-delivery">{display.deliveryText}</div>
-      <div
-        className={`medicine-stock-note ${medicine.stock > 0 ? 'is-available' : 'is-empty'}`}
-      >
+      <div className={`medicine-stock-note ${medicine.stock > 0 ? 'is-available' : 'is-empty'}`}>
         {display.stockText}
       </div>
 
@@ -107,15 +101,7 @@ function MedicineCard({ medicine, addItem, t }) {
           disabled={medicine.stock === 0}
           onClick={handleAdd}
         >
-          {isAdded ? (
-            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              ✓ Added
-            </span>
-          ) : medicine.stock > 0 ? (
-            t('medicines.add_to_cart')
-          ) : (
-            'Unavailable'
-          )}
+          {isAdded ? 'Added' : medicine.stock > 0 ? t('medicines.add_to_cart') : 'Unavailable'}
         </button>
       </div>
     </div>
@@ -149,6 +135,7 @@ function Medicines() {
         setLoading(false);
       }
     };
+
     loadMedicines();
   }, []);
 
@@ -191,7 +178,7 @@ function Medicines() {
           type="text"
           placeholder={`${t('medicines.search_placeholder')} / manufacturer`}
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={(event) => setSearchQuery(event.target.value)}
           className="search-input"
           style={{ paddingRight: '52px' }}
         />
@@ -205,27 +192,27 @@ function Medicines() {
 
       <div className="category-tabs-wrapper" style={{ margin: '0 -26px', padding: '0 26px', overflow: 'hidden' }}>
         <div className="category-tabs">
-        {categories.map((cat) => (
-          <button
-            key={cat.id}
-            className={`cat-tab ${activeCategory === cat.id ? 'active' : ''}`}
-            onClick={() => setActiveCategory(cat.id)}
-          >
-            {cat.label}
-          </button>
-        ))}
+          {categories.map((cat) => (
+            <button
+              key={cat.id}
+              className={`cat-tab ${activeCategory === cat.id ? 'active' : ''}`}
+              onClick={() => setActiveCategory(cat.id)}
+            >
+              {cat.label}
+            </button>
+          ))}
         </div>
       </div>
 
       <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '20px', alignItems: 'center' }}>
-        <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} style={{ padding: '10px 12px', borderRadius: '10px', border: '1.5px solid var(--border)' }}>
+        <select value={sortBy} onChange={(event) => setSortBy(event.target.value)} style={{ padding: '10px 12px', borderRadius: '10px', border: '1.5px solid var(--border)' }}>
           <option value="name">Sort: Name</option>
           <option value="priceLow">Price: Low to High</option>
           <option value="priceHigh">Price: High to Low</option>
           <option value="stock">Stock: High to Low</option>
         </select>
         <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700, color: 'var(--green)' }}>
-          <input type="checkbox" checked={showInStockOnly} onChange={(e) => setShowInStockOnly(e.target.checked)} />
+          <input type="checkbox" checked={showInStockOnly} onChange={(event) => setShowInStockOnly(event.target.checked)} />
           In stock only
         </label>
       </div>
