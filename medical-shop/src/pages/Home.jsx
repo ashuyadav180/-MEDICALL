@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import { fetchMyOrders } from '../api/orderApi';
 import Medicines from './Medicines';
 import { useAuth } from '../store/AuthContext';
@@ -158,57 +157,8 @@ function RecentOrderPanel() {
 }
 
 function Home() {
-  const { t } = useTranslation();
-
   return (
     <div className="main-content">
-      <div className="hero-section">
-        <div className="hero-content">
-          <div className="hero-kicker">Bablu Medical Store • Attrasand</div>
-          <h1>{t('hero.title')}</h1>
-          <p>{t('hero.subtitle')}</p>
-          <div className="hero-highlight-row">
-            <span className="hero-highlight-chip">Original medicines</span>
-            <span className="hero-highlight-chip">UPI or COD</span>
-            <span className="hero-highlight-chip">Live order updates</span>
-          </div>
-          <div className="hero-action-row">
-            <a href="#medicines" className="cta-btn">{t('hero.cta')}</a>
-            <Link to="/contact" className="hero-secondary-btn">Talk to Store</Link>
-          </div>
-        </div>
-        <div className="hero-image">
-          <div className="hero-visual-shell">
-            <div className="hero-floating-pill hero-floating-pill-top">Prescription support</div>
-            <div className="hero-floating-pill hero-floating-pill-bottom">Village delivery</div>
-            <div className="hero-visual-card">
-              <div className="hero-visual-icon">+</div>
-              <div className="hero-visual-copy">
-                <div className="hero-visual-title">Trusted medicine delivery</div>
-                <p>
-                  Upload a prescription, confirm payment by UPI or cash on delivery,
-                  and track the full order from packing to doorstep.
-                </p>
-              </div>
-              <div className="hero-visual-metrics">
-                <div className="hero-metric-card">
-                  <span className="hero-metric-value">Fast</span>
-                  <span className="hero-metric-label">packing updates</span>
-                </div>
-                <div className="hero-metric-card">
-                  <span className="hero-metric-value">Simple</span>
-                  <span className="hero-metric-label">reorder flow</span>
-                </div>
-                <div className="hero-metric-card">
-                  <span className="hero-metric-value">Safe</span>
-                  <span className="hero-metric-label">verified payment proof</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <RecentOrderPanel />
 
       <section id="medicines">
