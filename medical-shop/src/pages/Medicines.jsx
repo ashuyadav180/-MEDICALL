@@ -186,18 +186,25 @@ function Medicines() {
     <div className="medicines-container">
       <h2 className="section-title">Common Medicines</h2>
 
-      <div className="search-bar" style={{ position: 'relative', marginBottom: '20px' }}>
+      <div className="search-bar" style={{ position: 'relative', marginBottom: '22px' }}>
         <input
           type="text"
           placeholder={`${t('medicines.search_placeholder')} / manufacturer`}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="search-input"
+          style={{ paddingRight: '52px' }}
         />
-        <span className="search-icon">Search</span>
+        <div className="search-icon" style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center' }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </div>
       </div>
 
-      <div className="category-tabs">
+      <div className="category-tabs-wrapper" style={{ margin: '0 -26px', padding: '0 26px', overflow: 'hidden' }}>
+        <div className="category-tabs">
         {categories.map((cat) => (
           <button
             key={cat.id}
@@ -207,6 +214,7 @@ function Medicines() {
             {cat.label}
           </button>
         ))}
+        </div>
       </div>
 
       <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '20px', alignItems: 'center' }}>

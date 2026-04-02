@@ -6,7 +6,6 @@ import { useAuth } from '../store/AuthContext';
 import { useCart } from '../store/CartContext';
 import { getMedicineImage } from '../utils/medicineDisplay';
 import { getOrderReference, getPaymentStatusMeta, getShortOrderReference, getStatusMeta, reorderOrderItems } from '../utils/orderDisplay';
-
 function RecentOrderPanel() {
   const { isLoggedIn, user } = useAuth();
   const { addItem } = useCart();
@@ -55,8 +54,8 @@ function RecentOrderPanel() {
   }
 
   return (
-    <section style={{ marginTop: '24px' }}>
-      <div className="medicines-container" style={{ padding: '26px' }}>
+    <section className="recent-order-section">
+      <div className="medicines-container recent-order-container">
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: '16px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '18px' }}>
           <div>
             <h2 className="section-title" style={{ marginBottom: '8px' }}>Your Latest Order</h2>
@@ -81,8 +80,8 @@ function RecentOrderPanel() {
             </a>
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '18px' }}>
-            <div className="card" style={{ padding: '22px' }}>
+          <div className="recent-order-grid">
+            <div className="card recent-order-card">
               <div style={{ fontSize: '0.82rem', color: 'var(--muted)', marginBottom: '6px' }}>Order reference</div>
               <div style={{ fontSize: '1.45rem', fontWeight: 800, color: 'var(--green)', marginBottom: '14px' }}>
                 {getOrderReference(latestOrder)}
@@ -121,7 +120,7 @@ function RecentOrderPanel() {
               </div>
             </div>
 
-            <div className="card" style={{ padding: '22px' }}>
+            <div className="card recent-order-card">
               <h3 style={{ marginTop: 0, marginBottom: '14px', color: 'var(--green-dark)' }}>What You Ordered</h3>
               <div style={{ display: 'grid', gap: '12px' }}>
                 {latestOrder.orderItems.slice(0, 4).map((item, index) => (
@@ -165,24 +164,29 @@ function Home() {
         <Medicines />
       </section>
 
-      <section className="why-us" style={{ marginTop: '60px', padding: '40px 0' }}>
-        <h2 className="section-title" style={{ textAlign: 'center' }}>Why Bablu Medical Store?</h2>
-        <div className="usp-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', marginTop: '30px' }}>
-          <div className="usp-card" style={{ background: '#fff', padding: '20px', borderRadius: '15px', textAlign: 'center', border: '1.5px solid var(--border)' }}>
-            <div style={{ fontSize: '2rem', marginBottom: '10px' }}>Safe</div>
-            <h3 style={{ fontSize: '1.1rem', marginBottom: '10px' }}>Original Medicine</h3>
-            <p style={{ fontSize: '0.85rem', color: 'var(--muted)' }}>We only sell original and bill-checked medicines.</p>
-          </div>
-          <div className="usp-card" style={{ background: '#fff', padding: '20px', borderRadius: '15px', textAlign: 'center', border: '1.5px solid var(--border)' }}>
-            <div style={{ fontSize: '2rem', marginBottom: '10px' }}>Fast</div>
-            <h3 style={{ fontSize: '1.1rem', marginBottom: '10px' }}>Doorstep Delivery</h3>
-            <p style={{ fontSize: '0.85rem', color: 'var(--muted)' }}>Delivery available in Attrasand and nearby villages.</p>
-          </div>
-          <div className="usp-card" style={{ background: '#fff', padding: '20px', borderRadius: '15px', textAlign: 'center', border: '1.5px solid var(--border)' }}>
-            <div style={{ fontSize: '2rem', marginBottom: '10px' }}>Save</div>
-            <h3 style={{ fontSize: '1.1rem', marginBottom: '10px' }}>Best Prices</h3>
-            <p style={{ fontSize: '0.85rem', color: 'var(--muted)' }}>Get medicines at discounted MRP rates local to you.</p>
-          </div>
+      <section className="why-us">
+        <div className="section-heading">
+          <h2 className="section-title">Why Bablu Medical Store?</h2>
+          <p className="section-description">
+            We pair decades of chemist experience with modern fulfillment so every order lands accurately and on time.
+          </p>
+        </div>
+        <div className="usp-grid why-us-grid">
+          <article className="usp-card">
+            <div className="usp-emoji">🛡️</div>
+            <h3>Verified stock</h3>
+            <p>We inspect every batch, update inventory continuously, and only dispatch medicines that pass our strict quality checklist.</p>
+          </article>
+          <article className="usp-card">
+            <div className="usp-emoji">🚚</div>
+            <h3>Doorstep speed</h3>
+            <p>Orders placed before 6PM go out the same day inside Attrasand; regional villages see delivery within 24 hours.</p>
+          </article>
+          <article className="usp-card">
+            <div className="usp-emoji">💰</div>
+            <h3>Transparent pricing</h3>
+            <p>MRP rates, discounts, and delivery charges are clearly shown before you confirm the order—no surprises.</p>
+          </article>
         </div>
       </section>
     </div>
