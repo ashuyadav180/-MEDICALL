@@ -57,7 +57,7 @@ function DeliveryDashboard() {
     const completedTasks = tasks.filter(t => t.status === 'delivered');
 
     return (
-        <div className="main-content" style={{ maxWidth: '600px', margin: '0 auto' }}>
+        <div className="main-content delivery-dashboard-page" style={{ maxWidth: '600px', margin: '0 auto' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '25px' }}>
                 <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'var(--green)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>🛵</div>
                 <div>
@@ -82,7 +82,7 @@ function DeliveryDashboard() {
                             <div style={{ fontWeight: 800, fontSize: '1.1rem', marginBottom: '5px' }}>{task.customerName}</div>
                             <div style={{ fontSize: '0.85rem', color: 'var(--muted)', marginBottom: '15px' }}>📍 {task.customerAddress}</div>
 
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '15px' }}>
+                            <div className="delivery-action-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '15px' }}>
                                 <a href={`tel:${task.customerPhone}`} style={{ textDecoration: 'none', background: '#e7fbe9', color: '#1a7a4a', padding: '12px', borderRadius: '10px', textAlign: 'center', fontWeight: 800, fontSize: '0.85rem' }}>
                                     📞 Call Customer
                                 </a>

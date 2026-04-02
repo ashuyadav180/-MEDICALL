@@ -31,10 +31,18 @@ body {
   background:
     radial-gradient(circle at top right, rgba(26, 122, 74, 0.08), transparent 30%),
     linear-gradient(180deg, #f8fdf9 0%, var(--bg) 100%);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 a {
   color: inherit;
+}
+
+img {
+  max-width: 100%;
+  display: block;
 }
 
 button,
@@ -46,6 +54,7 @@ select {
 
 button {
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
 h1,
@@ -558,6 +567,25 @@ form select:focus {
   padding: 16px;
   border-radius: 20px;
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.cta-btn,
+.cta-button,
+.checkout-btn,
+.place-btn,
+.add-btn,
+.med-link-btn,
+.detail-button,
+.logout-btn,
+.login-link,
+.admin-btn,
+.cart-link a,
+.card,
+.form-card,
+.confirm-box,
+.admin-section,
+.order-tracking-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .medicine-card-shop:hover {
@@ -1337,6 +1365,30 @@ form select {
     min-height: 250px;
   }
 
+  .order-two-column-grid,
+  .analytics-grid,
+  .admin-product-form {
+    grid-template-columns: 1fr !important;
+  }
+
+  .analytics-wide-card {
+    grid-column: auto !important;
+  }
+
+  .analytics-pie-layout {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 14px;
+  }
+
+  .payment-method-card {
+    min-width: 0 !important;
+  }
+
+  .responsive-action-row > * {
+    flex: 1 1 220px;
+  }
+
   .profile-hero {
     flex-direction: column;
   }
@@ -1405,6 +1457,10 @@ form select {
     padding: 20px;
   }
 
+  .section-title {
+    font-size: 1.45rem;
+  }
+
   .cart-item {
     grid-template-columns: 1fr;
     justify-items: flex-start;
@@ -1420,6 +1476,149 @@ form select {
 
   .medicine-price-shop {
     font-size: 1.45rem;
+  }
+
+  .header-inner {
+    gap: 12px;
+  }
+
+  .logo-container {
+    width: 100%;
+  }
+
+  .logo-circle {
+    width: 46px;
+    height: 46px;
+    border-radius: 16px;
+  }
+
+  .logo-name {
+    font-size: 1.18rem;
+  }
+
+  .nav-links {
+    gap: 8px;
+  }
+
+  .nav-links li,
+  .nav-links a,
+  .login-link,
+  .admin-btn,
+  .logout-btn,
+  .cart-link {
+    width: 100%;
+  }
+
+  .nav-links a,
+  .login-link,
+  .admin-btn,
+  .logout-btn {
+    justify-content: center;
+  }
+
+  .user-nav-box {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .checkout-page .place-btn,
+  .responsive-action-row > *,
+  .track-search-form > * {
+    width: 100%;
+  }
+
+  .checkout-split-grid,
+  .payment-method-grid,
+  .upi-section-grid,
+  .delivery-action-grid,
+  .admin-stats-grid,
+  .admin-product-form,
+  .analytics-grid,
+  .profile-order-meta-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .payment-method-grid {
+    display: grid !important;
+  }
+
+  .payment-method-card {
+    min-width: 0 !important;
+  }
+
+  .track-search-form {
+    display: grid !important;
+    grid-template-columns: 1fr;
+  }
+
+  .track-search-form input {
+    min-width: 0 !important;
+  }
+
+  .track-order-card,
+  .order-confirmation-box {
+    padding: 20px !important;
+  }
+
+  .order-item-row {
+    grid-template-columns: 72px 1fr !important;
+    gap: 12px !important;
+  }
+
+  .order-item-row > :last-child {
+    grid-column: 2;
+    justify-self: start;
+    margin-top: 4px;
+  }
+
+  .compact-order-row {
+    flex-direction: column;
+    align-items: flex-start !important;
+  }
+
+  .medicine-price-row {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 10px !important;
+  }
+
+  .admin-view-tabs {
+    gap: 8px !important;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  .admin-view-tabs button {
+    white-space: nowrap;
+  }
+
+  .admin-product-row {
+    grid-template-columns: 1fr !important;
+    justify-items: flex-start;
+  }
+
+  .admin-product-row img {
+    width: 88px !important;
+    height: 88px !important;
+  }
+
+  .analytics-card {
+    height: 320px !important;
+  }
+
+  .analytics-pie-layout {
+    height: auto !important;
+  }
+
+  .analytics-pie-layout .recharts-responsive-container {
+    width: 100% !important;
+    min-width: 0;
+    height: 220px !important;
+  }
+
+  .analytics-legend-list {
+    padding: 0 !important;
   }
 
   .contact-grid,
@@ -1459,5 +1658,19 @@ form select {
 
   .user-nav-box {
     flex-wrap: wrap;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

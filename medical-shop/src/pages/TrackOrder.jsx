@@ -73,10 +73,10 @@ function TrackOrder() {
   const statusMeta = order ? getStatusMeta(order.status) : null;
 
   return (
-    <div className="main-content">
+    <div className="main-content track-order-page">
       <h2 className="section-title">Track Your Order</h2>
-      <div className="form-card" style={{ maxWidth: '640px', margin: '0 auto 28px' }}>
-        <form onSubmit={handleTrack} style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+      <div className="form-card track-search-card" style={{ maxWidth: '640px', margin: '0 auto 28px' }}>
+        <form onSubmit={handleTrack} className="track-search-form" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
           <input
             type="text"
             placeholder="Enter order reference like BMS-260402-ABCD"
@@ -95,8 +95,8 @@ function TrackOrder() {
       </div>
 
       {order && (
-        <div className="order-tracking-card" style={{ background: 'var(--card)', borderRadius: '20px', padding: '30px', border: '1.5px solid var(--border)', maxWidth: '860px', margin: '0 auto' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 1fr', gap: '18px', marginBottom: '24px' }}>
+        <div className="order-tracking-card track-order-card" style={{ background: 'var(--card)', borderRadius: '20px', padding: '30px', border: '1.5px solid var(--border)', maxWidth: '860px', margin: '0 auto' }}>
+          <div className="order-two-column-grid" style={{ display: 'grid', gridTemplateColumns: '1.1fr 1fr', gap: '18px', marginBottom: '24px' }}>
             <div>
               <div style={{ fontSize: '0.85rem', color: 'var(--muted)' }}>Tracking order</div>
               <div style={{ fontWeight: 800, fontSize: '1.4rem', color: 'var(--green)', marginBottom: '8px' }}>
@@ -167,7 +167,7 @@ function TrackOrder() {
             <div style={{ fontWeight: 800, marginBottom: '12px' }}>Ordered items</div>
             <div style={{ display: 'grid', gap: '10px' }}>
               {(order.orderItems || []).map((item, index) => (
-                <div key={`${item.name}-${index}`} style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', paddingBottom: '10px', borderBottom: index === order.orderItems.length - 1 ? 'none' : '1px solid var(--border)' }}>
+                <div key={`${item.name}-${index}`} className="compact-order-row" style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', paddingBottom: '10px', borderBottom: index === order.orderItems.length - 1 ? 'none' : '1px solid var(--border)' }}>
                   <div>
                     <div style={{ fontWeight: 700 }}>{item.name}</div>
                     <div style={{ fontSize: '0.86rem', color: 'var(--muted)' }}>
@@ -180,7 +180,7 @@ function TrackOrder() {
             </div>
           </div>
 
-          <div style={{ marginTop: '20px', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+          <div className="responsive-action-row" style={{ marginTop: '20px', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
             <Link to={`/orders/${encodeURIComponent(order.id)}`} className="cta-button" style={{ textDecoration: 'none' }}>
               View Full Order
             </Link>

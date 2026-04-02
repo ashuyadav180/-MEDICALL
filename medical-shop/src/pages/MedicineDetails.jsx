@@ -117,14 +117,14 @@ function MedicineDetails() {
             </div>
           )}
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '30px', padding: '20px 0', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
+          <div className="medicine-price-row" style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '30px', padding: '20px 0', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
             <span style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--text)' }}>Rs.{medicine.price.toFixed(2)}</span>
             <span style={{ background: 'var(--green-pale)', color: 'var(--green)', padding: '5px 15px', borderRadius: '20px', fontWeight: 700, fontSize: '0.9rem' }}>
               {medicine.stock > 0 ? 'In Stock' : 'Out of Stock'}
             </span>
           </div>
 
-          <div style={{ display: 'flex', gap: '15px' }}>
+          <div className="responsive-action-row" style={{ display: 'flex', gap: '15px' }}>
             {cartItem ? (
               <Link to="/cart" className="checkout-btn" style={{ textDecoration: 'none', textAlign: 'center', flex: 1, margin: 0 }}>
                 View in Cart ({cartItem.quantity})

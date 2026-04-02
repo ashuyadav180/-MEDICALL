@@ -170,7 +170,7 @@ function Checkout() {
   };
 
   return (
-    <div className="main-content">
+    <div className="main-content checkout-page">
       <button className="back-btn" onClick={() => window.history.back()}>Back to Cart</button>
       <h2 className="section-title">Place Your Order</h2>
 
@@ -195,7 +195,7 @@ function Checkout() {
             <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--green)' }}>Area / Locality</label>
             <input type="text" name="area" placeholder="Colony, locality, area" value={shippingDetails.area} onChange={handleInputChange} style={{ padding: '12px', border: '1.5px solid var(--border)', borderRadius: '10px', width: '100%' }} />
           </div>
-          <div className="form-group" style={{ marginTop: '15px', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
+          <div className="form-group checkout-split-grid" style={{ marginTop: '15px', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
             <div>
               <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--green)' }}>City / District *</label>
               <input type="text" name="city" placeholder="City or district" value={shippingDetails.city} onChange={handleInputChange} required style={{ padding: '12px', border: '1.5px solid var(--border)', borderRadius: '10px', width: '100%' }} />
@@ -205,7 +205,7 @@ function Checkout() {
               <input type="text" name="state" placeholder="State" value={shippingDetails.state} onChange={handleInputChange} required style={{ padding: '12px', border: '1.5px solid var(--border)', borderRadius: '10px', width: '100%' }} />
             </div>
           </div>
-          <div className="form-group" style={{ marginTop: '15px', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
+          <div className="form-group checkout-split-grid" style={{ marginTop: '15px', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
             <div>
               <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--green)' }}>Pincode *</label>
               <input type="text" name="pincode" placeholder="6-digit pincode" maxLength="6" value={shippingDetails.pincode} onChange={(event) => setShippingDetails((prev) => ({ ...prev, pincode: event.target.value.replace(/\D/g, '').slice(0, 6) }))} required style={{ padding: '12px', border: '1.5px solid var(--border)', borderRadius: '10px', width: '100%' }} />
@@ -223,19 +223,19 @@ function Checkout() {
 
         <div className="form-card" style={{ marginTop: '20px' }}>
           <h3 style={{ color: 'var(--green)', marginBottom: '15px' }}>Payment Method</h3>
-          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-            <div className={`pay-opt ${paymentMethod === 'cod' ? 'selected' : ''}`} onClick={() => setPaymentMethod('cod')} style={{ flex: 1, minWidth: '220px', padding: '15px', border: '2px solid var(--border)', borderRadius: '12px', textAlign: 'center', cursor: 'pointer' }}>
+          <div className="payment-method-grid" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+            <div className={`pay-opt payment-method-card ${paymentMethod === 'cod' ? 'selected' : ''}`} onClick={() => setPaymentMethod('cod')} style={{ flex: 1, minWidth: '220px', padding: '15px', border: '2px solid var(--border)', borderRadius: '12px', textAlign: 'center', cursor: 'pointer' }}>
               <div style={{ fontSize: '1.5rem' }}>Cash</div>
               <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>Cash on Delivery</div>
             </div>
-            <div className={`pay-opt ${paymentMethod === 'upi' ? 'selected' : ''}`} onClick={() => setPaymentMethod('upi')} style={{ flex: 1, minWidth: '220px', padding: '15px', border: '2px solid var(--border)', borderRadius: '12px', textAlign: 'center', cursor: 'pointer' }}>
+            <div className={`pay-opt payment-method-card ${paymentMethod === 'upi' ? 'selected' : ''}`} onClick={() => setPaymentMethod('upi')} style={{ flex: 1, minWidth: '220px', padding: '15px', border: '2px solid var(--border)', borderRadius: '12px', textAlign: 'center', cursor: 'pointer' }}>
               <div style={{ fontSize: '1.5rem' }}>UPI</div>
               <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>Pay via UPI / QR</div>
             </div>
           </div>
 
           {paymentMethod === 'upi' && (
-            <div style={{ marginTop: '18px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '18px', alignItems: 'start' }}>
+            <div className="upi-section-grid" style={{ marginTop: '18px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '18px', alignItems: 'start' }}>
               <div style={{ background: '#f9fffb', border: '1px solid var(--border)', borderRadius: '18px', padding: '18px', textAlign: 'center' }}>
                 <img
                   src={displayQrCodeUrl}

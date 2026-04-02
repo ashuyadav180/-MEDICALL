@@ -57,11 +57,11 @@ function OrderDetail() {
   const paymentMeta = getPaymentStatusMeta(order.paymentStatus);
 
   return (
-    <div className="main-content">
+    <div className="main-content order-detail-shell">
       <div className="order-detail-page" style={{ maxWidth: '980px', margin: '0 auto' }}>
         <h1 style={{ marginBottom: '16px' }}>Order Summary</h1>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '18px', marginBottom: '20px' }}>
+        <div className="order-two-column-grid" style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '18px', marginBottom: '20px' }}>
           <div className="card" style={{ padding: '22px' }}>
             <div style={{ fontSize: '0.85rem', color: 'var(--muted)', marginBottom: '6px' }}>Order reference</div>
             <div style={{ fontWeight: 800, fontSize: '1.6rem', color: 'var(--green)', marginBottom: '14px' }}>
@@ -109,7 +109,7 @@ function OrderDetail() {
           <h2 style={{ marginTop: 0, marginBottom: '16px' }}>Items Ordered</h2>
           <div style={{ display: 'grid', gap: '14px' }}>
             {order.orderItems.map((item, index) => (
-              <div key={`${item.name}-${index}`} style={{ display: 'grid', gridTemplateColumns: '88px 1fr auto', gap: '14px', alignItems: 'center', paddingBottom: '14px', borderBottom: index === order.orderItems.length - 1 ? 'none' : '1px solid var(--border)' }}>
+              <div key={`${item.name}-${index}`} className="order-item-row" style={{ display: 'grid', gridTemplateColumns: '88px 1fr auto', gap: '14px', alignItems: 'center', paddingBottom: '14px', borderBottom: index === order.orderItems.length - 1 ? 'none' : '1px solid var(--border)' }}>
                 <img
                   src={getMedicineImage(item)}
                   alt={item.name}
@@ -135,7 +135,7 @@ function OrderDetail() {
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '22px' }}>
+        <div className="responsive-action-row" style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '22px' }}>
           <button onClick={handleReorder} className="cta-button">Reorder Items</button>
           <Link to={`/track?ref=${encodeURIComponent(getOrderReference(order))}`} className="cta-button" style={{ textDecoration: 'none', backgroundColor: '#0f766e' }}>
             Track This Order

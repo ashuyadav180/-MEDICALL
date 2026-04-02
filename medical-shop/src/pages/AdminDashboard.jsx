@@ -19,7 +19,7 @@ const StatCards = ({ orders }) => {
   const revenue = orders.filter((order) => order.status === 'delivered').reduce((sum, order) => sum + order.totalPrice, 0);
 
   return (
-    <div className="stats-row" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '15px', marginBottom: '30px' }}>
+    <div className="stats-row admin-stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '15px', marginBottom: '30px' }}>
       <div className="stat-card" style={{ background: 'var(--card)', border: '1.5px solid var(--border)', borderRadius: '15px', padding: '20px', textAlign: 'center' }}>
         <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--green)' }}>{totalOrders}</div>
         <div style={{ fontSize: '0.85rem', color: 'var(--muted)' }}>Total Orders</div>
@@ -87,7 +87,7 @@ const ManageOrders = ({ orders, setOrders, partners }) => {
 
   return (
     <div className="admin-section">
-      <div style={{ display: 'flex', gap: '5px', background: 'var(--green-pale)', borderRadius: '12px', padding: '5px', marginBottom: '20px', overflowX: 'auto' }}>
+      <div className="admin-tab-strip" style={{ display: 'flex', gap: '5px', background: 'var(--green-pale)', borderRadius: '12px', padding: '5px', marginBottom: '20px', overflowX: 'auto' }}>
         {tabs.map((tab) => (
           <div
             key={tab.id}
@@ -267,7 +267,7 @@ const ManageProductsLayout = ({ products, setProducts }) => {
   return (
     <div className="admin-section">
       <h3 className="section-title">{isEditing ? `Edit Product: ${form.name}` : 'Add New Product'}</h3>
-      <form onSubmit={handleSubmit} style={{ background: 'var(--card)', padding: '20px', borderRadius: '15px', border: '1.5px solid var(--border)', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '15px' }}>
+      <form onSubmit={handleSubmit} className="admin-product-form" style={{ background: 'var(--card)', padding: '20px', borderRadius: '15px', border: '1.5px solid var(--border)', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '15px' }}>
         <input name="name" placeholder="Medicine Name" value={form.name || ''} onChange={handleChange} required style={{ padding: '12px', borderRadius: '10px', border: '1.5px solid var(--border)' }} />
         <input name="price" type="number" step="0.01" placeholder="Price" value={form.price || ''} onChange={handleChange} required style={{ padding: '12px', borderRadius: '10px', border: '1.5px solid var(--border)' }} />
         <input name="stock" type="number" placeholder="Stock Qty" value={form.stock || ''} onChange={handleChange} required style={{ padding: '12px', borderRadius: '10px', border: '1.5px solid var(--border)' }} />
@@ -304,7 +304,7 @@ const ManageProductsLayout = ({ products, setProducts }) => {
 
       <div style={{ marginTop: '24px', display: 'grid', gap: '14px' }}>
         {products.map((product) => (
-          <div key={product.id} style={{ display: 'grid', gridTemplateColumns: '96px 1fr auto', gap: '16px', alignItems: 'center', background: '#fff', border: '1px solid var(--border)', borderRadius: '16px', padding: '14px' }}>
+          <div key={product.id} className="admin-product-row" style={{ display: 'grid', gridTemplateColumns: '96px 1fr auto', gap: '16px', alignItems: 'center', background: '#fff', border: '1px solid var(--border)', borderRadius: '16px', padding: '14px' }}>
             <img src={product.imageUrl} alt={product.name} style={{ width: '96px', height: '96px', objectFit: 'cover', borderRadius: '14px', background: '#f7fbf8', border: '1px solid var(--border)' }} />
             <div>
               <div style={{ fontWeight: 800, color: 'var(--green-dark)' }}>{product.name}</div>
@@ -391,7 +391,7 @@ function AdminDashboard() {
 
       <StatCards orders={orders} />
 
-      <div style={{ display: 'flex', gap: '15px', marginBottom: '20px', borderBottom: '2px solid var(--border)' }}>
+      <div className="admin-view-tabs" style={{ display: 'flex', gap: '15px', marginBottom: '20px', borderBottom: '2px solid var(--border)' }}>
         <button onClick={() => setActiveView('summary')} style={{ background: 'none', border: 'none', padding: '10px 0', marginRight: '20px', fontWeight: 800, cursor: 'pointer', color: activeView === 'summary' ? 'var(--green)' : 'var(--muted)', borderBottom: activeView === 'summary' ? '3px solid var(--green)' : 'none' }}>Manage Orders</button>
         <button onClick={() => setActiveView('inventory')} style={{ background: 'none', border: 'none', padding: '10px 0', fontWeight: 800, cursor: 'pointer', color: activeView === 'inventory' ? 'var(--green)' : 'var(--muted)', borderBottom: activeView === 'inventory' ? '3px solid var(--green)' : 'none' }}>Inventory</button>
       </div>

@@ -35,8 +35,8 @@ function OrderConfirmation() {
   const paymentMeta = getPaymentStatusMeta(order.paymentStatus);
 
   return (
-    <div className="main-content">
-      <div className="confirm-box" style={{ maxWidth: '880px', margin: '0 auto', padding: '24px 20px 48px' }}>
+    <div className="main-content order-confirmation-page">
+      <div className="confirm-box order-confirmation-box" style={{ maxWidth: '880px', margin: '0 auto', padding: '24px 20px 48px' }}>
         <div style={{ textAlign: 'center', marginBottom: '28px' }}>
           <div style={{ width: '92px', height: '92px', background: 'var(--green-pale)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.2rem', margin: '0 auto 18px', color: 'var(--green)' }}>
             OK
@@ -47,7 +47,7 @@ function OrderConfirmation() {
           </p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '18px', alignItems: 'stretch' }}>
+        <div className="order-two-column-grid" style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '18px', alignItems: 'stretch' }}>
           <div style={{ background: 'var(--card)', border: '1.5px solid var(--border)', borderRadius: '18px', padding: '22px' }}>
             <div style={{ fontSize: '0.8rem', color: 'var(--muted)', marginBottom: '6px' }}>Order reference</div>
             <div style={{ fontSize: '1.7rem', fontWeight: 800, color: 'var(--green)', letterSpacing: '0.04em', marginBottom: '14px' }}>
@@ -87,7 +87,7 @@ function OrderConfirmation() {
           <div style={{ fontWeight: 800, marginBottom: '14px', color: 'var(--green-dark)' }}>Items in this order</div>
           <div style={{ display: 'grid', gap: '12px' }}>
             {(order.orderItems || []).map((item, index) => (
-              <div key={`${item.name}-${index}`} style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', paddingBottom: '12px', borderBottom: index === order.orderItems.length - 1 ? 'none' : '1px solid var(--border)' }}>
+              <div key={`${item.name}-${index}`} className="compact-order-row" style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', paddingBottom: '12px', borderBottom: index === order.orderItems.length - 1 ? 'none' : '1px solid var(--border)' }}>
                 <div>
                   <div style={{ fontWeight: 700 }}>{item.name}</div>
                   <div style={{ fontSize: '0.86rem', color: 'var(--muted)' }}>
@@ -103,7 +103,7 @@ function OrderConfirmation() {
         <div style={{ background: '#e7fbe9', border: '1.5px solid #a5d6a7', borderRadius: '18px', padding: '20px', marginTop: '18px', fontSize: '0.92rem', color: '#1b5e20' }}>
           <strong style={{ display: 'block', marginBottom: '8px' }}>Send order to shop on WhatsApp</strong>
           This opens WhatsApp with the exact order summary so the store can prepare it faster.
-          <div style={{ marginTop: '14px', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+          <div className="responsive-action-row" style={{ marginTop: '14px', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
             <button onClick={sendWhatsApp} style={{ background: '#25d366', color: '#fff', border: 'none', padding: '12px 24px', borderRadius: '12px', fontWeight: 800, cursor: 'pointer' }}>
               Send on WhatsApp
             </button>
