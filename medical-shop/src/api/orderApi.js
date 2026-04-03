@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { API_BASE_URL } from '../config';
+import { withAuthRetry } from './authSession';
 
 const API_URL = `${API_BASE_URL}/api/orders`;
 const normalizeOrder = (order) => ({
@@ -8,24 +9,13 @@ const normalizeOrder = (order) => ({
     reference: order.reference || order.orderNumber || order._id || order.id,
 });
 
-// Helper to get headers with token
-const getAuthHeaders = () => {
-    const token = localStorage.getItem('token');
-    if (token) {
-        return { Authorization: `Bearer ${token}` };
-    }
-
-    const user = JSON.parse(localStorage.getItem('user'));
-    return user?.token ? { Authorization: `Bearer ${user.token}` } : {};
-};
-
 // Create a new order
 export const placeOrder = async (orderData) => {
     try {
-        const response = await axios.post(API_URL, orderData, {
-            headers: getAuthHeaders(),
+        const response = await withAuthRetry((headers) => axios.post(API_URL, orderData, {
+            headers,
             withCredentials: true,
-        });
+        }));
         return normalizeOrder(response.data);
     } catch (error) {
         console.error('Error placing order:', error);
@@ -36,9 +26,9 @@ export const placeOrder = async (orderData) => {
 // Fetch all orders (Admin only)
 export const fetchOrders = async () => {
     try {
-        const response = await axios.get(API_URL, {
-            headers: getAuthHeaders()
-        });
+        const response = await withAuthRetry((headers) => axios.get(API_URL, {
+            headers,
+        }));
         return response.data.map(normalizeOrder);
     } catch (error) {
         console.error('Error fetching orders:', error);
@@ -48,9 +38,9 @@ export const fetchOrders = async () => {
 
 export const fetchMyOrders = async () => {
     try {
-        const response = await axios.get(`${API_URL}/my`, {
-            headers: getAuthHeaders()
-        });
+        const response = await withAuthRetry((headers) => axios.get(`${API_URL}/my`, {
+            headers,
+        }));
         return response.data.map(normalizeOrder);
     } catch (error) {
         console.error('Error fetching my orders:', error);
@@ -60,9 +50,9 @@ export const fetchMyOrders = async () => {
 
 export const fetchOrderById = async (orderId) => {
     try {
-        const response = await axios.get(`${API_URL}/${orderId}`, {
-            headers: getAuthHeaders()
-        });
+        const response = await withAuthRetry((headers) => axios.get(`${API_URL}/${orderId}`, {
+            headers,
+        }));
         return normalizeOrder(response.data);
     } catch (error) {
         console.error('Error fetching order details:', error);
@@ -83,9 +73,9 @@ export const fetchTrackOrder = async (reference) => {
 // Update order status (Admin / Delivery Partner)
 export const updateOrderStatus = async (orderId, status) => {
     try {
-        const response = await axios.put(`${API_URL}/${orderId}/status`, { status }, {
-            headers: getAuthHeaders()
-        });
+        const response = await withAuthRetry((headers) => axios.put(`${API_URL}/${orderId}/status`, { status }, {
+            headers,
+        }));
         return normalizeOrder(response.data);
     } catch (error) {
         console.error('Error updating order status:', error);
@@ -95,9 +85,9 @@ export const updateOrderStatus = async (orderId, status) => {
 
 export const updateOrderPaymentStatus = async (orderId, paymentStatus) => {
     try {
-        const response = await axios.put(`${API_URL}/${orderId}/payment-status`, { paymentStatus }, {
-            headers: getAuthHeaders(),
-        });
+        const response = await withAuthRetry((headers) => axios.put(`${API_URL}/${orderId}/payment-status`, { paymentStatus }, {
+            headers,
+        }));
         return normalizeOrder(response.data);
     } catch (error) {
         console.error('Error updating payment status:', error);
@@ -108,9 +98,9 @@ export const updateOrderPaymentStatus = async (orderId, paymentStatus) => {
 // Assign order to delivery partner
 export const assignOrder = async (orderId, deliveryPartnerId) => {
     try {
-        const response = await axios.put(`${API_URL}/${orderId}/assign`, { deliveryPartnerId }, {
-            headers: getAuthHeaders()
-        });
+        const response = await withAuthRetry((headers) => axios.put(`${API_URL}/${orderId}/assign`, { deliveryPartnerId }, {
+            headers,
+        }));
         return normalizeOrder(response.data);
     } catch (error) {
         console.error('Error assigning order:', error);
@@ -121,9 +111,9 @@ export const assignOrder = async (orderId, deliveryPartnerId) => {
 // Fetch assigned tasks (Delivery Partner only)
 export const fetchMyTasks = async () => {
     try {
-        const response = await axios.get(`${API_URL}/my/tasks`, {
-            headers: getAuthHeaders()
-        });
+        const response = await withAuthRetry((headers) => axios.get(`${API_URL}/my/tasks`, {
+            headers,
+        }));
         return response.data.map(normalizeOrder);
     } catch (error) {
         console.error('Error fetching partner tasks:', error);

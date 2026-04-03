@@ -1,18 +1,9 @@
 import axios from 'axios';
 import { API_BASE_URL } from '../config';
+import { withAuthRetry } from './authSession';
 
 const API_URL = `${API_BASE_URL}/api/auth`;
 const credentialConfig = { withCredentials: true };
-
-const getAuthHeaders = () => {
-    const token = localStorage.getItem('token');
-    if (token) {
-        return { Authorization: `Bearer ${token}` };
-    }
-
-    const storedUser = JSON.parse(localStorage.getItem('user'));
-    return storedUser?.token ? { Authorization: `Bearer ${storedUser.token}` } : {};
-};
 
 export const loginUser = async ({ identifier, password }) => {
     try {
@@ -83,10 +74,10 @@ export const resetPassword = async ({ email, otp, password }) => {
 
 export const fetchProfile = async () => {
     try {
-        const response = await axios.get(`${API_URL}/profile`, {
-            headers: getAuthHeaders(),
+        const response = await withAuthRetry((headers) => axios.get(`${API_URL}/profile`, {
+            headers,
             withCredentials: true,
-        });
+        }));
         return response.data;
     } catch (error) {
         throw new Error(error.response?.data?.message || 'Failed to fetch profile.');
@@ -95,14 +86,14 @@ export const fetchProfile = async () => {
 
 export const updateProfile = async ({ name, email, phone, password }) => {
     try {
-        const response = await axios.put(
+        const response = await withAuthRetry((headers) => axios.put(
             `${API_URL}/profile`,
             { name, email, phone, password },
             {
-                headers: getAuthHeaders(),
+                headers,
                 withCredentials: true,
             }
-        );
+        ));
         return {
             token: response.data.token,
             user: response.data,
@@ -114,10 +105,10 @@ export const updateProfile = async ({ name, email, phone, password }) => {
 
 export const fetchDeliveryPartners = async () => {
     try {
-        const response = await axios.get(`${API_URL}/partners`, {
-            headers: getAuthHeaders(),
+        const response = await withAuthRetry((headers) => axios.get(`${API_URL}/partners`, {
+            headers,
             withCredentials: true,
-        });
+        }));
         return response.data;
     } catch (error) {
         throw new Error(error.response?.data?.message || 'Failed to fetch partners.');

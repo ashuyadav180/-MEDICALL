@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { API_BASE_URL } from '../config';
+import { withAuthRetry } from './authSession';
 
 const API_URL = `${API_BASE_URL}/api/medicines`;
 const MEDICINES_CACHE_KEY = 'medicines_cache_v1';
@@ -115,17 +116,6 @@ export const primeMedicineCache = (medicine) => {
     writeCache(`${MEDICINE_CACHE_PREFIX}${medicine.id}`, medicine);
 };
 
-// Helper to get headers with token
-const getAuthHeaders = () => {
-    const token = localStorage.getItem('token');
-    if (token) {
-        return { Authorization: `Bearer ${token}` };
-    }
-
-    const user = JSON.parse(localStorage.getItem('user'));
-    return user?.token ? { Authorization: `Bearer ${user.token}` } : {};
-};
-
 // Fetch all medicines
 export const fetchMedicines = async (options = {}) => {
     const { forceRefresh = false } = options;
@@ -166,9 +156,9 @@ export const fetchMedicineById = async (id) => {
 // Add a new medicine (Admin only)
 export const addMedicine = async (medicineData) => {
     try {
-        const response = await axios.post(API_URL, medicineData, {
-            headers: getAuthHeaders()
-        });
+        const response = await withAuthRetry((headers) => axios.post(API_URL, medicineData, {
+            headers,
+        }));
         const medicine = normalizeMedicine(response.data);
         primeMedicineCache(medicine);
         syncMedicineListCache(medicine);
@@ -182,9 +172,9 @@ export const addMedicine = async (medicineData) => {
 // Update an existing medicine (Admin only)
 export const updateMedicine = async (id, medicineData) => {
     try {
-        const response = await axios.put(`${API_URL}/${id}`, medicineData, {
-            headers: getAuthHeaders()
-        });
+        const response = await withAuthRetry((headers) => axios.put(`${API_URL}/${id}`, medicineData, {
+            headers,
+        }));
         const medicine = normalizeMedicine(response.data);
         primeMedicineCache(medicine);
         syncMedicineListCache(medicine);
@@ -198,9 +188,9 @@ export const updateMedicine = async (id, medicineData) => {
 // Delete a medicine (Admin only)
 export const deleteMedicine = async (id) => {
     try {
-        await axios.delete(`${API_URL}/${id}`, {
-            headers: getAuthHeaders()
-        });
+        await withAuthRetry((headers) => axios.delete(`${API_URL}/${id}`, {
+            headers,
+        }));
         medicineMemoryCache.delete(id);
         if (canUseStorage) {
             window.sessionStorage.removeItem(`${MEDICINE_CACHE_PREFIX}${id}`);
