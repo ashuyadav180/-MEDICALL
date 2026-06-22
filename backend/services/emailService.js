@@ -117,7 +117,45 @@ const sendOrderNotificationEmail = async ({ to, order, backendBaseUrl }) => {
   });
 };
 
+const sendSupportMessageEmail = async ({ to, name, email, subject, message }) => {
+  if (!isEmail(to)) {
+    return { skipped: true, reason: 'invalid_email' };
+  }
+
+  const safeName = String(name || 'Customer').trim();
+  const safeEmail = String(email || '').trim();
+  const safeSubject = String(subject || 'Website support request').trim();
+  const safeMessage = String(message || '').trim();
+
+  return sendTransactionalEmail({
+    to,
+    toName: 'Store Support',
+    subject: `Support request: ${safeSubject}`,
+    textContent: [
+      'New support request received',
+      `Name: ${safeName}`,
+      `Email: ${safeEmail || 'Not provided'}`,
+      `Subject: ${safeSubject}`,
+      '',
+      safeMessage,
+    ].join('\n'),
+    htmlContent: `
+      <html>
+        <body style="font-family: Arial, sans-serif; color: #1c2d1f;">
+          <h2>New support request received</h2>
+          <p><strong>Name:</strong> ${safeName}</p>
+          <p><strong>Email:</strong> ${safeEmail || 'Not provided'}</p>
+          <p><strong>Subject:</strong> ${safeSubject}</p>
+          <p><strong>Message:</strong></p>
+          <p style="white-space: pre-line;">${safeMessage}</p>
+        </body>
+      </html>
+    `,
+  });
+};
+
 module.exports = {
   sendOtpEmail,
   sendOrderNotificationEmail,
+  sendSupportMessageEmail,
 };

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import PremiumPageShell from '../components/ui/PremiumPageShell';
 import { getOrderReference, getPaymentStatusMeta, getStatusMeta } from '../utils/orderDisplay';
 
 function OrderConfirmation() {
@@ -18,15 +19,22 @@ function OrderConfirmation() {
 
   if (!order) {
     return (
-      <div className="main-content" style={{ textAlign: 'center', padding: '48px 20px' }}>
-        <h2 style={{ color: 'var(--green)', marginBottom: '12px' }}>Order details unavailable</h2>
-        <p style={{ color: 'var(--muted)', marginBottom: '20px' }}>
-          The confirmation page needs a recent order session. You can still track your order from the tracking page.
-        </p>
-        <Link to="/track" className="back-home-btn" style={{ textDecoration: 'none', display: 'inline-block', padding: '12px 28px' }}>
-          Go to Tracking
-        </Link>
-      </div>
+      <PremiumPageShell
+        eyebrow="Confirmation"
+        title="Order details are unavailable in this session."
+        description="You can still track the order manually using your reference from the tracking page."
+      >
+        <div className="premium-empty-state">
+          <div className="premium-empty-icon">OK</div>
+          <h2>Order details unavailable</h2>
+          <p>The confirmation page needs a recent order session. You can still track your order from the tracking page.</p>
+          <div className="premium-inline-actions" style={{ justifyContent: 'center' }}>
+            <Link to="/track" className="premium-cta">
+              Go to Tracking
+            </Link>
+          </div>
+        </div>
+      </PremiumPageShell>
     );
   }
 
@@ -35,88 +43,116 @@ function OrderConfirmation() {
   const paymentMeta = getPaymentStatusMeta(order.paymentStatus);
 
   return (
-    <div className="main-content order-confirmation-page">
-      <div className="confirm-box order-confirmation-box" style={{ maxWidth: '880px', margin: '0 auto', padding: '24px 20px 48px' }}>
-        <div style={{ textAlign: 'center', marginBottom: '28px' }}>
-          <div style={{ width: '92px', height: '92px', background: 'var(--green-pale)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.2rem', margin: '0 auto 18px', color: 'var(--green)' }}>
-            OK
+    <PremiumPageShell
+      eyebrow="Order confirmed"
+      title="Your order has been placed successfully."
+      description="The order is now recorded with a fixed reference across confirmation, tracking, profile history, and detailed order views."
+      stats={[
+        { value: reference, label: 'order reference' },
+        { value: statusMeta.label, label: 'current status' },
+      ]}
+      heroBadges={['Confirmed order', 'Trackable instantly', 'WhatsApp handoff ready']}
+      heroPanels={[
+        { label: 'Reference', value: reference },
+        { label: 'Status', value: statusMeta.label },
+        { label: 'Payment', value: paymentMeta.label },
+      ]}
+    >
+      <section className="premium-status-banner">
+        <div style={{ display: 'flex', gap: '18px', alignItems: 'center' }}>
+          <div className="premium-confirm-icon">OK</div>
+          <div>
+            <h2 style={{ margin: 0 }}>Everything is locked in.</h2>
+            <p className="premium-muted" style={{ margin: '8px 0 0' }}>
+              We will keep this order reference fixed across every post-purchase touchpoint.
+            </p>
           </div>
-          <h2 style={{ fontSize: '1.9rem', fontWeight: 800, color: 'var(--green)', marginBottom: '8px' }}>Order placed successfully</h2>
-          <p style={{ color: 'var(--muted)', fontSize: '1rem', margin: 0 }}>
-            Your order has been received. We&apos;ll keep this reference fixed across order history, detail view, and tracking.
-          </p>
         </div>
+        <span className="premium-soft-badge is-success">{paymentMeta.label}</span>
+      </section>
 
-        <div className="order-two-column-grid" style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '18px', alignItems: 'stretch' }}>
-          <div style={{ background: 'var(--card)', border: '1.5px solid var(--border)', borderRadius: '18px', padding: '22px' }}>
-            <div style={{ fontSize: '0.8rem', color: 'var(--muted)', marginBottom: '6px' }}>Order reference</div>
-            <div style={{ fontSize: '1.7rem', fontWeight: 800, color: 'var(--green)', letterSpacing: '0.04em', marginBottom: '14px' }}>
-              {reference}
-            </div>
-            <div style={{ display: 'grid', gap: '10px', color: 'var(--text)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px' }}>
-                <span style={{ color: 'var(--muted)' }}>Status</span>
-                <span style={{ fontWeight: 700 }}>{statusMeta.label}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px' }}>
-                <span style={{ color: 'var(--muted)' }}>Payment</span>
-                <span style={{ fontWeight: 700 }}>{order.paymentMethod === 'cod' ? 'Cash on Delivery' : 'UPI / QR Code'}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px' }}>
-                <span style={{ color: 'var(--muted)' }}>Total</span>
-                <span style={{ fontWeight: 800 }}>Rs.{Number(order.totalPrice || 0).toFixed(2)}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px' }}>
-                <span style={{ color: 'var(--muted)' }}>Payment status</span>
-                <span style={{ fontWeight: 700, color: order.paymentStatus === 'received' ? 'var(--green)' : '#8a5a00' }}>{paymentMeta.label}</span>
-              </div>
-            </div>
-          </div>
-
-          <div style={{ background: '#fff8e1', border: '1.5px solid #ffe082', borderRadius: '18px', padding: '22px', color: '#7a5500' }}>
-            <div style={{ fontWeight: 800, fontSize: '1rem', marginBottom: '10px' }}>What happens next</div>
-            <div style={{ display: 'grid', gap: '10px', fontSize: '0.92rem', lineHeight: 1.5 }}>
-              <div>1. The store verifies your order and payment proof.</div>
-              <div>2. Order status moves from placed to packing to out for delivery.</div>
-              <div>3. You can track the same order using the reference above.</div>
+      <div className="premium-grid-two">
+        <section className="premium-surface-card">
+          <div className="premium-section-header">
+            <div>
+              <h2>Order Summary</h2>
+              <p>Core order information stays visible at a glance.</p>
             </div>
           </div>
-        </div>
 
-        <div style={{ background: 'var(--card)', border: '1.5px solid var(--border)', borderRadius: '18px', padding: '22px', marginTop: '18px' }}>
-          <div style={{ fontWeight: 800, marginBottom: '14px', color: 'var(--green-dark)' }}>Items in this order</div>
-          <div style={{ display: 'grid', gap: '12px' }}>
-            {(order.orderItems || []).map((item, index) => (
-              <div key={`${item.name}-${index}`} className="compact-order-row" style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', paddingBottom: '12px', borderBottom: index === order.orderItems.length - 1 ? 'none' : '1px solid var(--border)' }}>
-                <div>
-                  <div style={{ fontWeight: 700 }}>{item.name}</div>
-                  <div style={{ fontSize: '0.86rem', color: 'var(--muted)' }}>
-                    Qty {item.quantity} x Rs.{Number(item.price || 0).toFixed(2)}
-                  </div>
-                </div>
-                <div style={{ fontWeight: 800 }}>Rs.{Number((item.price || 0) * (item.quantity || 0)).toFixed(2)}</div>
-              </div>
-            ))}
+          <div className="premium-list-stack">
+            <div className="premium-summary-row">
+              <span>Status</span>
+              <strong>{statusMeta.label}</strong>
+            </div>
+            <div className="premium-summary-row">
+              <span>Payment method</span>
+              <strong>{order.paymentMethod === 'cod' ? 'Cash on Delivery' : 'UPI / QR Code'}</strong>
+            </div>
+            <div className="premium-summary-row">
+              <span>Total</span>
+              <strong>Rs.{Number(order.totalPrice || 0).toFixed(2)}</strong>
+            </div>
+            <div className="premium-summary-row">
+              <span>Payment status</span>
+              <strong>{paymentMeta.label}</strong>
+            </div>
           </div>
-        </div>
+        </section>
 
-        <div style={{ background: '#e7fbe9', border: '1.5px solid #a5d6a7', borderRadius: '18px', padding: '20px', marginTop: '18px', fontSize: '0.92rem', color: '#1b5e20' }}>
-          <strong style={{ display: 'block', marginBottom: '8px' }}>Send order to shop on WhatsApp</strong>
-          This opens WhatsApp with the exact order summary so the store can prepare it faster.
-          <div className="responsive-action-row" style={{ marginTop: '14px', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-            <button onClick={sendWhatsApp} style={{ background: '#25d366', color: '#fff', border: 'none', padding: '12px 24px', borderRadius: '12px', fontWeight: 800, cursor: 'pointer' }}>
-              Send on WhatsApp
-            </button>
-            <Link to={`/track?ref=${encodeURIComponent(reference)}`} className="back-home-btn" style={{ textDecoration: 'none', display: 'inline-block', padding: '12px 24px' }}>
-              Track this Order
-            </Link>
-            <Link to="/profile" className="back-home-btn" style={{ textDecoration: 'none', display: 'inline-block', padding: '12px 24px', background: '#425466' }}>
-              View Order History
-            </Link>
-          </div>
-        </div>
+        <section className="premium-highlight-panel">
+          <h3>What happens next</h3>
+          <ul className="premium-bullet-list">
+            <li>The store verifies your order and payment proof.</li>
+            <li>Status moves from placed to packing to out for delivery.</li>
+            <li>You can track the same order using the reference above.</li>
+          </ul>
+        </section>
       </div>
-    </div>
+
+      <section className="premium-surface-card">
+        <div className="premium-section-header">
+          <div>
+            <h3>Items in this order</h3>
+            <p>Every item from checkout is captured in the final order record.</p>
+          </div>
+        </div>
+
+        <div className="premium-list-stack">
+          {(order.orderItems || []).map((item, index) => (
+            <article key={`${item.name}-${index}`} className="premium-track-item">
+              <div className="premium-track-header">
+                <strong>{item.name}</strong>
+                <span className="premium-pill">Rs.{Number((item.price || 0) * (item.quantity || 0)).toFixed(2)}</span>
+              </div>
+              <div className="premium-muted" style={{ marginTop: '6px' }}>
+                Qty {item.quantity} x Rs.{Number(item.price || 0).toFixed(2)}
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="premium-info-strip">
+        <div>
+          <strong>Send order details to the shop on WhatsApp</strong>
+          <div className="premium-muted">
+            This opens WhatsApp with the exact order summary so the store can prepare it faster.
+          </div>
+        </div>
+        <div className="premium-inline-actions">
+          <button type="button" onClick={sendWhatsApp} className="premium-cta">
+            Send on WhatsApp
+          </button>
+          <Link to={`/track?ref=${encodeURIComponent(reference)}`} className="premium-secondary-btn">
+            Track this Order
+          </Link>
+          <Link to="/profile" className="premium-ghost-btn">
+            View Order History
+          </Link>
+        </div>
+      </section>
+    </PremiumPageShell>
   );
 }
 

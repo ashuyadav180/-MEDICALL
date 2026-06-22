@@ -195,6 +195,31 @@ const IMAGE_MAPPER = {
 
 const normalizeText = (value) => String(value || '').replace(/\s+/g, ' ').trim();
 
+const getImagePoolForCategory = (category) => IMAGE_MAPPER[category] || IMAGE_MAPPER.other;
+
+const buildImageSeedKey = (medicine = {}) =>
+  normalizeText(medicine.searchTerm || medicine.name || medicine.displayName || medicine.category || 'medicine')
+    .toLowerCase();
+
+const getStableIndexFromKey = (key, listLength) => {
+  if (!listLength) {
+    return 0;
+  }
+
+  let hash = 0;
+  for (let index = 0; index < key.length; index += 1) {
+    hash = ((hash << 5) - hash + key.charCodeAt(index)) | 0;
+  }
+
+  return Math.abs(hash) % listLength;
+};
+
+const getSeedImageForMedicine = (medicine = {}) => {
+  const images = getImagePoolForCategory(medicine.category);
+  const seedKey = buildImageSeedKey(medicine);
+  return images[getStableIndexFromKey(seedKey, images.length)] || '';
+};
+
 const truncateText = (value, maxLength = 180) => {
   const cleanValue = normalizeText(value);
   if (cleanValue.length <= maxLength) {
@@ -231,6 +256,10 @@ const mapFdaRecordToMedicine = (query, record) => ({
 });
 
 const buildFallbackMedicine = (query) => ({
+  id: `fallback-${query.category}-${query.displayName
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')}`,
   name: query.displayName,
   price: query.price,
   description: `Commonly used for ${query.searchTerm.replace(/_/g, ' ')} care. Consult a doctor or pharmacist before use.`,
@@ -243,6 +272,15 @@ const buildFallbackMedicine = (query) => ({
   packUnit: query.packUnit || '',
   category: query.category,
   stock: query.stock,
+});
+
+const getStaticSeedMedicines = () => MEDICINE_QUERIES.map((query) => {
+  const medicine = buildFallbackMedicine(query);
+  medicine.manufacturer = 'Bablu Medical Essentials';
+  medicine.sourceName = 'Built-in store catalog';
+  medicine.sourceUrl = '';
+  medicine.imageUrl = getSeedImageForMedicine(query);
+  return medicine;
 });
 
 const fetchFdaRecord = async (query) => {
@@ -259,8 +297,6 @@ const fetchFdaRecord = async (query) => {
 };
 
 const getSeedMedicines = async () => {
-  const categoryCounts = {};
-  
   // We'll process in batches to avoid overwhelming the API
   const BATCH_SIZE = 10;
   const results = [];
@@ -271,13 +307,6 @@ const getSeedMedicines = async () => {
     
     const batchResults = await Promise.all(
       batch.map(async (query) => {
-        // Track count per category for round-robin images
-        const count = categoryCounts[query.category] || 0;
-        categoryCounts[query.category] = count + 1;
-        
-        const images = IMAGE_MAPPER[query.category] || IMAGE_MAPPER.other;
-        const imageUrl = images[count % images.length];
-        
         const fdaRecord = await fetchFdaRecord(query);
         let medicine;
         
@@ -287,7 +316,7 @@ const getSeedMedicines = async () => {
           medicine = buildFallbackMedicine(query);
         }
         
-        medicine.imageUrl = imageUrl;
+        medicine.imageUrl = getSeedImageForMedicine(query);
         return medicine;
       })
     );
@@ -302,4 +331,6 @@ const getSeedMedicines = async () => {
 
 module.exports = {
   getSeedMedicines,
+  getSeedImageForMedicine,
+  getStaticSeedMedicines,
 };

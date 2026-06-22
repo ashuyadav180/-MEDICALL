@@ -1,8 +1,11 @@
+const mongoose = require('mongoose');
 const Medicine = require('../models/Medicine');
+const { getStaticSeedMedicines } = require('../data/fdaMedicines');
 
 const MEDICINES_CACHE_TTL_MS = 60 * 1000;
 let medicinesListCache = null;
 let medicinesListCacheExpiry = 0;
+const fallbackMedicines = getStaticSeedMedicines();
 
 const invalidateMedicineCache = () => {
   medicinesListCache = null;
@@ -23,10 +26,14 @@ const getMedicines = async (req, res) => {
       return res.json(medicinesListCache);
     }
 
-    const medicines = await Medicine.find({})
+    let medicines = await Medicine.find({})
       .select('name price description manufacturer sourceName sourceUrl imageUrl dosage packQuantity packUnit category stock createdAt updatedAt')
       .sort({ name: 1 })
       .lean();
+
+    if (!medicines.length) {
+      medicines = fallbackMedicines;
+    }
 
     medicinesListCache = medicines;
     medicinesListCacheExpiry = Date.now() + MEDICINES_CACHE_TTL_MS;
@@ -42,6 +49,16 @@ const getMedicines = async (req, res) => {
 // @access  Public
 const getMedicineById = async (req, res) => {
   try {
+    const fallbackMedicine = fallbackMedicines.find((medicine) => medicine.id === req.params.id);
+    if (fallbackMedicine) {
+      res.set('Cache-Control', 'public, max-age=60');
+      return res.json(fallbackMedicine);
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({ message: 'Medicine not found' });
+    }
+
     const medicine = await Medicine.findById(req.params.id).lean();
 
     if (medicine) {

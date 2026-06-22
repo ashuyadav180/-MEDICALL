@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+import PremiumPageShell from '../components/ui/PremiumPageShell';
 import { fetchMedicineById, getCachedMedicineById, primeMedicineCache } from '../api/medicineApi';
 import { useCart } from '../store/CartContext';
 import { buildPackLabel, getMedicineImage } from '../utils/medicineDisplay';
@@ -40,8 +41,12 @@ function MedicineDetails() {
   }, [id, location.state]);
 
   const handleAddToCart = () => {
-    if (!medicine) return;
+    if (!medicine) {
+      return;
+    }
+
     addItem({
+      ...medicine,
       id: medicine.id,
       name: medicine.name,
       price: medicine.price,
@@ -49,109 +54,138 @@ function MedicineDetails() {
     });
   };
 
-  if (isLoading) return <div className="text-center p-20"><h2>Loading...</h2></div>;
-  if (!medicine) {
+  if (isLoading) {
     return (
-      <div className="main-content text-center p-20">
-        <h1 style={{ fontSize: '4rem', color: 'var(--green)' }}>404</h1>
-        <h2 style={{ marginBottom: '20px' }}>Medicine Not Found</h2>
-        <button onClick={() => navigate('/')} className="add-btn" style={{ padding: '12px 30px' }}>
-          Back to Shop
-        </button>
-      </div>
+      <PremiumPageShell eyebrow="Medicine" title="Loading product details..." description="Fetching the full medicine information for a richer product page." />
     );
   }
 
-  const cartItem = items.find((i) => i.id === medicine.id);
-  const getBadgeClass = (category) => `med-badge badge-${category || 'other'}`;
+  if (!medicine) {
+    return (
+      <PremiumPageShell
+        eyebrow="Medicine"
+        title="Medicine not found."
+        description="The product could not be loaded, but you can return to the catalog and continue shopping."
+      >
+        <div className="premium-empty-state">
+          <div className="premium-empty-icon">404</div>
+          <h2>Medicine Not Found</h2>
+          <p>This medicine could not be located in the catalog.</p>
+          <div className="premium-inline-actions" style={{ justifyContent: 'center' }}>
+            <button type="button" onClick={() => navigate('/')} className="premium-cta">
+              Back to Shop
+            </button>
+          </div>
+        </div>
+      </PremiumPageShell>
+    );
+  }
+
+  const cartItem = items.find((item) => item.id === medicine.id);
   const packLabel = buildPackLabel(medicine);
 
   return (
-    <div className="main-content">
-      <button className="back-btn" onClick={() => navigate(-1)}>Back</button>
-
-      <div className="med-detail-card" style={{ background: 'var(--card)', border: '1.5px solid var(--border)', borderRadius: '20px', padding: '30px', display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '40px', marginTop: '20px', boxShadow: 'var(--shadow)' }}>
-        <div style={{ background: 'var(--bg)', borderRadius: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-          <img
-            src={getMedicineImage(medicine)}
-            alt={medicine.name}
-            style={{ width: '100%', maxWidth: '320px', maxHeight: '280px', objectFit: 'contain' }}
-          />
+    <PremiumPageShell
+      eyebrow={medicine.category || 'medicine'}
+      title={medicine.name}
+      description={medicine.description}
+      stats={[
+        { value: `Rs.${medicine.price.toFixed(2)}`, label: 'current price' },
+        { value: medicine.stock > 0 ? 'In stock' : 'Out of stock', label: 'availability' },
+      ]}
+      heroBadges={['Detailed product view', 'Pack and stock clarity', 'Cart-ready decision']}
+      heroPanels={[
+        { label: 'Category', value: medicine.category || 'Medicine' },
+        { label: 'Pack', value: packLabel },
+        { label: 'Availability', value: medicine.stock > 0 ? 'Ready to order' : 'Unavailable' },
+      ]}
+      actions={
+        <button type="button" className="premium-secondary-btn" onClick={() => navigate(-1)}>
+          Back
+        </button>
+      }
+      sideContent={
+        <div className="premium-side-card">
+          <span>Product summary</span>
+          <strong>Pack, strength, and manufacturer details remain visible before users commit to cart.</strong>
+          <ul className="premium-helper-list">
+            <li>Rich fallback product visuals keep each category recognizable.</li>
+            <li>Cart actions use the full medicine object so imagery stays consistent later.</li>
+          </ul>
         </div>
-
-        <div>
-          <span className={getBadgeClass(medicine.category)} style={{ fontSize: '0.8rem' }}>
-            {medicine.category}
-          </span>
-          <h1 style={{ color: 'var(--green)', fontSize: '2rem', fontWeight: 800, margin: '10px 0' }}>{medicine.name}</h1>
-          <p style={{ color: 'var(--muted)', fontSize: '1.1rem', marginBottom: '20px' }}>{medicine.description}</p>
-
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '20px' }}>
-            <span style={{ background: '#eef6ff', color: '#175ea8', padding: '6px 12px', borderRadius: '999px', fontWeight: 700, fontSize: '0.85rem' }}>
-              Pack: {packLabel}
-            </span>
-            {medicine.dosage && (
-              <span style={{ background: '#f5f3ff', color: '#5b21b6', padding: '6px 12px', borderRadius: '999px', fontWeight: 700, fontSize: '0.85rem' }}>
-                Strength: {medicine.dosage}
-              </span>
-            )}
+      }
+    >
+      <section className="premium-surface-card">
+        <div className="premium-product-hero">
+          <div className="premium-product-stage">
+            <img src={getMedicineImage(medicine)} alt={medicine.name} />
           </div>
 
-          {(medicine.manufacturer || medicine.sourceName) && (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '20px' }}>
-              {medicine.manufacturer && (
-                <span style={{ background: '#eef6ff', color: '#175ea8', padding: '6px 12px', borderRadius: '999px', fontWeight: 700, fontSize: '0.85rem' }}>
-                  Maker: {medicine.manufacturer}
-                </span>
-              )}
-              {medicine.sourceName && medicine.sourceUrl && (
-                <a
-                  href={medicine.sourceUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  style={{ background: '#f4f8ef', color: 'var(--green)', padding: '6px 12px', borderRadius: '999px', fontWeight: 700, fontSize: '0.85rem', textDecoration: 'none' }}
-                >
-                  Source: {medicine.sourceName}
-                </a>
-              )}
+          <div className="premium-form-grid">
+            <div className="premium-chip-row">
+              <span className="premium-pill">{medicine.category}</span>
+              <span className="premium-pill">Pack: {packLabel}</span>
+              {medicine.dosage ? <span className="premium-pill">Strength: {medicine.dosage}</span> : null}
             </div>
-          )}
 
-          <div className="medicine-price-row" style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '30px', padding: '20px 0', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
-            <span style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--text)' }}>Rs.{medicine.price.toFixed(2)}</span>
-            <span style={{ background: 'var(--green-pale)', color: 'var(--green)', padding: '5px 15px', borderRadius: '20px', fontWeight: 700, fontSize: '0.9rem' }}>
-              {medicine.stock > 0 ? 'In Stock' : 'Out of Stock'}
-            </span>
-          </div>
+            <div className="premium-info-strip">
+              <div>
+                <strong>Manufacturer</strong>
+                <div className="premium-muted">{medicine.manufacturer || 'Trusted healthcare brand'}</div>
+              </div>
+              <span className={`premium-soft-badge ${medicine.stock > 0 ? 'is-success' : 'is-danger'}`}>
+                {medicine.stock > 0 ? 'In Stock' : 'Out of Stock'}
+              </span>
+            </div>
 
-          <div className="responsive-action-row" style={{ display: 'flex', gap: '15px' }}>
-            {cartItem ? (
-              <Link to="/cart" className="checkout-btn" style={{ textDecoration: 'none', textAlign: 'center', flex: 1, margin: 0 }}>
-                View in Cart ({cartItem.quantity})
+            {medicine.sourceName && medicine.sourceUrl ? (
+              <a href={medicine.sourceUrl} target="_blank" rel="noreferrer" className="premium-ghost-btn">
+                Source: {medicine.sourceName}
+              </a>
+            ) : null}
+
+            <div className="premium-price-emphasis">
+              <strong>Rs.{medicine.price.toFixed(2)}</strong>
+              <span className="premium-tag">{medicine.stock} unit(s) available</span>
+            </div>
+
+            <div className="premium-inline-actions">
+              {cartItem ? (
+                <Link to="/cart" className="premium-cta">
+                  View in Cart ({cartItem.quantity})
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleAddToCart}
+                  disabled={medicine.stock === 0}
+                  className="premium-cta"
+                >
+                  {medicine.stock > 0 ? 'Add to Cart' : 'Currently Unavailable'}
+                </button>
+              )}
+              <Link to="/" className="premium-secondary-btn">
+                Continue Shopping
               </Link>
-            ) : (
-              <button
-                onClick={handleAddToCart}
-                disabled={medicine.stock === 0}
-                className="checkout-btn"
-                style={{ flex: 1, margin: 0 }}
-              >
-                {medicine.stock > 0 ? 'Add to Cart' : 'Currently Unavailable'}
-              </button>
-            )}
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div style={{ marginTop: '40px', padding: '30px', background: 'var(--card)', border: '1.5px solid var(--border)', borderRadius: '20px' }}>
-        <h3 className="section-title" style={{ border: 'none', padding: 0 }}>Product Information & Usage</h3>
-        <p style={{ color: 'var(--muted)', lineHeight: '1.8' }}>
-          This medicine ({medicine.name}) is primarily used for {medicine.description.toLowerCase()}.
-          As with all healthcare products, please ensure you follow the prescribed dosage or consult with a healthcare professional before use.
-          Keep out of reach of children and store in a cool, dry place.
+      <section className="premium-surface-card">
+        <div className="premium-section-header">
+          <div>
+            <h3>Product Information and Usage</h3>
+            <p>Important context remains easy to scan in a cleaner informational surface.</p>
+          </div>
+        </div>
+        <p className="premium-support-copy">
+          This medicine ({medicine.name}) is primarily used for {String(medicine.description || '').toLowerCase()}.
+          As with all healthcare products, please ensure you follow the prescribed dosage or consult a healthcare
+          professional before use. Keep out of reach of children and store in a cool, dry place.
         </p>
-      </div>
-    </div>
+      </section>
+    </PremiumPageShell>
   );
 }
 

@@ -15,3 +15,5 @@ yarn-debug.log*
 yarn-error.log*
 run-logs/
 bablu qr.jpeg
+push-tmp/
+temp.txt

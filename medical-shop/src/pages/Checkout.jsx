@@ -1,10 +1,14 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import PremiumPageShell from '../components/ui/PremiumPageShell';
 import { placeOrder } from '../api/orderApi';
 import { SHOP_UPI_ID, SHOP_UPI_NAME, SHOP_UPI_NOTE, SHOP_UPI_QR_IMAGE } from '../config';
+import { buildPackLabel, getMedicineImage } from '../utils/medicineDisplay';
 import { useAuth } from '../store/AuthContext';
 import { useCart } from '../store/CartContext';
 import { getOrderReference } from '../utils/orderDisplay';
+
+const formatCurrency = (value) => `Rs.${Number(value || 0).toFixed(2)}`;
 
 function Checkout() {
   const { items, totalAmount, clearCart } = useCart();
@@ -35,7 +39,10 @@ function Checkout() {
   const total = subtotal + delivery;
 
   const upiUri = useMemo(
-    () => `upi://pay?pa=${encodeURIComponent(SHOP_UPI_ID)}&pn=${encodeURIComponent(SHOP_UPI_NAME)}&am=${encodeURIComponent(total.toFixed(2))}&cu=INR&tn=${encodeURIComponent(SHOP_UPI_NOTE)}`,
+    () =>
+      `upi://pay?pa=${encodeURIComponent(SHOP_UPI_ID)}&pn=${encodeURIComponent(
+        SHOP_UPI_NAME
+      )}&am=${encodeURIComponent(total.toFixed(2))}&cu=INR&tn=${encodeURIComponent(SHOP_UPI_NOTE)}`,
     [total]
   );
   const qrCodeUrl = useMemo(
@@ -145,6 +152,12 @@ function Checkout() {
             quantity: item.quantity,
             price: item.price,
             medicine: item.id,
+            imageUrl: item.imageUrl || '',
+            manufacturer: item.manufacturer || '',
+            dosage: item.dosage || '',
+            packQuantity: item.packQuantity ?? null,
+            packUnit: item.packUnit || '',
+            category: item.category || 'other',
           }))
         )
       );
@@ -170,130 +183,328 @@ function Checkout() {
   };
 
   return (
-    <div className="main-content checkout-page">
-      <button className="back-btn" onClick={() => window.history.back()}>Back to Cart</button>
-      <h2 className="section-title">Place Your Order</h2>
-
-      <form onSubmit={handleSubmitOrder}>
-        <div className="form-card">
-          <h3 style={{ color: 'var(--green)', marginBottom: '15px' }}>Your Details</h3>
-          {validationError && <p style={{ color: 'var(--red)', marginBottom: '15px', fontWeight: 600 }}>{validationError}</p>}
-
-          <div className="form-group">
-            <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--green)' }}>Full Name *</label>
-            <input type="text" name="fullName" placeholder="Your name" value={shippingDetails.fullName} onChange={handleInputChange} required style={{ padding: '12px', border: '1.5px solid var(--border)', borderRadius: '10px', width: '100%' }} />
-          </div>
-          <div className="form-group" style={{ marginTop: '15px' }}>
-            <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--green)' }}>Mobile Number *</label>
-            <input type="tel" name="mobile" placeholder="10-digit mobile number" maxLength="10" value={shippingDetails.mobile} onChange={handleInputChange} required style={{ padding: '12px', border: '1.5px solid var(--border)', borderRadius: '10px', width: '100%' }} />
-          </div>
-          <div className="form-group" style={{ marginTop: '15px' }}>
-            <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--green)' }}>House No / Street / Village *</label>
-            <textarea name="addressLine1" placeholder="House no, street, village or mohalla" value={shippingDetails.addressLine1} onChange={handleInputChange} required style={{ padding: '12px', border: '1.5px solid var(--border)', borderRadius: '10px', width: '100%', minHeight: '80px' }} />
-          </div>
-          <div className="form-group" style={{ marginTop: '15px' }}>
-            <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--green)' }}>Area / Locality</label>
-            <input type="text" name="area" placeholder="Colony, locality, area" value={shippingDetails.area} onChange={handleInputChange} style={{ padding: '12px', border: '1.5px solid var(--border)', borderRadius: '10px', width: '100%' }} />
-          </div>
-          <div className="form-group checkout-split-grid" style={{ marginTop: '15px', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
-            <div>
-              <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--green)' }}>City / District *</label>
-              <input type="text" name="city" placeholder="City or district" value={shippingDetails.city} onChange={handleInputChange} required style={{ padding: '12px', border: '1.5px solid var(--border)', borderRadius: '10px', width: '100%' }} />
-            </div>
-            <div>
-              <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--green)' }}>State *</label>
-              <input type="text" name="state" placeholder="State" value={shippingDetails.state} onChange={handleInputChange} required style={{ padding: '12px', border: '1.5px solid var(--border)', borderRadius: '10px', width: '100%' }} />
-            </div>
-          </div>
-          <div className="form-group checkout-split-grid" style={{ marginTop: '15px', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
-            <div>
-              <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--green)' }}>Pincode *</label>
-              <input type="text" name="pincode" placeholder="6-digit pincode" maxLength="6" value={shippingDetails.pincode} onChange={(event) => setShippingDetails((prev) => ({ ...prev, pincode: event.target.value.replace(/\D/g, '').slice(0, 6) }))} required style={{ padding: '12px', border: '1.5px solid var(--border)', borderRadius: '10px', width: '100%' }} />
-            </div>
-            <div>
-              <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--green)' }}>Landmark</label>
-              <input type="text" name="landmark" placeholder="School, temple, chowk" value={shippingDetails.landmark} onChange={handleInputChange} style={{ padding: '12px', border: '1.5px solid var(--border)', borderRadius: '10px', width: '100%' }} />
-            </div>
-          </div>
-          <div className="form-group" style={{ marginTop: '15px' }}>
-            <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--green)' }}>Nearby Place / Extra Direction</label>
-            <input type="text" name="nearby" placeholder="Nearby shop, turn, road, extra direction" value={shippingDetails.nearby} onChange={handleInputChange} style={{ padding: '12px', border: '1.5px solid var(--border)', borderRadius: '10px', width: '100%' }} />
-          </div>
+    <PremiumPageShell
+      eyebrow="Checkout"
+      title="Confirm delivery, payment, and prescription details in one premium flow."
+      description="This checkout combines address capture, payment proof, and order verification so the final step feels calm, trustworthy, and fast."
+      stats={[
+        { value: formatCurrency(total), label: 'order total' },
+        { value: paymentMethod === 'cod' ? 'COD' : 'UPI', label: 'selected payment mode' },
+      ]}
+      heroBadges={['Delivery verified', 'Payment proof ready', 'Prescription upload supported']}
+      heroPanels={[
+        { label: 'Order total', value: formatCurrency(total) },
+        { label: 'Payment mode', value: paymentMethod === 'cod' ? 'Cash on Delivery' : 'UPI proof' },
+        { label: 'Validation', value: 'Address + files checked' },
+      ]}
+      actions={
+        <button type="button" className="premium-secondary-btn" onClick={() => navigate(-1)}>
+          Back to Cart
+        </button>
+      }
+      sideContent={
+        <div className="premium-side-card">
+          <span>Checkout promise</span>
+          <strong>Every order captures only what the store needs to fulfill quickly and correctly.</strong>
+          <ul className="premium-helper-list">
+            <li>Upload payment proof for UPI and move straight into confirmation.</li>
+            <li>Prescription files stay attached to the order record for review.</li>
+          </ul>
         </div>
+      }
+    >
+      {validationError ? <div className="premium-note-banner is-danger">{validationError}</div> : null}
 
-        <div className="form-card" style={{ marginTop: '20px' }}>
-          <h3 style={{ color: 'var(--green)', marginBottom: '15px' }}>Payment Method</h3>
-          <div className="payment-method-grid" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-            <div className={`pay-opt payment-method-card ${paymentMethod === 'cod' ? 'selected' : ''}`} onClick={() => setPaymentMethod('cod')} style={{ flex: 1, minWidth: '220px', padding: '15px', border: '2px solid var(--border)', borderRadius: '12px', textAlign: 'center', cursor: 'pointer' }}>
-              <div style={{ fontSize: '1.5rem' }}>Cash</div>
-              <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>Cash on Delivery</div>
+      <div className="premium-checkout-layout">
+        <form id="checkout-form" onSubmit={handleSubmitOrder} className="premium-page-body" style={{ marginTop: 0 }}>
+          <section className="premium-form-panel">
+            <div className="premium-section-header">
+              <div>
+                <h2>Delivery Details</h2>
+                <p>Tell us where to deliver and how the rider should find you quickly.</p>
+              </div>
             </div>
-            <div className={`pay-opt payment-method-card ${paymentMethod === 'upi' ? 'selected' : ''}`} onClick={() => setPaymentMethod('upi')} style={{ flex: 1, minWidth: '220px', padding: '15px', border: '2px solid var(--border)', borderRadius: '12px', textAlign: 'center', cursor: 'pointer' }}>
-              <div style={{ fontSize: '1.5rem' }}>UPI</div>
-              <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>Pay via UPI / QR</div>
-            </div>
-          </div>
 
-          {paymentMethod === 'upi' && (
-            <div className="upi-section-grid" style={{ marginTop: '18px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '18px', alignItems: 'start' }}>
-              <div style={{ background: '#f9fffb', border: '1px solid var(--border)', borderRadius: '18px', padding: '18px', textAlign: 'center' }}>
-                <img
-                  src={displayQrCodeUrl}
-                  alt="UPI QR"
-                  onError={() => setIsCustomQrAvailable(false)}
-                  style={{ width: '100%', maxWidth: '220px', borderRadius: '16px', border: '1px solid var(--border)', background: '#fff' }}
+            <div className="premium-form-grid">
+              <div className="premium-field">
+                <label>Full Name *</label>
+                <input
+                  type="text"
+                  name="fullName"
+                  placeholder="Your name"
+                  value={shippingDetails.fullName}
+                  onChange={handleInputChange}
+                  required
+                  className="premium-input"
                 />
-                <div style={{ marginTop: '12px', fontSize: '0.85rem', color: 'var(--muted)' }}>Scan to pay exact amount</div>
-                <div style={{ marginTop: '6px', fontWeight: 800, color: 'var(--green)' }}>Rs.{total.toFixed(2)}</div>
-                <div style={{ marginTop: '8px', fontSize: '0.78rem', color: 'var(--muted)' }}>
-                  {isCustomQrAvailable ? 'Showing your shop QR image.' : 'Shop QR image not found, so generated UPI QR is shown.'}
+              </div>
+              <div className="premium-field">
+                <label>Mobile Number *</label>
+                <input
+                  type="tel"
+                  name="mobile"
+                  placeholder="10-digit mobile number"
+                  maxLength="10"
+                  value={shippingDetails.mobile}
+                  onChange={handleInputChange}
+                  required
+                  className="premium-input"
+                />
+              </div>
+              <div className="premium-field">
+                <label>House No / Street / Village *</label>
+                <textarea
+                  name="addressLine1"
+                  placeholder="House no, street, village or mohalla"
+                  value={shippingDetails.addressLine1}
+                  onChange={handleInputChange}
+                  required
+                  className="premium-textarea"
+                />
+              </div>
+              <div className="premium-field">
+                <label>Area / Locality</label>
+                <input
+                  type="text"
+                  name="area"
+                  placeholder="Colony, locality, area"
+                  value={shippingDetails.area}
+                  onChange={handleInputChange}
+                  className="premium-input"
+                />
+              </div>
+              <div className="premium-form-split">
+                <div className="premium-field">
+                  <label>City / District *</label>
+                  <input
+                    type="text"
+                    name="city"
+                    placeholder="City or district"
+                    value={shippingDetails.city}
+                    onChange={handleInputChange}
+                    required
+                    className="premium-input"
+                  />
+                </div>
+                <div className="premium-field">
+                  <label>State *</label>
+                  <input
+                    type="text"
+                    name="state"
+                    placeholder="State"
+                    value={shippingDetails.state}
+                    onChange={handleInputChange}
+                    required
+                    className="premium-input"
+                  />
                 </div>
               </div>
+              <div className="premium-form-split">
+                <div className="premium-field">
+                  <label>Pincode *</label>
+                  <input
+                    type="text"
+                    name="pincode"
+                    placeholder="6-digit pincode"
+                    maxLength="6"
+                    value={shippingDetails.pincode}
+                    onChange={(event) =>
+                      setShippingDetails((prev) => ({
+                        ...prev,
+                        pincode: event.target.value.replace(/\D/g, '').slice(0, 6),
+                      }))
+                    }
+                    required
+                    className="premium-input"
+                  />
+                </div>
+                <div className="premium-field">
+                  <label>Landmark</label>
+                  <input
+                    type="text"
+                    name="landmark"
+                    placeholder="School, temple, chowk"
+                    value={shippingDetails.landmark}
+                    onChange={handleInputChange}
+                    className="premium-input"
+                  />
+                </div>
+              </div>
+              <div className="premium-field">
+                <label>Nearby Place / Extra Direction</label>
+                <input
+                  type="text"
+                  name="nearby"
+                  placeholder="Nearby shop, turn, road, extra direction"
+                  value={shippingDetails.nearby}
+                  onChange={handleInputChange}
+                  className="premium-input"
+                />
+              </div>
+            </div>
+          </section>
 
-              <div style={{ display: 'grid', gap: '12px' }}>
-                <div style={{ padding: '14px', background: 'var(--green-soft)', borderRadius: '14px' }}>
-                  <div style={{ fontSize: '0.78rem', color: 'var(--muted)', marginBottom: '4px' }}>UPI ID</div>
-                  <div style={{ fontWeight: 800, color: 'var(--green-dark)' }}>{SHOP_UPI_ID}</div>
-                  <div style={{ marginTop: '6px', fontSize: '0.82rem', color: 'var(--muted)' }}>
-                    Replace `VITE_SHOP_UPI_ID` with your real UPI ID before taking live payments.
+          <section className="premium-form-panel">
+            <div className="premium-section-header">
+              <div>
+                <h3>Payment Method</h3>
+                <p>Choose a payment mode and upload proof only when needed.</p>
+              </div>
+            </div>
+
+            <div className="premium-grid-two">
+              <button
+                type="button"
+                className={`premium-support-card ${paymentMethod === 'cod' ? 'is-selected' : ''}`}
+                onClick={() => setPaymentMethod('cod')}
+              >
+                <strong>Cash on Delivery</strong>
+                <span>Pay at doorstep after the order is confirmed and dispatched.</span>
+              </button>
+
+              <button
+                type="button"
+                className={`premium-support-card ${paymentMethod === 'upi' ? 'is-selected' : ''}`}
+                onClick={() => setPaymentMethod('upi')}
+              >
+                <strong>UPI / QR Payment</strong>
+                <span>Scan, pay, and upload your screenshot so the store can verify quickly.</span>
+              </button>
+            </div>
+
+            {paymentMethod === 'upi' ? (
+              <div className="premium-grid-two">
+                <div className="premium-surface-card">
+                  <div className="premium-section-header">
+                    <div>
+                      <h3>Scan to Pay</h3>
+                      <p>Pay the exact amount and upload the proof below.</p>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', justifyItems: 'center', gap: '12px' }}>
+                    <img
+                      src={displayQrCodeUrl}
+                      alt="UPI QR"
+                      onError={() => setIsCustomQrAvailable(false)}
+                      style={{
+                        width: '100%',
+                        maxWidth: '220px',
+                        borderRadius: '18px',
+                        border: '1px solid rgba(114, 146, 219, 0.12)',
+                        background: '#fff',
+                      }}
+                    />
+                    <strong style={{ fontSize: '1.2rem', color: '#12724c' }}>{formatCurrency(total)}</strong>
+                    <div className="premium-muted" style={{ textAlign: 'center' }}>
+                      {isCustomQrAvailable
+                        ? 'Using your configured shop QR image.'
+                        : 'Shop QR image not found, so a generated UPI QR is shown.'}
+                    </div>
                   </div>
                 </div>
 
-                <div className="form-group">
-                  <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--green)' }}>UPI Transaction Reference</label>
-                  <input type="text" placeholder="Optional transaction / UTR number" value={paymentReference} onChange={(event) => setPaymentReference(event.target.value)} style={{ padding: '12px', border: '1.5px solid var(--border)', borderRadius: '10px', width: '100%' }} />
-                </div>
-
-                <div style={{ border: '2px dashed var(--border)', background: '#fffaf1', borderRadius: '16px', padding: '16px' }}>
-                  <div style={{ fontWeight: 800, color: '#8a5a00', marginBottom: '8px' }}>Upload Payment Screenshot *</div>
-                  <input type="file" accept="image/*" onChange={(event) => setPaymentScreenshotFile(event.target.files?.[0] || null)} style={{ fontSize: '0.9rem' }} />
-                  {paymentScreenshotFile && (
-                    <div style={{ marginTop: '10px', fontSize: '0.82rem', color: 'var(--green-dark)', fontWeight: 700 }}>
-                      Proof selected: {paymentScreenshotFile.name}
+                <div className="premium-form-grid">
+                  <div className="premium-info-strip">
+                    <div>
+                      <strong>UPI ID</strong>
+                      <div className="premium-muted">{SHOP_UPI_ID}</div>
                     </div>
-                  )}
+                    <span className="premium-pill">Exact amount</span>
+                  </div>
+
+                  <div className="premium-field">
+                    <label>UPI Transaction Reference</label>
+                    <input
+                      type="text"
+                      placeholder="Optional transaction / UTR number"
+                      value={paymentReference}
+                      onChange={(event) => setPaymentReference(event.target.value)}
+                      className="premium-input"
+                    />
+                  </div>
+
+                  <div className="premium-upload-panel">
+                    <strong>Upload Payment Screenshot *</strong>
+                    <span className="premium-muted">This helps the store verify the payment faster.</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(event) => setPaymentScreenshotFile(event.target.files?.[0] || null)}
+                    />
+                    {paymentScreenshotFile ? (
+                      <div className="premium-file-name">Proof selected: {paymentScreenshotFile.name}</div>
+                    ) : null}
+                  </div>
                 </div>
               </div>
+            ) : null}
+          </section>
+
+          <section className="premium-upload-panel">
+            <div>
+              <strong>Upload Prescription (Optional)</strong>
+              <div className="premium-muted">
+                Add a doctor&apos;s slip if any medicine in this order requires review.
+              </div>
             </div>
-          )}
-        </div>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(event) => setPrescriptionFile(event.target.files?.[0] || null)}
+            />
+            {prescriptionFile ? (
+              <div className="premium-file-name">Prescription selected: {prescriptionFile.name}</div>
+            ) : null}
+          </section>
+        </form>
 
-        <div className="form-card" style={{ marginTop: '20px', border: '2px dashed var(--border)', background: 'var(--green-pale)' }}>
-          <h3 style={{ color: 'var(--green)', marginBottom: '10px' }}>Upload Prescription (Optional)</h3>
-          <p style={{ fontSize: '0.8rem', color: 'var(--muted)', marginBottom: '15px' }}>If you have a doctor&apos;s slip, upload a photo here.</p>
-          <input type="file" accept="image/*" onChange={(event) => setPrescriptionFile(event.target.files?.[0] || null)} style={{ fontSize: '0.9rem' }} />
-          {prescriptionFile && (
-            <p style={{ marginTop: '10px', fontSize: '0.8rem', color: 'var(--green)', fontWeight: 700 }}>
-              File selected: {prescriptionFile.name}
-            </p>
-          )}
-        </div>
+        <aside className="premium-summary-panel">
+          <div className="premium-section-header" style={{ marginBottom: 0 }}>
+            <div>
+              <h3>Order Summary</h3>
+              <p>Everything in the cart is ready for final confirmation.</p>
+            </div>
+          </div>
 
-        <button type="submit" className="place-btn" disabled={isSubmitting}>
-          {isSubmitting ? 'Placing Order...' : paymentMethod === 'upi' ? 'Submit UPI Order' : 'Place Order'}
-        </button>
-      </form>
-    </div>
+          <div className="premium-list-stack">
+            {items.map((item) => (
+              <article key={item.id} className="premium-track-item">
+                <div className="premium-track-header">
+                  <strong>{item.name}</strong>
+                  <span className="premium-pill">{formatCurrency(item.price * item.quantity)}</span>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '56px 1fr', gap: '12px', alignItems: 'center', marginTop: '10px' }}>
+                  <div className="premium-cart-media" style={{ width: '56px', height: '56px', borderRadius: '18px' }}>
+                    <img src={getMedicineImage(item)} alt={item.name} />
+                  </div>
+                  <div className="premium-muted">
+                    Qty {item.quantity} · {buildPackLabel(item)}
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+
+          <div className="premium-summary-row">
+            <span>Subtotal</span>
+            <strong>{formatCurrency(subtotal)}</strong>
+          </div>
+          <div className="premium-summary-row">
+            <span>Delivery</span>
+            <strong>{delivery === 0 ? 'FREE' : formatCurrency(delivery)}</strong>
+          </div>
+          <div className="premium-summary-total">
+            <span>Total</span>
+            <strong>{formatCurrency(total)}</strong>
+          </div>
+
+          <button type="submit" form="checkout-form" className="premium-cta" disabled={isSubmitting}>
+            {isSubmitting ? 'Placing Order...' : paymentMethod === 'upi' ? 'Submit UPI Order' : 'Place Order'}
+          </button>
+        </aside>
+      </div>
+    </PremiumPageShell>
   );
 }
 

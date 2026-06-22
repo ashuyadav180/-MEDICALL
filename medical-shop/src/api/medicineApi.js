@@ -1,9 +1,10 @@
 import axios from 'axios';
 import { API_BASE_URL } from '../config';
+import { FALLBACK_MEDICINES } from '../data/fallbackMedicines';
 import { withAuthRetry } from './authSession';
 
 const API_URL = `${API_BASE_URL}/api/medicines`;
-const MEDICINES_CACHE_KEY = 'medicines_cache_v1';
+const MEDICINES_CACHE_KEY = 'medicines_cache_v2';
 const MEDICINE_CACHE_PREFIX = 'medicine_cache_v1:';
 const CACHE_TTL_MS = 5 * 60 * 1000;
 let medicinesMemoryCache = null;
@@ -53,6 +54,8 @@ const writeCache = (key, data) => {
 };
 
 const normalizeMedicine = (medicine) => ({ ...medicine, id: medicine._id || medicine.id });
+
+const fallbackMedicines = FALLBACK_MEDICINES.map(normalizeMedicine);
 
 const cacheMedicineList = (medicines) => {
     medicinesMemoryCache = medicines;
@@ -107,6 +110,8 @@ export const getCachedMedicines = () => {
     return [];
 };
 
+export const getFallbackMedicines = () => fallbackMedicines;
+
 export const primeMedicineCache = (medicine) => {
     if (!medicine?.id) {
         return;
@@ -127,11 +132,13 @@ export const fetchMedicines = async (options = {}) => {
     try {
         const response = await axios.get(API_URL);
         const medicines = response.data.map(normalizeMedicine);
-        cacheMedicineList(medicines);
-        return medicines;
+        const catalog = medicines.length ? medicines : fallbackMedicines;
+        cacheMedicineList(catalog);
+        return catalog;
     } catch (error) {
         console.error('Error fetching medicines:', error);
-        throw error;
+        cacheMedicineList(fallbackMedicines);
+        return fallbackMedicines;
     }
 };
 
@@ -140,6 +147,12 @@ export const fetchMedicineById = async (id) => {
     const cachedMedicine = getCachedMedicineById(id);
     if (cachedMedicine) {
         return cachedMedicine;
+    }
+
+    const fallbackMedicine = fallbackMedicines.find((medicine) => medicine.id === id);
+    if (fallbackMedicine) {
+        primeMedicineCache(fallbackMedicine);
+        return fallbackMedicine;
     }
 
     try {

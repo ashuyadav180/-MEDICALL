@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import PremiumPageShell from '../components/ui/PremiumPageShell';
 import { fetchTrackOrder } from '../api/orderApi';
 import socket from '../socket';
 import { getOrderReference, getPaymentStatusMeta, getStatusMeta } from '../utils/orderDisplay';
@@ -20,11 +21,7 @@ function TrackOrder() {
   const [error, setError] = useState('');
   const [liveMessage, setLiveMessage] = useState('');
 
-  useEffect(() => {
-    return () => {
-      socket.off('status_updated');
-    };
-  }, []);
+  useEffect(() => () => socket.off('status_updated'), []);
 
   const currentStepIndex = useMemo(
     () => (order ? statusSteps.findIndex((step) => step.id === order.status) : -1),
@@ -73,124 +70,132 @@ function TrackOrder() {
   const statusMeta = order ? getStatusMeta(order.status) : null;
 
   return (
-    <div className="main-content track-order-page">
-      <h2 className="section-title">Track Your Order</h2>
-      <div className="form-card track-search-card" style={{ maxWidth: '640px', margin: '0 auto 28px' }}>
-        <form onSubmit={handleTrack} className="track-search-form" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+    <PremiumPageShell
+      eyebrow="Live tracking"
+      title="Track your order with the same clarity as the rest of the product."
+      description="Search using the fixed order reference and follow payment, packing, and delivery progress without guesswork."
+      stats={[
+        { value: order ? getOrderReference(order) : 'Live', label: 'active tracking reference' },
+        { value: order ? getStatusMeta(order.status).label : 'Ready', label: 'current order status' },
+      ]}
+      heroBadges={['Real-time status', 'Fixed order reference', 'Payment visibility']}
+      heroPanels={[
+        { label: 'Reference', value: order ? getOrderReference(order) : 'Enter order ID' },
+        { label: 'Delivery stage', value: order ? getStatusMeta(order.status).label : 'Ready to search' },
+        { label: 'Socket updates', value: 'Live when connected' },
+      ]}
+    >
+      <section className="premium-form-panel">
+        <div className="premium-section-header">
+          <div>
+            <h2>Track by Order Reference</h2>
+            <p>Use the same reference shown on confirmation, detail view, and profile history.</p>
+          </div>
+        </div>
+
+        <form onSubmit={handleTrack} className="premium-inline-actions">
           <input
             type="text"
             placeholder="Enter order reference like BMS-260402-ABCD"
             value={orderId}
             onChange={(event) => setOrderId(event.target.value)}
-            style={{ flex: 1, minWidth: '260px', padding: '12px', borderRadius: '10px', border: '1.5px solid var(--border)' }}
+            className="premium-input"
+            style={{ flex: 1, minWidth: '280px' }}
           />
-          <button type="submit" className="add-btn" style={{ padding: '12px 25px' }} disabled={loading}>
+          <button type="submit" className="premium-cta" disabled={loading}>
             {loading ? 'Tracking...' : 'Track'}
           </button>
         </form>
-        <div style={{ marginTop: '10px', fontSize: '0.84rem', color: 'var(--muted)' }}>
-          Use the same reference shown on the confirmation page and in order history.
-        </div>
-        {error && <p style={{ color: 'var(--red)', marginTop: '10px', fontSize: '0.85rem' }}>{error}</p>}
-      </div>
 
-      {order && (
-        <div className="order-tracking-card track-order-card" style={{ background: 'var(--card)', borderRadius: '20px', padding: '30px', border: '1.5px solid var(--border)', maxWidth: '860px', margin: '0 auto' }}>
-          <div className="order-two-column-grid" style={{ display: 'grid', gridTemplateColumns: '1.1fr 1fr', gap: '18px', marginBottom: '24px' }}>
-            <div>
-              <div style={{ fontSize: '0.85rem', color: 'var(--muted)' }}>Tracking order</div>
-              <div style={{ fontWeight: 800, fontSize: '1.4rem', color: 'var(--green)', marginBottom: '8px' }}>
-                {getOrderReference(order)}
-              </div>
-              <div style={{ fontSize: '0.92rem', color: 'var(--text)' }}>
-                {statusMeta?.helper}
-              </div>
-            </div>
-            <div style={{ background: 'var(--green-pale)', borderRadius: '16px', padding: '18px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                <span style={{ color: 'var(--muted)' }}>Current status</span>
-                <span style={{ fontWeight: 800 }}>{statusMeta?.label}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                <span style={{ color: 'var(--muted)' }}>Total amount</span>
-                <span style={{ fontWeight: 800 }}>Rs.{Number(order.totalPrice || 0).toFixed(2)}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--muted)' }}>Payment</span>
-                <span style={{ fontWeight: 700 }}>{order.paymentMethod === 'cod' ? 'Cash on Delivery' : 'UPI / QR Code'}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px' }}>
-                <span style={{ color: 'var(--muted)' }}>Payment status</span>
-                <span style={{ fontWeight: 700, color: order.paymentStatus === 'received' ? 'var(--green)' : '#8a5a00' }}>{getPaymentStatusMeta(order.paymentStatus).label}</span>
-              </div>
-            </div>
-          </div>
+        {error ? <div className="premium-note-banner is-danger">{error}</div> : null}
+      </section>
 
-          {liveMessage && (
-            <div style={{ marginBottom: '20px', padding: '12px 14px', borderRadius: '12px', background: 'var(--green-soft)', color: 'var(--green-dark)', fontWeight: 700 }}>
-              {liveMessage}
-            </div>
-          )}
+      {order ? (
+        <div className="premium-page-body" style={{ marginTop: 0 }}>
+          <div className="premium-track-layout">
+            <section className="premium-surface-card">
+              <div className="premium-section-header">
+                <div>
+                  <h2>{getOrderReference(order)}</h2>
+                  <p>{statusMeta?.helper}</p>
+                </div>
+                <span className="premium-soft-badge is-success">{statusMeta?.label}</span>
+              </div>
 
-          <div className="tracking-timeline" style={{ position: 'relative', display: 'flex', justifyContent: 'space-between', gap: '8px', marginBottom: '28px' }}>
-            <div style={{ position: 'absolute', top: '24px', left: '10%', right: '10%', height: '4px', background: '#e8ecef', zIndex: 0 }} />
-            <div style={{ position: 'absolute', top: '24px', left: '10%', width: `${Math.max(currentStepIndex, 0) / (statusSteps.length - 1) * 80}%`, height: '4px', background: 'var(--green)', zIndex: 1, transition: 'width 0.5s ease' }} />
+              {liveMessage ? <div className="premium-note-banner is-success">{liveMessage}</div> : null}
 
-            {statusSteps.map((step, index) => {
-              const isActive = index <= currentStepIndex;
-              return (
-                <div key={step.id} style={{ position: 'relative', zIndex: 2, textAlign: 'center', flex: 1 }}>
-                  <div
-                    style={{
-                      width: '48px',
-                      height: '48px',
-                      borderRadius: '50%',
-                      background: isActive ? 'var(--green)' : '#fff',
-                      border: `3px solid ${isActive ? 'var(--green)' : '#d8dee3'}`,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: isActive ? '#fff' : '#7b8794',
-                      fontWeight: 800,
-                      margin: '0 auto 10px',
-                    }}
+              <div className="premium-track-timeline" style={{ marginTop: '18px' }}>
+                {statusSteps.map((step, index) => (
+                  <article
+                    key={step.id}
+                    className={`premium-track-step ${index <= currentStepIndex ? 'is-active' : ''}`}
                   >
-                    {index + 1}
-                  </div>
-                  <div style={{ fontSize: '0.78rem', fontWeight: 700, color: isActive ? 'var(--green)' : 'var(--muted)' }}>{step.label}</div>
+                    <strong>{index + 1}</strong>
+                    <span>{step.label}</span>
+                  </article>
+                ))}
+              </div>
+            </section>
+
+            <section className="premium-surface-card">
+              <div className="premium-section-header">
+                <div>
+                  <h2>Payment and Delivery</h2>
+                  <p>Review total, payment method, and verification state.</p>
                 </div>
-              );
-            })}
+              </div>
+
+              <div className="premium-list-stack">
+                <div className="premium-summary-row">
+                  <span>Total amount</span>
+                  <strong>Rs.{Number(order.totalPrice || 0).toFixed(2)}</strong>
+                </div>
+                <div className="premium-summary-row">
+                  <span>Payment method</span>
+                  <strong>{order.paymentMethod === 'cod' ? 'Cash on Delivery' : 'UPI / QR Code'}</strong>
+                </div>
+                <div className="premium-summary-row">
+                  <span>Payment status</span>
+                  <strong>{getPaymentStatusMeta(order.paymentStatus).label}</strong>
+                </div>
+              </div>
+            </section>
           </div>
 
-          <div style={{ borderTop: '1.5px solid var(--border)', paddingTop: '18px' }}>
-            <div style={{ fontWeight: 800, marginBottom: '12px' }}>Ordered items</div>
-            <div style={{ display: 'grid', gap: '10px' }}>
+          <section className="premium-surface-card">
+            <div className="premium-section-header">
+              <div>
+                <h3>Ordered Items</h3>
+                <p>Each line item remains available from this tracking view.</p>
+              </div>
+            </div>
+
+            <div className="premium-list-stack">
               {(order.orderItems || []).map((item, index) => (
-                <div key={`${item.name}-${index}`} className="compact-order-row" style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', paddingBottom: '10px', borderBottom: index === order.orderItems.length - 1 ? 'none' : '1px solid var(--border)' }}>
-                  <div>
-                    <div style={{ fontWeight: 700 }}>{item.name}</div>
-                    <div style={{ fontSize: '0.86rem', color: 'var(--muted)' }}>
-                      Qty {item.quantity} x Rs.{Number(item.price || 0).toFixed(2)}
-                    </div>
+                <article key={`${item.name}-${index}`} className="premium-track-item">
+                  <div className="premium-track-header">
+                    <strong>{item.name}</strong>
+                    <span className="premium-pill">Rs.{Number((item.price || 0) * (item.quantity || 0)).toFixed(2)}</span>
                   </div>
-                  <div style={{ fontWeight: 800 }}>Rs.{Number((item.price || 0) * (item.quantity || 0)).toFixed(2)}</div>
-                </div>
+                  <div className="premium-muted" style={{ marginTop: '6px' }}>
+                    Qty {item.quantity} x Rs.{Number(item.price || 0).toFixed(2)}
+                  </div>
+                </article>
               ))}
             </div>
-          </div>
 
-          <div className="responsive-action-row" style={{ marginTop: '20px', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-            <Link to={`/orders/${encodeURIComponent(order.id)}`} className="cta-button" style={{ textDecoration: 'none' }}>
-              View Full Order
-            </Link>
-            <Link to="/profile" className="cta-button" style={{ textDecoration: 'none', backgroundColor: '#425466' }}>
-              My Orders
-            </Link>
-          </div>
+            <div className="premium-inline-actions" style={{ marginTop: '20px' }}>
+              <Link to={`/orders/${encodeURIComponent(order.id)}`} className="premium-cta">
+                View Full Order
+              </Link>
+              <Link to="/profile" className="premium-secondary-btn">
+                My Orders
+              </Link>
+            </div>
+          </section>
         </div>
-      )}
-    </div>
+      ) : null}
+    </PremiumPageShell>
   );
 }
 

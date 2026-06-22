@@ -1,13 +1,13 @@
 import { API_BASE_URL } from '../config';
 
 const CATEGORY_FALLBACKS = {
-  tablet: { label: 'TABLET', unit: 'tablets', accent: '#24458c', glow: '#dbe5ff' },
-  capsule: { label: 'CAPSULE', unit: 'capsules', accent: '#0f766e', glow: '#d4f6ef' },
-  syrup: { label: 'SYRUP', unit: 'ml', accent: '#1d4ed8', glow: '#dbe8ff' },
-  cream: { label: 'CREAM', unit: 'g', accent: '#b42318', glow: '#ffe0de' },
-  drops: { label: 'DROPS', unit: 'ml', accent: '#7c3aed', glow: '#eadcff' },
-  injection: { label: 'INJECTION', unit: 'vial', accent: '#9a3412', glow: '#ffe6d7' },
-  default: { label: 'MEDICINE', unit: 'units', accent: '#1a7a4a', glow: '#dff5e7' },
+  tablet: { label: 'TABLET', unit: 'tablets', accent: '#24458c', secondary: '#6ea5ff', glow: '#dbe5ff' },
+  capsule: { label: 'CAPSULE', unit: 'capsules', accent: '#0f766e', secondary: '#5dd9ca', glow: '#d4f6ef' },
+  syrup: { label: 'SYRUP', unit: 'ml', accent: '#1d4ed8', secondary: '#5ec9ff', glow: '#dbe8ff' },
+  cream: { label: 'CREAM', unit: 'g', accent: '#b42318', secondary: '#ff8e7f', glow: '#ffe0de' },
+  drops: { label: 'DROPS', unit: 'ml', accent: '#7c3aed', secondary: '#b99bff', glow: '#eadcff' },
+  injection: { label: 'INJECTION', unit: 'vial', accent: '#9a3412', secondary: '#ffb782', glow: '#ffe6d7' },
+  default: { label: 'MEDICINE', unit: 'units', accent: '#1a7a4a', secondary: '#5ed59a', glow: '#dff5e7' },
 };
 
 const escapeXml = (value) =>
@@ -72,52 +72,121 @@ export const buildMedicineCatalogMeta = (medicine) => {
   };
 };
 
-const buildFallbackSvg = (medicine) => {
-  const theme = getMedicineTheme(medicine.category);
-  const title = escapeXml(medicine.name || theme.label);
-  const subtitle = escapeXml(buildPackLabel(medicine));
-  const accent = theme.accent;
-  const glow = theme.glow;
-  const categoryLabel = escapeXml(theme.label);
+const optimizeRemoteImageUrl = (imageUrl) => {
+  try {
+    const parsedUrl = new URL(imageUrl);
 
-  return `
-    <svg xmlns="http://www.w3.org/2000/svg" width="480" height="360" viewBox="0 0 480 360">
-      <defs>
-        <linearGradient id="surface" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stop-color="${glow}" />
-          <stop offset="100%" stop-color="#ffffff" />
-        </linearGradient>
-      </defs>
-      <rect width="480" height="360" rx="32" fill="url(#surface)" />
-      <rect x="92" y="58" width="296" height="204" rx="28" fill="#ffffff" stroke="${accent}" stroke-width="6" />
-      <rect x="118" y="86" width="244" height="84" rx="24" fill="${accent}" opacity="0.12" />
-      <rect x="144" y="112" width="92" height="34" rx="17" fill="${accent}" />
-      <rect x="232" y="112" width="92" height="34" rx="17" fill="#ffffff" stroke="${accent}" stroke-width="6" />
-      <circle cx="154" cy="214" r="16" fill="${accent}" opacity="0.18" />
-      <circle cx="194" cy="214" r="16" fill="${accent}" opacity="0.28" />
-      <circle cx="234" cy="214" r="16" fill="${accent}" opacity="0.38" />
-      <text x="240" y="292" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="${accent}">${categoryLabel}</text>
-      <text x="240" y="320" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#163124">${title}</text>
-      <text x="240" y="344" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#4b6356">${subtitle}</text>
-    </svg>
-  `;
+    if (parsedUrl.hostname.includes('images.unsplash.com')) {
+      parsedUrl.searchParams.set('auto', 'format');
+      parsedUrl.searchParams.set('fit', 'crop');
+      parsedUrl.searchParams.set('w', '640');
+      parsedUrl.searchParams.set('q', '70');
+    }
+
+    return parsedUrl.toString();
+  } catch {
+    return imageUrl;
+  }
+};
+
+/* ── Clean product-box SVG illustration ── */
+const buildProductBoxSvg = (medicine) => {
+  const theme = getMedicineTheme(medicine.category);
+  const accent = theme.accent;
+  const secondary = theme.secondary;
+  const glow = theme.glow;
+  const catLabel = escapeXml(theme.label);
+  const medName = escapeXml((medicine.name || catLabel).slice(0, 22));
+  const dosage = escapeXml(medicine.dosage || buildPackLabel(medicine));
+  const cat = String(medicine.category || '').toLowerCase();
+
+  /* pick box shape by category */
+  let shape = '';
+  if (cat === 'syrup') {
+    /* bottle */
+    shape = `
+      <rect x="170" y="55" width="140" height="28" rx="10" fill="${accent}" opacity="0.85"/>
+      <rect x="150" y="80" width="180" height="185" rx="34" fill="#fff" stroke="${accent}" stroke-width="5"/>
+      <rect x="166" y="100" width="148" height="52" rx="8" fill="${glow}"/>
+      <rect x="172" y="168" width="136" height="70" rx="12" fill="${secondary}" opacity="0.22"/>
+      <text x="240" y="134" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" font-weight="800" fill="${accent}" letter-spacing="1">${catLabel}</text>
+      <text x="240" y="152" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" fill="#555">${dosage}</text>
+    `;
+  } else if (cat === 'cream') {
+    /* tube */
+    shape = `
+      <rect x="145" y="90" width="190" height="160" rx="22" fill="#fff" stroke="${accent}" stroke-width="5"/>
+      <rect x="145" y="90" width="190" height="54" rx="22" fill="${accent}" opacity="0.9"/>
+      <rect x="155" y="170" width="170" height="55" rx="10" fill="${glow}"/>
+      <rect x="195" y="255" width="90" height="28" rx="14" fill="${accent}" opacity="0.18"/>
+      <text x="240" y="124" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" font-weight="800" fill="#fff" letter-spacing="1">${catLabel}</text>
+      <text x="240" y="204" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" fill="#555">${dosage}</text>
+    `;
+  } else if (cat === 'drops') {
+    /* dropper bottle */
+    shape = `
+      <rect x="195" y="55" width="90" height="30" rx="10" fill="${accent}" opacity="0.85"/>
+      <rect x="175" y="82" width="130" height="175" rx="28" fill="#fff" stroke="${accent}" stroke-width="5"/>
+      <rect x="185" y="100" width="110" height="42" rx="8" fill="${glow}"/>
+      <rect x="188" y="162" width="104" height="60" rx="10" fill="${secondary}" opacity="0.22"/>
+      <circle cx="240" cy="238" r="18" fill="${accent}" opacity="0.12"/>
+      <text x="240" y="124" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" font-weight="800" fill="${accent}" letter-spacing="1">${catLabel}</text>
+      <text x="240" y="144" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" fill="#555">${dosage}</text>
+    `;
+  } else if (cat === 'injection') {
+    /* vial + syringe */
+    shape = `
+      <rect x="195" y="65" width="90" height="175" rx="22" fill="#fff" stroke="${accent}" stroke-width="5"/>
+      <rect x="195" y="65" width="90" height="52" rx="22" fill="${accent}" opacity="0.85"/>
+      <line x1="310" y1="130" x2="380" y2="200" stroke="${accent}" stroke-width="9" stroke-linecap="round"/>
+      <circle cx="308" cy="127" r="14" fill="${accent}" opacity="0.3"/>
+      <rect x="205" y="135" width="70" height="72" rx="10" fill="${glow}"/>
+      <text x="240" y="90" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" font-weight="800" fill="#fff" letter-spacing="1">${catLabel}</text>
+      <text x="240" y="180" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" fill="#555">${dosage}</text>
+    `;
+  } else {
+    /* default box (tablet / capsule / other) */
+    shape = `
+      <rect x="130" y="80" width="220" height="185" rx="22" fill="#fff" stroke="${accent}" stroke-width="5"/>
+      <rect x="130" y="80" width="220" height="58" rx="22" fill="${accent}" opacity="0.88"/>
+      <rect x="130" y="114" width="220" height="24" fill="${accent}" opacity="0.88"/>
+      <rect x="146" y="160" width="188" height="72" rx="12" fill="${glow}"/>
+      <g fill="#fff" stroke="${accent}" stroke-width="4">
+        <rect x="158" y="175" width="46" height="28" rx="14"/>
+        <rect x="217" y="175" width="46" height="28" rx="14"/>
+        <rect x="276" y="175" width="46" height="28" rx="14"/>
+      </g>
+      <text x="240" y="108" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" font-weight="800" fill="#fff" letter-spacing="1">${catLabel}</text>
+    `;
+  }
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="320" height="320" viewBox="0 0 480 360">
+  <defs>
+    <linearGradient id="bg${cat}" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="${glow}"/>
+    </linearGradient>
+  </defs>
+  <rect width="480" height="360" fill="url(#bg${cat})"/>
+  <circle cx="400" cy="60" r="80" fill="${secondary}" opacity="0.14"/>
+  <circle cx="80" cy="310" r="90" fill="${accent}" opacity="0.07"/>
+  ${shape}
+  <text x="240" y="290" text-anchor="middle" font-family="Arial,sans-serif" font-size="17" font-weight="700" fill="#1a2e22">${medName}</text>
+  <text x="240" y="312" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" fill="#6b7a72">${dosage}</text>
+</svg>`;
 };
 
 export const getMedicineImage = (medicine) => {
   const imageUrl = String(medicine?.imageUrl || '').trim();
 
   if (imageUrl) {
-    if (/^(https?:)?\/\//i.test(imageUrl) || /^(data|blob):/i.test(imageUrl)) {
-      return imageUrl;
-    }
-
-    if (imageUrl.startsWith('/')) {
-      return `${API_BASE_URL}${imageUrl}`;
-    }
-
+    if (/^(data|blob):/i.test(imageUrl)) return imageUrl;
+    if (imageUrl.startsWith('/')) return `${API_BASE_URL}${imageUrl}`;
+    if (/^https?:\/\//i.test(imageUrl)) return optimizeRemoteImageUrl(imageUrl);
     return `${API_BASE_URL}/${imageUrl.replace(/^\/+/, '')}`;
   }
 
-  const svg = buildFallbackSvg(medicine || {});
+  /* Always fall back to clean SVG illustration */
+  const svg = buildProductBoxSvg(medicine || {});
   return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
 };

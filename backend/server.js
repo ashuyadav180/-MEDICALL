@@ -15,6 +15,10 @@ const server = http.createServer(app);
 const fallbackOrigins = [
   'http://localhost:5173',
   'http://localhost:5174',
+  'http://localhost:4173',
+  'http://127.0.0.1:5173',
+  'http://127.0.0.1:5174',
+  'http://127.0.0.1:4173',
   'https://medicall-aw84.vercel.app',
 ];
 const allowedOrigins = (process.env.CLIENT_URLS || '')
@@ -33,6 +37,7 @@ const io = new Server(server, {
 });
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(
   cors({
@@ -70,6 +75,16 @@ app.set('io', io);
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/medicines', require('./routes/medicineRoutes'));
 app.use('/api/orders', require('./routes/orderRoutes'));
+app.use('/api/support', require('./routes/supportRoutes'));
+
+app.get('/api/health', (_req, res) => {
+  res.json({
+    status: 'ok',
+    service: 'Bablu Medical Store API',
+    uptime: Math.round(process.uptime()),
+    timestamp: new Date().toISOString(),
+  });
+});
 
 app.get('/', (req, res) => {
   res.send('Bablu Medical Store Enterprise API is running...');

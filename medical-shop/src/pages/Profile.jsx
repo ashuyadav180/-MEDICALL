@@ -1,10 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import PremiumPageShell from '../components/ui/PremiumPageShell';
 import { updateProfile } from '../api/authApi';
 import { fetchMyOrders } from '../api/orderApi';
 import { useAuth } from '../store/AuthContext';
 import { useCart } from '../store/CartContext';
-import { getPaymentStatusMeta, getShortOrderReference, getStatusMeta, reorderOrderItems } from '../utils/orderDisplay';
+import {
+  getPaymentStatusMeta,
+  getShortOrderReference,
+  getStatusMeta,
+  reorderOrderItems,
+} from '../utils/orderDisplay';
 
 function Profile() {
   const { user, isLoggedIn, login } = useAuth();
@@ -51,7 +57,24 @@ function Profile() {
   }, [isLoggedIn]);
 
   if (!isLoggedIn) {
-    return <div className="text-center p-20">Please log in to view your profile.</div>;
+    return (
+      <PremiumPageShell
+        eyebrow="My account"
+        title="Log in to view your healthcare profile."
+        description="Your account keeps delivery details, order history, and repeat purchases in one place."
+      >
+        <div className="premium-empty-state">
+          <div className="premium-empty-icon">ID</div>
+          <h2>Please log in to view your profile.</h2>
+          <p>Once you sign in, your account page will show order history and saved details.</p>
+          <div className="premium-inline-actions" style={{ justifyContent: 'center' }}>
+            <button type="button" className="premium-cta" onClick={() => navigate('/login')}>
+              Go to Login
+            </button>
+          </div>
+        </div>
+      </PremiumPageShell>
+    );
   }
 
   const handleChange = (event) => {
@@ -88,148 +111,131 @@ function Profile() {
   const latestOrder = orders[0] || null;
 
   return (
-    <div className="profile-page">
-      <div className="profile-hero">
-        <div>
-          <p className="profile-eyebrow">My Account</p>
-          <h1>Welcome Back, {user?.name || 'Customer'}</h1>
-          <p className="profile-subtitle">
-            Manage your details and keep track of every medicine order in one place.
-          </p>
+    <PremiumPageShell
+      eyebrow="My account"
+      title={`Welcome back, ${user?.name || 'Customer'}.`}
+      description="Manage your account details, inspect payment and delivery progress, and reorder medicines without starting from scratch."
+      stats={[
+        { value: String(orders.length), label: 'orders placed' },
+        { value: latestOrder ? getShortOrderReference(latestOrder) : 'None yet', label: 'latest order' },
+      ]}
+      heroBadges={['Account command center', 'One-tap reorder', 'Live order memory']}
+      heroPanels={[
+        { label: 'Orders placed', value: String(orders.length) },
+        { label: 'Latest ref', value: latestOrder ? getShortOrderReference(latestOrder) : 'No orders yet' },
+        { label: 'Actions', value: 'Update, view, reorder' },
+      ]}
+      actions={
+        <button type="button" className="premium-secondary-btn" onClick={() => navigate('/')}>
+          Start New Order
+        </button>
+      }
+      sideContent={
+        <div className="premium-side-card">
+          <span>Account system</span>
+          <strong>Your account now acts like a command center for orders, profile updates, and reorders.</strong>
+          <ul className="premium-helper-list">
+            <li>See payment status and fulfillment stage in one place.</li>
+            <li>Update profile details without leaving the account hub.</li>
+          </ul>
         </div>
+      }
+    >
+      {error ? <div className="premium-note-banner is-danger">{error}</div> : null}
+      {message ? <div className="premium-note-banner is-success">{message}</div> : null}
 
-        <div className="profile-stats">
-          <div className="profile-stat-card">
-            <span className="profile-stat-label">Total orders</span>
-            <strong>{orders.length}</strong>
+      <div className="premium-grid-two">
+        <section className="premium-form-panel">
+          <div className="premium-section-header">
+            <div>
+              <h2>Account Details</h2>
+              <p>Keep your core profile data current for smoother ordering and delivery.</p>
+            </div>
           </div>
-          <div className="profile-stat-card">
-            <span className="profile-stat-label">Latest order</span>
-            <strong>{latestOrder ? getShortOrderReference(latestOrder) : 'None yet'}</strong>
-          </div>
-        </div>
-      </div>
 
-      <div className="profile-grid">
-        <div className="profile-details card">
-          <h2>Account Details</h2>
-          {error && <p style={{ color: 'var(--red)', fontWeight: 700 }}>{error}</p>}
-          {message && <p style={{ color: 'var(--green)', fontWeight: 700 }}>{message}</p>}
-
-          <form onSubmit={handleUpdate} style={{ display: 'grid', gap: '12px', marginTop: '15px' }}>
-            <input name="name" value={form.name} onChange={handleChange} placeholder="Full Name" style={{ padding: '12px', borderRadius: '10px', border: '1.5px solid var(--border)' }} />
-            <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="Email" style={{ padding: '12px', borderRadius: '10px', border: '1.5px solid var(--border)' }} />
-            <input name="phone" value={form.phone} onChange={handleChange} placeholder="10-digit mobile number" maxLength="10" style={{ padding: '12px', borderRadius: '10px', border: '1.5px solid var(--border)' }} />
-            <input name="password" type="password" value={form.password} onChange={handleChange} placeholder="New password (optional)" style={{ padding: '12px', borderRadius: '10px', border: '1.5px solid var(--border)' }} />
-            <button type="submit" className="cta-button" style={{ width: '100%' }} disabled={saving}>
+          <form onSubmit={handleUpdate} className="premium-form-grid">
+            <div className="premium-field">
+              <label>Full Name</label>
+              <input name="name" value={form.name} onChange={handleChange} placeholder="Full Name" className="premium-input" />
+            </div>
+            <div className="premium-field">
+              <label>Email</label>
+              <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="Email" className="premium-input" />
+            </div>
+            <div className="premium-field">
+              <label>Phone</label>
+              <input name="phone" value={form.phone} onChange={handleChange} placeholder="10-digit mobile number" maxLength="10" className="premium-input" />
+            </div>
+            <div className="premium-field">
+              <label>New Password</label>
+              <input name="password" type="password" value={form.password} onChange={handleChange} placeholder="Optional password change" className="premium-input" />
+            </div>
+            <button type="submit" className="premium-cta" disabled={saving}>
               {saving ? 'Saving...' : 'Update Details'}
             </button>
           </form>
-        </div>
+        </section>
 
-        <div className="order-history card">
-          <div className="profile-section-head">
+        <section className="premium-surface-card">
+          <div className="premium-section-header">
             <div>
               <h2>Order History ({orders.length})</h2>
-              <p className="profile-section-copy">
-                Open any order, check payment progress, or reorder the same medicines quickly.
-              </p>
+              <p>Review past orders, monitor status, or move the same medicines back into the cart.</p>
             </div>
           </div>
 
           {loadingOrders ? (
-            <div style={{ marginTop: '15px' }}>Loading orders...</div>
+            <div className="premium-muted">Loading orders...</div>
           ) : orders.length === 0 ? (
-            <div style={{ marginTop: '15px', color: 'var(--muted)' }}>No orders yet.</div>
-          ) : (
-            <>
-              <div className="order-history-table-wrap">
-                <table className="admin-table" style={{ marginTop: '15px' }}>
-                  <thead>
-                    <tr>
-                      <th>Order Ref</th>
-                      <th>Date</th>
-                      <th>Total</th>
-                      <th>Status</th>
-                      <th>Payment</th>
-                      <th>Details</th>
-                      <th>Reorder</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {orders.map((order) => (
-                      <tr key={order.id}>
-                        <td>{getShortOrderReference(order)}</td>
-                        <td>{new Date(order.createdAt).toLocaleDateString()}</td>
-                        <td>Rs.{Number(order.totalPrice || 0).toFixed(2)}</td>
-                        <td><span className={`status-${order.status.toLowerCase()}`}>{getStatusMeta(order.status).label}</span></td>
-                        <td style={{ color: order.paymentStatus === 'received' ? 'var(--green)' : '#8a5a00', fontWeight: 700 }}>
-                          {getPaymentStatusMeta(order.paymentStatus).label}
-                        </td>
-                        <td style={{ width: '10%' }}>
-                          <button onClick={() => navigate(`/orders/${encodeURIComponent(order.id)}`)} className="detail-button">View</button>
-                        </td>
-                        <td style={{ width: '12%' }}>
-                          <button onClick={() => handleReorder(order)} className="detail-button" style={{ backgroundColor: '#0f766e', color: '#fff' }}>Reorder</button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+            <div className="premium-empty-state" style={{ padding: '24px' }}>
+              <div className="premium-empty-icon" style={{ width: '72px', height: '72px', fontSize: '1.8rem' }}>
+                Rx
               </div>
-
-              <div className="profile-order-cards">
-                {orders.map((order) => (
-                  <article key={order.id} className="profile-order-card">
-                    <div className="profile-order-card-top">
-                      <div>
-                        <div className="profile-order-label">Order reference</div>
-                        <div className="profile-order-ref">{getShortOrderReference(order)}</div>
-                      </div>
-                      <div className="profile-order-date">{new Date(order.createdAt).toLocaleDateString()}</div>
+              <h2>No orders yet.</h2>
+              <p>Once you place your first order, it will appear here with delivery and payment status.</p>
+            </div>
+          ) : (
+            <div className="premium-list-stack">
+              {orders.map((order) => (
+                <article key={order.id} className="premium-order-mini-card">
+                  <div className="premium-track-header">
+                    <strong>{getShortOrderReference(order)}</strong>
+                    <span className="premium-pill">{new Date(order.createdAt).toLocaleDateString()}</span>
+                  </div>
+                  <div className="premium-grid-two" style={{ marginTop: '14px', gap: '12px' }}>
+                    <div className="premium-support-card">
+                      <strong>Total</strong>
+                      <span>Rs.{Number(order.totalPrice || 0).toFixed(2)}</span>
                     </div>
-
-                    <div className="profile-order-meta-grid">
-                      <div className="profile-order-meta">
-                        <span className="profile-order-label">Total</span>
-                        <strong>Rs.{Number(order.totalPrice || 0).toFixed(2)}</strong>
-                      </div>
-                      <div className="profile-order-meta">
-                        <span className="profile-order-label">Status</span>
-                        <span className={`status-${order.status.toLowerCase()}`}>{getStatusMeta(order.status).label}</span>
-                      </div>
-                      <div className="profile-order-meta profile-order-meta-full">
-                        <span className="profile-order-label">Payment</span>
-                        <strong style={{ color: order.paymentStatus === 'received' ? 'var(--green)' : '#8a5a00' }}>
-                          {getPaymentStatusMeta(order.paymentStatus).label}
-                        </strong>
-                      </div>
+                    <div className="premium-support-card">
+                      <strong>Status</strong>
+                      <span>{getStatusMeta(order.status).label}</span>
                     </div>
-
-                    <div className="profile-order-actions">
-                      <button onClick={() => navigate(`/orders/${encodeURIComponent(order.id)}`)} className="detail-button">
-                        View Details
+                  </div>
+                  <div className="premium-between-row" style={{ marginTop: '14px' }}>
+                    <span className="premium-soft-badge">
+                      Payment: {getPaymentStatusMeta(order.paymentStatus).label}
+                    </span>
+                    <div className="premium-inline-actions">
+                      <button
+                        type="button"
+                        onClick={() => navigate(`/orders/${encodeURIComponent(order.id)}`)}
+                        className="premium-secondary-btn"
+                      >
+                        View
                       </button>
-                      <button onClick={() => handleReorder(order)} className="detail-button profile-reorder-btn">
+                      <button type="button" onClick={() => handleReorder(order)} className="premium-cta">
                         Reorder
                       </button>
                     </div>
-                  </article>
-                ))}
-              </div>
-            </>
+                  </div>
+                </article>
+              ))}
+            </div>
           )}
-
-          <button
-            onClick={() => navigate('/')}
-            className="cta-button"
-            style={{ width: '100%', marginTop: '20px', backgroundColor: '#0056b3' }}
-          >
-            Start New Order
-          </button>
-        </div>
+        </section>
       </div>
-    </div>
+    </PremiumPageShell>
   );
 }
 

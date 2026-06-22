@@ -7,21 +7,21 @@ import { clearStoredAuth, getStoredAuth, persistAuth, refreshAccessToken } from 
 // Synchronous function to read local storage instantly
 const retrieveStoredData = () => getStoredAuth();
 
-const data = retrieveStoredData(); 
+const data = retrieveStoredData();
 
 export const AuthContext = createContext({
-    isLoggedIn: !!data.token, 
+    isLoggedIn: !!data.token,
     token: data.token,
     user: data.user,
-    login: () => {},
-    logout: () => {},
+    login: () => { },
+    logout: () => { },
 });
 
 export const AuthProvider = ({ children }) => {
     const [token, setToken] = useState(data.token);
     const [user, setUser] = useState(data.user);
 
-    const userIsLoggedIn = !!token; 
+    const userIsLoggedIn = !!token;
 
     const loginHandler = (newToken, userData) => {
         const nextUser = userData ? { ...userData, token: newToken } : null;
@@ -60,11 +60,18 @@ export const AuthProvider = ({ children }) => {
                 }
 
                 setToken(newToken);
-                setUser((currentUser) => (
-                    currentUser ? { ...currentUser, token: newToken } : currentUser
-                ));
+                setUser((currentUser) => {
+                    if (!currentUser) {
+                        persistAuth(newToken, null);
+                        return currentUser;
+                    }
+
+                    const nextUser = { ...currentUser, token: newToken };
+                    persistAuth(newToken, nextUser);
+                    return nextUser;
+                });
             } catch {
-                console.log("No valid refresh token found.");
+                // Keep the current session state until an authenticated request proves it is invalid.
             }
         };
 

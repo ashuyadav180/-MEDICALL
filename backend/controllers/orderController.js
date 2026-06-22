@@ -48,6 +48,9 @@ const parseAddressDetails = (value) => {
   }
 };
 
+const isValidPhone = (value) => /^\d{10}$/.test(String(value || '').replace(/\D/g, '').slice(-10));
+const ORDER_STATUSES = ['pending', 'packing', 'out', 'delivered', 'cancelled'];
+
 const generateOrderNumber = () => {
   const datePart = new Date().toISOString().slice(2, 10).replace(/-/g, '');
   const randomPart = Math.random().toString(36).slice(2, 6).toUpperCase();
@@ -66,6 +69,12 @@ const parseOrderItems = (value) => {
     name: String(item?.name || '').trim(),
     quantity: Number(item?.quantity || 0),
     price: Number(item?.price || 0),
+    imageUrl: String(item?.imageUrl || '').trim(),
+    manufacturer: String(item?.manufacturer || '').trim(),
+    dosage: String(item?.dosage || '').trim(),
+    packQuantity: item?.packQuantity === null || item?.packQuantity === undefined ? null : Number(item.packQuantity),
+    packUnit: String(item?.packUnit || '').trim(),
+    category: String(item?.category || 'other').trim(),
   }));
 };
 
@@ -92,6 +101,21 @@ const buildOrderItemSnapshot = (item, medicine) => ({
   packQuantity: medicine.packQuantity ?? null,
   packUnit: medicine.packUnit || '',
   category: medicine.category || 'other',
+});
+
+const isFallbackMedicineId = (id) => String(id || '').startsWith('fallback-');
+
+const buildFallbackOrderItemSnapshot = (item) => ({
+  name: item.name,
+  quantity: Number(item.quantity),
+  price: Number(item.price),
+  medicine: undefined,
+  imageUrl: item.imageUrl || '',
+  manufacturer: item.manufacturer || 'Bablu Medical Essentials',
+  dosage: item.dosage || '',
+  packQuantity: Number.isFinite(item.packQuantity) ? item.packQuantity : null,
+  packUnit: item.packUnit || '',
+  category: item.category || 'other',
 });
 
 const serializeOrder = (orderDoc) => {
@@ -173,6 +197,18 @@ const addOrderItems = async (req, res) => {
       return res.status(400).json({ message: 'Invalid payment method selected.' });
     }
 
+    if (String(customerName || '').trim().length < 2) {
+      return res.status(400).json({ message: 'Customer name is required.' });
+    }
+
+    if (!isValidPhone(customerPhone)) {
+      return res.status(400).json({ message: 'A valid 10-digit customer phone number is required.' });
+    }
+
+    if (String(customerAddress || '').trim().length < 10) {
+      return res.status(400).json({ message: 'A complete delivery address is required.' });
+    }
+
     if (parsedOrderItems.length === 0 && !prescriptionImage) {
       return res.status(400).json({ message: 'No order items' });
     }
@@ -181,17 +217,27 @@ const addOrderItems = async (req, res) => {
       return res.status(400).json({ message: 'Please upload your UPI payment screenshot.' });
     }
 
-    if (Number(itemsPrice) < 100) {
+    if (!prescriptionImage && Number(itemsPrice) < 100) {
       return res.status(400).json({
         message: 'Minimum order amount is Rs.100 (excluding delivery charges).',
       });
     }
 
-    const medicineIds = [...new Set(parsedOrderItems.map((item) => item.medicine).filter(Boolean))];
+    if (!Number.isFinite(Number(totalPrice)) || Number(totalPrice) <= 0) {
+      return res.status(400).json({ message: 'A valid order total is required.' });
+    }
+
+    const medicineIds = [
+      ...new Set(
+        parsedOrderItems
+          .map((item) => item.medicine)
+          .filter((id) => mongoose.Types.ObjectId.isValid(String(id)))
+      ),
+    ];
     const medicines = medicineIds.length
       ? await Medicine.find({
-          _id: { $in: medicineIds },
-        })
+        _id: { $in: medicineIds },
+      })
       : [];
     const medicineMap = new Map(medicines.map((medicine) => [String(medicine._id), medicine]));
 
@@ -202,6 +248,18 @@ const addOrderItems = async (req, res) => {
 
       if (!Number.isFinite(item.quantity) || item.quantity <= 0) {
         return res.status(400).json({ message: `Invalid quantity for ${item.name || 'an item'}.` });
+      }
+
+      if (!mongoose.Types.ObjectId.isValid(String(item.medicine))) {
+        if (!isFallbackMedicineId(item.medicine)) {
+          return res.status(400).json({ message: `Invalid medicine id for ${item.name || 'an item'}.` });
+        }
+
+        if (!item.name || !Number.isFinite(item.price) || item.price <= 0) {
+          return res.status(400).json({ message: 'Fallback medicine item is missing valid details.' });
+        }
+
+        continue;
       }
 
       const medicine = medicineMap.get(String(item.medicine));
@@ -218,6 +276,10 @@ const addOrderItems = async (req, res) => {
     }
 
     const enrichedOrderItems = parsedOrderItems.map((item) => {
+      if (!mongoose.Types.ObjectId.isValid(String(item.medicine)) && isFallbackMedicineId(item.medicine)) {
+        return buildFallbackOrderItemSnapshot(item);
+      }
+
       const medicine = medicineMap.get(String(item.medicine));
       return buildOrderItemSnapshot(item, medicine);
     });
@@ -242,6 +304,10 @@ const addOrderItems = async (req, res) => {
     });
 
     for (const item of parsedOrderItems) {
+      if (!mongoose.Types.ObjectId.isValid(String(item.medicine))) {
+        continue;
+      }
+
       const medicine = medicineMap.get(String(item.medicine));
       medicine.stock -= item.quantity;
       await medicine.save();
@@ -361,7 +427,13 @@ const updateOrderStatus = async (req, res) => {
       return res.status(403).json({ message: 'This delivery task is not assigned to you' });
     }
 
-    order.status = req.body.status || order.status;
+    const nextStatus = String(req.body.status || '').trim().toLowerCase();
+
+    if (!ORDER_STATUSES.includes(nextStatus)) {
+      return res.status(400).json({ message: 'Invalid order status.' });
+    }
+
+    order.status = nextStatus;
 
     if (order.status === 'delivered') {
       order.deliveredAt = Date.now();
@@ -369,6 +441,8 @@ const updateOrderStatus = async (req, res) => {
         order.paymentStatus = 'received';
         order.paidAt = Date.now();
       }
+    } else if (order.status !== 'delivered') {
+      order.deliveredAt = undefined;
     }
 
     const updatedOrder = await order.save();
@@ -482,7 +556,61 @@ const getAnalytics = async (req, res) => {
       { $limit: 5 },
     ]);
 
-    res.json({ stats, topMedicines });
+    const [summary] = await Order.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalOrders: { $sum: 1 },
+          totalRevenue: { $sum: '$totalPrice' },
+          deliveredRevenue: {
+            $sum: {
+              $cond: [{ $eq: ['$status', 'delivered'] }, '$totalPrice', 0],
+            },
+          },
+          pendingPayments: {
+            $sum: {
+              $cond: [{ $eq: ['$paymentStatus', 'pending'] }, 1, 0],
+            },
+          },
+        },
+      },
+    ]);
+
+    const statusBreakdownRaw = await Order.aggregate([
+      {
+        $group: {
+          _id: '$status',
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { count: -1 } },
+    ]);
+
+    const statusBreakdown = ORDER_STATUSES.map((status) => {
+      const match = statusBreakdownRaw.find((entry) => entry._id === status);
+      return {
+        status,
+        count: match?.count || 0,
+      };
+    });
+
+    const recentOrders = await Order.find({})
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .select('orderNumber customerName totalPrice status paymentStatus createdAt');
+
+    res.json({
+      stats,
+      topMedicines,
+      summary: {
+        totalOrders: summary?.totalOrders || 0,
+        totalRevenue: summary?.totalRevenue || 0,
+        deliveredRevenue: summary?.deliveredRevenue || 0,
+        pendingPayments: summary?.pendingPayments || 0,
+      },
+      statusBreakdown,
+      recentOrders: recentOrders.map(serializeOrder),
+    });
   } catch (error) {
     res.status(500).json({ message: 'Server Error' });
   }
@@ -497,6 +625,10 @@ const assignOrder = async (req, res) => {
 
     if (!order) {
       return res.status(404).json({ message: 'Order not found' });
+    }
+
+    if (!deliveryPartnerId || !mongoose.Types.ObjectId.isValid(String(deliveryPartnerId))) {
+      return res.status(400).json({ message: 'A valid delivery partner id is required.' });
     }
 
     order.deliveryPartner = deliveryPartnerId;

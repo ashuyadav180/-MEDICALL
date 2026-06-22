@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import PremiumPageShell from '../components/ui/PremiumPageShell';
 import { sendOTP, verifyOTP } from '../api/authApi';
 import { useAuth } from '../store/AuthContext';
 
@@ -20,12 +21,24 @@ function Register() {
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  const handleSendOTP = async (e) => {
-    e.preventDefault();
-    if (name.length < 3) return setError('Please enter your full name.');
-    if (!isValidEmail(email)) return setError('Please enter a valid email address.');
-    if (!isValidMobile(mobile)) return setError('Please enter a valid 10-digit mobile number.');
-    if (password.length < 6) return setError('Password must be at least 6 characters long.');
+  const handleSendOTP = async (event) => {
+    event.preventDefault();
+    if (name.length < 3) {
+      setError('Please enter your full name.');
+      return;
+    }
+    if (!isValidEmail(email)) {
+      setError('Please enter a valid email address.');
+      return;
+    }
+    if (!isValidMobile(mobile)) {
+      setError('Please enter a valid 10-digit mobile number.');
+      return;
+    }
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters long.');
+      return;
+    }
 
     setLoading(true);
     setError(null);
@@ -40,9 +53,12 @@ function Register() {
     }
   };
 
-  const handleVerifyAndRegister = async (e) => {
-    e.preventDefault();
-    if (otp.length !== 6) return setError('Please enter the 6-digit OTP.');
+  const handleVerifyAndRegister = async (event) => {
+    event.preventDefault();
+    if (otp.length !== 6) {
+      setError('Please enter the 6-digit OTP.');
+      return;
+    }
 
     setLoading(true);
     setError(null);
@@ -54,7 +70,7 @@ function Register() {
       });
 
       login(token, user);
-      setMessage('Account created successfully!');
+      setMessage('Account created successfully.');
       setTimeout(() => navigate('/'), 1000);
     } catch (err) {
       setError(err.message);
@@ -64,69 +80,135 @@ function Register() {
   };
 
   return (
-    <div className="main-content" style={{ display: 'flex', justifyContent: 'center', padding: '60px 20px' }}>
-      <div className="form-card" style={{ maxWidth: '400px', width: '100%' }}>
-        <h2 style={{ textAlign: 'center', marginBottom: '10px', fontFamily: 'Baloo 2' }}>Join Bablu Medical</h2>
-        <p style={{ textAlign: 'center', color: 'var(--muted)', fontSize: '0.9rem', marginBottom: '30px' }}>
-          Sign up with email verification and use either email or mobile at login.
-        </p>
+    <PremiumPageShell
+      eyebrow="Create account"
+      title="Set up a polished healthcare account in minutes."
+      description="Register once and move across ordering, profile management, tracking, and repeat purchases with a faster and more reliable customer flow."
+      stats={[
+        { value: '2-step', label: 'verified signup flow' },
+        { value: 'Email', label: 'secure OTP verification' },
+      ]}
+      heroBadges={['Verified signup', 'Reusable account', 'Healthcare ready']}
+      heroPanels={[
+        { label: 'Verification', value: '2-step onboarding' },
+        { label: 'Identity', value: 'Email + mobile' },
+        { label: 'Ready for', value: 'Orders, profile, tracking' },
+      ]}
+    >
+      <div className="premium-auth-layout">
+        <section className="premium-auth-panel">
+          <div className="premium-section-header">
+            <div>
+              <h2>Why create an account?</h2>
+              <p>Everything stays synced once you verify your identity.</p>
+            </div>
+          </div>
 
-        {error && <div style={{ background: '#fff0f0', color: 'var(--red)', padding: '12px', borderRadius: '10px', marginBottom: '20px', fontSize: '0.85rem', fontWeight: 700, textAlign: 'center' }}>{error}</div>}
-        {message && <div style={{ background: 'var(--green-pale)', color: 'var(--green)', padding: '12px', borderRadius: '10px', marginBottom: '20px', fontSize: '0.85rem', fontWeight: 700, textAlign: 'center' }}>{message}</div>}
+          <div className="premium-side-card">
+            <span>Member flow</span>
+            <strong>Save time on every next order with remembered details and order history.</strong>
+            <ul className="premium-helper-list">
+              <li>Use email or mobile later at login.</li>
+              <li>Track orders and reorder from profile in one tap.</li>
+              <li>Keep prescription-ready shopping and delivery data together.</li>
+            </ul>
+          </div>
+        </section>
 
-        {step === 1 ? (
-          <form onSubmit={handleSendOTP}>
-            <div style={{ marginBottom: '15px' }}>
-              <label style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--green)' }}>Full Name</label>
-              <input type="text" placeholder="Aman Kumar" value={name} onChange={(e) => setName(e.target.value)} required style={{ width: '100%', marginTop: '5px', padding: '12px', borderRadius: '10px', border: '1.5px solid var(--border)' }} />
+        <section className="premium-form-panel">
+          <div className="premium-section-header">
+            <div>
+              <h3>{step === 1 ? 'Signup details' : 'Verify your email'}</h3>
+              <p>{step === 1 ? 'Fill in your essentials to begin verification.' : `We sent a verification code to ${email}.`}</p>
             </div>
-            <div style={{ marginBottom: '15px' }}>
-              <label style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--green)' }}>Email Address</label>
-              <input type="email" placeholder="example@email.com" value={email} onChange={(e) => setEmail(e.target.value)} required style={{ width: '100%', marginTop: '5px', padding: '12px', borderRadius: '10px', border: '1.5px solid var(--border)' }} />
-            </div>
-            <div style={{ marginBottom: '15px' }}>
-              <label style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--green)' }}>Mobile Number</label>
-              <input type="tel" placeholder="10-Digit Mobile" value={mobile} onChange={(e) => setMobile(e.target.value.replace(/\D/g, '').slice(0, 10))} required style={{ width: '100%', marginTop: '5px', padding: '12px', borderRadius: '10px', border: '1.5px solid var(--border)' }} />
-            </div>
-            <div style={{ marginBottom: '25px' }}>
-              <label style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--green)' }}>Password</label>
-              <input type="password" placeholder="Min 6 characters" value={password} onChange={(e) => setPassword(e.target.value)} required style={{ width: '100%', marginTop: '5px', padding: '12px', borderRadius: '10px', border: '1.5px solid var(--border)' }} />
-            </div>
-            <button type="submit" className="add-btn" style={{ width: '100%', padding: '14px' }} disabled={loading}>
-              {loading ? 'Sending OTP...' : 'Continue to Verify'}
-            </button>
-          </form>
-        ) : (
-          <form onSubmit={handleVerifyAndRegister}>
-            <div style={{ marginBottom: '20px', textAlign: 'center' }}>
-              <p style={{ fontSize: '0.85rem', color: 'var(--muted)' }}>We've sent a 6-digit code to <strong>{email}</strong></p>
-            </div>
-            <div style={{ marginBottom: '25px' }}>
-              <label style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--green)' }}>Enter OTP</label>
-              <input
-                type="text"
-                placeholder="6-Digit Code"
-                maxLength="6"
-                value={otp}
-                onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                required
-                style={{ width: '100%', marginTop: '10px', padding: '12px', borderRadius: '10px', border: '1.5px solid var(--border)', textAlign: 'center', letterSpacing: '8px', fontSize: '1.5rem', fontWeight: 800 }}
-              />
-            </div>
-            <button type="submit" className="add-btn" style={{ width: '100%', padding: '14px' }} disabled={loading}>
-              {loading ? 'Verifying...' : 'Complete Signup'}
-            </button>
-            <div style={{ textAlign: 'center', marginTop: '15px' }}>
-              <button type="button" onClick={() => setStep(1)} style={{ background: 'none', border: 'none', color: 'var(--blue)', fontWeight: 700, cursor: 'pointer', fontSize: '0.85rem' }}>Edit Details</button>
-            </div>
-          </form>
-        )}
+            <span className="premium-pill">Step {step} of 2</span>
+          </div>
 
-        <div style={{ textAlign: 'center', marginTop: '30px', fontSize: '0.9rem' }}>
-          Already have an account? <Link to="/login" style={{ color: 'var(--green)', fontWeight: 800, textDecoration: 'none' }}>Login instead</Link>
-        </div>
+          {error ? <div className="premium-note-banner is-danger">{error}</div> : null}
+          {message ? <div className="premium-note-banner is-success">{message}</div> : null}
+
+          {step === 1 ? (
+            <form onSubmit={handleSendOTP} className="premium-form-grid">
+              <div className="premium-field">
+                <label>Full Name</label>
+                <input
+                  type="text"
+                  placeholder="Aman Kumar"
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                  required
+                  className="premium-input"
+                />
+              </div>
+              <div className="premium-field">
+                <label>Email Address</label>
+                <input
+                  type="email"
+                  placeholder="example@email.com"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  required
+                  className="premium-input"
+                />
+              </div>
+              <div className="premium-field">
+                <label>Mobile Number</label>
+                <input
+                  type="tel"
+                  placeholder="10-digit mobile"
+                  value={mobile}
+                  onChange={(event) => setMobile(event.target.value.replace(/\D/g, '').slice(0, 10))}
+                  required
+                  className="premium-input"
+                />
+              </div>
+              <div className="premium-field">
+                <label>Password</label>
+                <input
+                  type="password"
+                  placeholder="Minimum 6 characters"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  required
+                  className="premium-input"
+                />
+              </div>
+              <button type="submit" className="premium-cta" disabled={loading}>
+                {loading ? 'Sending OTP...' : 'Continue to Verify'}
+              </button>
+            </form>
+          ) : (
+            <form onSubmit={handleVerifyAndRegister} className="premium-form-grid">
+              <div className="premium-field">
+                <label>Enter OTP</label>
+                <input
+                  type="text"
+                  placeholder="6-digit code"
+                  maxLength="6"
+                  value={otp}
+                  onChange={(event) => setOtp(event.target.value.replace(/\D/g, '').slice(0, 6))}
+                  required
+                  className="premium-input premium-otp-input"
+                />
+              </div>
+              <button type="submit" className="premium-cta" disabled={loading}>
+                {loading ? 'Verifying...' : 'Complete Signup'}
+              </button>
+              <button type="button" onClick={() => setStep(1)} className="premium-link-button">
+                Edit Details
+              </button>
+            </form>
+          )}
+
+          <div className="premium-form-note">
+            Already have an account?{' '}
+            <Link to="/login" style={{ color: '#3460c9', fontWeight: 800, textDecoration: 'none' }}>
+              Login instead
+            </Link>
+          </div>
+        </section>
       </div>
-    </div>
+    </PremiumPageShell>
   );
 }
 

@@ -1,7 +1,14 @@
 import React, { useState } from 'react';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import PremiumPageShell from '../components/ui/PremiumPageShell';
 import { useAuth } from '../store/AuthContext';
-import { loginUser, sendOTP, verifyOTP, requestPasswordReset, resetPassword } from '../api/authApi';
+import {
+  loginUser,
+  requestPasswordReset,
+  resetPassword,
+  sendOTP,
+  verifyOTP,
+} from '../api/authApi';
 
 const isValidEmail = (value) => /\S+@\S+\.\S+/.test(value);
 const isValidPhone = (value) => /^\d{10}$/.test(String(value || '').replace(/\D/g, ''));
@@ -24,13 +31,13 @@ function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const redirectPath = location.state?.from || null;
 
-  const redirectPath = location.state?.from || '/';
-
-  const handleRequestOTP = async (e) => {
-    e.preventDefault();
+  const handleRequestOTP = async (event) => {
+    event.preventDefault();
     if (!isValidEmail(identifier) && !isValidPhone(identifier)) {
-      return setError('Please enter a valid email or 10-digit mobile number.');
+      setError('Please enter a valid email or 10-digit mobile number.');
+      return;
     }
 
     setLoading(true);
@@ -50,14 +57,14 @@ function Login() {
     }
   };
 
-  const handleVerifyOTP = async (e) => {
-    e.preventDefault();
+  const handleVerifyOTP = async (event) => {
+    event.preventDefault();
     setLoading(true);
     setError(null);
     try {
       const { token, user } = await verifyOTP({ identifier, otp });
       login(token, user);
-      navigate(redirectPath);
+      navigate(redirectPath || (user?.role === 'admin' ? '/admin' : '/'));
     } catch (err) {
       setError(err.message);
     } finally {
@@ -65,14 +72,14 @@ function Login() {
     }
   };
 
-  const handlePasswordLogin = async (e) => {
-    e.preventDefault();
+  const handlePasswordLogin = async (event) => {
+    event.preventDefault();
     setLoading(true);
     setError(null);
     try {
       const { token, user } = await loginUser({ identifier, password });
       login(token, user);
-      navigate(redirectPath);
+      navigate(redirectPath || (user?.role === 'admin' ? '/admin' : '/'));
     } catch (err) {
       setError(err.message);
     } finally {
@@ -80,10 +87,11 @@ function Login() {
     }
   };
 
-  const handleRequestPasswordReset = async (e) => {
-    e.preventDefault();
+  const handleRequestPasswordReset = async (event) => {
+    event.preventDefault();
     if (!isValidEmail(resetEmail)) {
-      return setError('Please enter a valid email address.');
+      setError('Please enter a valid email address.');
+      return;
     }
 
     setLoading(true);
@@ -99,8 +107,8 @@ function Login() {
     }
   };
 
-  const handleResetPassword = async (e) => {
-    e.preventDefault();
+  const handleResetPassword = async (event) => {
+    event.preventDefault();
     setLoading(true);
     setError(null);
     try {
@@ -120,121 +128,221 @@ function Login() {
   };
 
   return (
-    <div className="main-content" style={{ display: 'flex', justifyContent: 'center', padding: '60px 20px' }}>
-      <div className="form-card" style={{ maxWidth: '420px', width: '100%' }}>
-        <h2 style={{ textAlign: 'center', marginBottom: '10px', fontFamily: 'Baloo 2' }}>Welcome Back!</h2>
-        <p style={{ textAlign: 'center', color: 'var(--muted)', fontSize: '0.9rem', marginBottom: '30px' }}>
-          Login with email or mobile number.
-        </p>
+    <PremiumPageShell
+      eyebrow="Secure access"
+      title="Welcome back to your faster healthcare account."
+      description="Use OTP or password login with a calmer, premium flow designed to get customers back into ordering, tracking, and profile management quickly."
+      stats={[
+        { value: 'OTP', label: 'one-tap login option' },
+        { value: '24/7', label: 'account recovery support' },
+      ]}
+      heroBadges={['OTP-first access', 'Password recovery', 'Order history sync']}
+      heroPanels={[
+        { label: 'Access modes', value: 'OTP + Password' },
+        { label: 'Recovery', value: 'Email reset OTP' },
+        { label: 'After login', value: 'Orders, profile, reorders' },
+      ]}
+    >
+      <div className="premium-auth-layout">
+        <section className="premium-auth-panel">
+          <div className="premium-section-header">
+            <div>
+              <h2>Login</h2>
+              <p>Choose the flow that feels fastest for you.</p>
+            </div>
+          </div>
 
-        {error && <div style={{ background: '#fff0f0', color: 'var(--red)', padding: '12px', borderRadius: '10px', marginBottom: '20px', fontSize: '0.85rem', fontWeight: 700, textAlign: 'center' }}>{error}</div>}
-        {message && <div style={{ background: 'var(--green-pale)', color: 'var(--green)', padding: '12px', borderRadius: '10px', marginBottom: '20px', fontSize: '0.85rem', fontWeight: 700, textAlign: 'center' }}>{message}</div>}
+          <div className="premium-side-card">
+            <span>Account benefits</span>
+            <strong>One account powers medicines, diagnostics, consultations, and reorder history.</strong>
+            <ul className="premium-helper-list">
+              <li>Track orders and payment status from one dashboard.</li>
+              <li>Reorder past medicines without rebuilding the basket.</li>
+              <li>Recover access with guided password reset or OTP.</li>
+            </ul>
+          </div>
+        </section>
 
-        {showReset ? (
-          <div>
-            {resetStep === 1 ? (
-              <form onSubmit={handleRequestPasswordReset}>
-                <div style={{ marginBottom: '15px' }}>
-                  <label style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--green)' }}>Account Email</label>
-                  <input type="email" placeholder="example@email.com" value={resetEmail} onChange={(e) => setResetEmail(e.target.value.trim())} required style={{ width: '100%', marginTop: '5px', padding: '12px', borderRadius: '10px', border: '1.5px solid var(--border)' }} />
-                </div>
-                <button type="submit" className="add-btn" style={{ width: '100%', padding: '14px' }} disabled={loading}>
-                  {loading ? 'Sending...' : 'Send Reset OTP'}
-                </button>
-              </form>
-            ) : (
-              <form onSubmit={handleResetPassword}>
-                <div style={{ display: 'grid', gap: '12px' }}>
-                  <input type="text" placeholder="6-digit OTP" maxLength="6" value={resetOtp} onChange={(e) => setResetOtp(e.target.value.replace(/\D/g, '').slice(0, 6))} required style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1.5px solid var(--border)' }} />
-                  <input type="password" placeholder="New password" value={resetPasswordValue} onChange={(e) => setResetPasswordValue(e.target.value)} required style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1.5px solid var(--border)' }} />
-                  <button type="submit" className="add-btn" style={{ width: '100%', padding: '14px' }} disabled={loading}>
+        <section className="premium-form-panel">
+          <div className="premium-section-header">
+            <div>
+              <h3>{showReset ? 'Reset access' : loginMethod === 'otp' ? 'OTP Login' : 'Password Login'}</h3>
+              <p>{showReset ? 'Secure your account and set a fresh password.' : 'Login with email or mobile number.'}</p>
+            </div>
+            {!showReset ? (
+              <span className="premium-pill">{loginMethod === 'otp' ? `Step ${step} of 2` : 'Ready'}</span>
+            ) : null}
+          </div>
+
+          {error ? <div className="premium-note-banner is-danger">{error}</div> : null}
+          {message ? <div className="premium-note-banner is-success">{message}</div> : null}
+
+          {showReset ? (
+            <>
+              {resetStep === 1 ? (
+                <form onSubmit={handleRequestPasswordReset} className="premium-form-grid">
+                  <div className="premium-field">
+                    <label>Account Email</label>
+                    <input
+                      type="email"
+                      placeholder="example@email.com"
+                      value={resetEmail}
+                      onChange={(event) => setResetEmail(event.target.value.trim())}
+                      required
+                      className="premium-input"
+                    />
+                  </div>
+                  <button type="submit" className="premium-cta" disabled={loading}>
+                    {loading ? 'Sending...' : 'Send Reset OTP'}
+                  </button>
+                </form>
+              ) : (
+                <form onSubmit={handleResetPassword} className="premium-form-grid">
+                  <div className="premium-field">
+                    <label>Reset OTP</label>
+                    <input
+                      type="text"
+                      placeholder="6-digit OTP"
+                      maxLength="6"
+                      value={resetOtp}
+                      onChange={(event) => setResetOtp(event.target.value.replace(/\D/g, '').slice(0, 6))}
+                      required
+                      className="premium-input premium-otp-input"
+                    />
+                  </div>
+                  <div className="premium-field">
+                    <label>New Password</label>
+                    <input
+                      type="password"
+                      placeholder="Choose a stronger password"
+                      value={resetPasswordValue}
+                      onChange={(event) => setResetPasswordValue(event.target.value)}
+                      required
+                      className="premium-input"
+                    />
+                  </div>
+                  <button type="submit" className="premium-cta" disabled={loading}>
                     {loading ? 'Resetting...' : 'Reset Password'}
                   </button>
-                </div>
-              </form>
-            )}
+                </form>
+              )}
 
-            <div style={{ textAlign: 'center', marginTop: '20px' }}>
-              <button type="button" onClick={() => { setShowReset(false); setError(null); setMessage(null); }} style={{ background: 'none', border: 'none', color: 'var(--blue)', fontWeight: 700, cursor: 'pointer', fontSize: '0.85rem' }}>Back to login</button>
-            </div>
-          </div>
-        ) : loginMethod === 'otp' ? (
-          <div>
-            {step === 1 ? (
-              <form onSubmit={handleRequestOTP}>
-                <div style={{ marginBottom: '15px' }}>
-                  <label style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--green)' }}>Email or Mobile Number</label>
-                  <input
-                    type="text"
-                    placeholder="example@email.com or 9876543210"
-                    value={identifier}
-                    onChange={(e) => setIdentifier(e.target.value.trim())}
-                    required
-                    style={{ width: '100%', marginTop: '5px', padding: '12px', borderRadius: '10px', border: '1.5px solid var(--border)' }}
-                  />
-                </div>
-                <button type="submit" className="add-btn" style={{ width: '100%', padding: '14px' }} disabled={loading}>
-                  {loading ? 'Sending...' : 'Get OTP'}
-                </button>
-              </form>
-            ) : (
-              <form onSubmit={handleVerifyOTP}>
-                <div style={{ marginBottom: '15px' }}>
-                  <label style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--green)' }}>Enter OTP</label>
-                  <input
-                    type="text"
-                    placeholder="6-Digit Code"
-                    maxLength="6"
-                    value={otp}
-                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                    required
-                    style={{ width: '100%', marginTop: '5px', padding: '12px', borderRadius: '10px', border: '1.5px solid var(--border)', textAlign: 'center', letterSpacing: '8px', fontSize: '1.2rem', fontWeight: 800 }}
-                  />
-                </div>
-                <button type="submit" className="add-btn" style={{ width: '100%', padding: '14px' }} disabled={loading}>
-                  {loading ? 'Verifying...' : 'Verify & Login'}
-                </button>
-                <div style={{ textAlign: 'center', marginTop: '15px' }}>
-                  <button type="button" onClick={() => setStep(1)} style={{ background: 'none', border: 'none', color: 'var(--blue)', fontWeight: 700, cursor: 'pointer', fontSize: '0.85rem' }}>Change Email / Number</button>
-                </div>
-              </form>
-            )}
+              <button
+                type="button"
+                onClick={() => {
+                  setShowReset(false);
+                  setError(null);
+                  setMessage(null);
+                }}
+                className="premium-link-button"
+              >
+                Back to login
+              </button>
+            </>
+          ) : loginMethod === 'otp' ? (
+            <>
+              {step === 1 ? (
+                <form onSubmit={handleRequestOTP} className="premium-form-grid">
+                  <div className="premium-field">
+                    <label>Email or Mobile Number</label>
+                    <input
+                      type="text"
+                      placeholder="example@email.com or 9876543210"
+                      value={identifier}
+                      onChange={(event) => setIdentifier(event.target.value.trim())}
+                      required
+                      className="premium-input"
+                    />
+                  </div>
+                  <button type="submit" className="premium-cta" disabled={loading}>
+                    {loading ? 'Sending...' : 'Get OTP'}
+                  </button>
+                </form>
+              ) : (
+                <form onSubmit={handleVerifyOTP} className="premium-form-grid">
+                  <div className="premium-field">
+                    <label>Enter OTP</label>
+                    <input
+                      type="text"
+                      placeholder="6-digit code"
+                      maxLength="6"
+                      value={otp}
+                      onChange={(event) => setOtp(event.target.value.replace(/\D/g, '').slice(0, 6))}
+                      required
+                      className="premium-input premium-otp-input"
+                    />
+                  </div>
+                  <button type="submit" className="premium-cta" disabled={loading}>
+                    {loading ? 'Verifying...' : 'Verify and Login'}
+                  </button>
+                  <button type="button" onClick={() => setStep(1)} className="premium-link-button">
+                    Change email or number
+                  </button>
+                </form>
+              )}
 
-            <div style={{ position: 'relative', textAlign: 'center', margin: '30px 0' }}>
-              <hr style={{ border: 'none', borderTop: '1px solid var(--border)' }} />
-              <span style={{ position: 'absolute', top: '-10px', left: '50%', transform: 'translateX(-50%)', background: '#fff', padding: '0 15px', color: 'var(--muted)', fontSize: '0.8rem' }}>OR</span>
-            </div>
-            <button onClick={() => setLoginMethod('password')} style={{ width: '100%', background: 'none', border: '1.5px solid var(--border)', padding: '12px', borderRadius: '10px', fontWeight: 700, cursor: 'pointer' }}>Login with Password</button>
-          </div>
-        ) : (
-          <form onSubmit={handlePasswordLogin}>
-            <div style={{ marginBottom: '15px' }}>
-              <label style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--green)' }}>Email or Mobile Number</label>
-              <input type="text" placeholder="example@email.com or 9876543210" value={identifier} onChange={(e) => setIdentifier(e.target.value.trim())} required style={{ width: '100%', marginTop: '5px', padding: '12px', borderRadius: '10px', border: '1.5px solid var(--border)' }} />
-            </div>
-            <div style={{ marginBottom: '12px' }}>
-              <label style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--green)' }}>Password</label>
-              <input type="password" placeholder="Enter password" value={password} onChange={(e) => setPassword(e.target.value)} required style={{ width: '100%', marginTop: '5px', padding: '12px', borderRadius: '10px', border: '1.5px solid var(--border)' }} />
-            </div>
-            <div style={{ textAlign: 'right', marginBottom: '20px' }}>
-              <button type="button" onClick={() => { setShowReset(true); setResetEmail(identifier && isValidEmail(identifier) ? identifier : ''); setError(null); setMessage(null); }} style={{ background: 'none', border: 'none', color: 'var(--blue)', fontWeight: 700, cursor: 'pointer', fontSize: '0.85rem' }}>
+              <div className="premium-inline-divider">
+                <span>OR</span>
+              </div>
+
+              <button type="button" onClick={() => setLoginMethod('password')} className="premium-secondary-btn">
+                Login with Password
+              </button>
+            </>
+          ) : (
+            <form onSubmit={handlePasswordLogin} className="premium-form-grid">
+              <div className="premium-field">
+                <label>Email or Mobile Number</label>
+                <input
+                  type="text"
+                  placeholder="example@email.com or 9876543210"
+                  value={identifier}
+                  onChange={(event) => setIdentifier(event.target.value.trim())}
+                  required
+                  className="premium-input"
+                />
+              </div>
+              <div className="premium-field">
+                <label>Password</label>
+                <input
+                  type="password"
+                  placeholder="Enter password"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  required
+                  className="premium-input"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowReset(true);
+                  setResetEmail(identifier && isValidEmail(identifier) ? identifier : '');
+                  setError(null);
+                  setMessage(null);
+                }}
+                className="premium-link-button"
+              >
                 Forgot password?
               </button>
-            </div>
-            <button type="submit" className="add-btn" style={{ width: '100%', padding: '14px' }} disabled={loading}>
-              {loading ? 'Logging in...' : 'Login with Password'}
-            </button>
-            <div style={{ textAlign: 'center', marginTop: '20px' }}>
-              <button type="button" onClick={() => setLoginMethod('otp')} style={{ background: 'none', border: 'none', color: 'var(--blue)', fontWeight: 700, cursor: 'pointer', fontSize: '0.85rem' }}>Switch back to OTP Login</button>
-            </div>
-          </form>
-        )}
+              <button type="submit" className="premium-cta" disabled={loading}>
+                {loading ? 'Logging in...' : 'Login with Password'}
+              </button>
+              <button type="button" onClick={() => setLoginMethod('otp')} className="premium-link-button">
+                Switch back to OTP Login
+              </button>
+            </form>
+          )}
 
-        <div style={{ textAlign: 'center', marginTop: '30px', fontSize: '0.9rem' }}>
-          Don't have an account? <Link to="/register" style={{ color: 'var(--green)', fontWeight: 800, textDecoration: 'none' }}>Signup here</Link>
-        </div>
+          <div className="premium-form-note">
+            Don't have an account?{' '}
+            <Link to="/register" style={{ color: '#3460c9', fontWeight: 800, textDecoration: 'none' }}>
+              Signup here
+            </Link>
+          </div>
+        </section>
       </div>
-    </div>
+    </PremiumPageShell>
   );
 }
 

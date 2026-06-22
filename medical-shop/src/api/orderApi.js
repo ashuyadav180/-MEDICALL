@@ -120,3 +120,15 @@ export const fetchMyTasks = async () => {
         throw error;
     }
 };
+
+export const fetchAnalyticsStats = async () => {
+    try {
+        const response = await withAuthRetry((headers) => axios.get(`${API_URL}/analytics/stats`, {
+            headers,
+        }));
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching analytics stats:', error);
+        throw error;
+    }
+};

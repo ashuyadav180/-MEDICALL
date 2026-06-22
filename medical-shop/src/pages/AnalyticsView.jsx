@@ -1,116 +1,271 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { API_BASE_URL } from '../config';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
 import {
-  BarChart,
   Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Legend,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
-  Cell,
 } from 'recharts';
+import PremiumPageShell from '../components/ui/PremiumPageShell';
+import { fetchAnalyticsStats } from '../api/orderApi';
+import { useAuth } from '../store/AuthContext';
+import { getOrderReference } from '../utils/orderDisplay';
+
+const currency = (value) => `Rs.${Number(value || 0).toFixed(2)}`;
+const chartColors = ['#467cff', '#39d0c8', '#62e991', '#f3b44d', '#ff7d7d'];
+
+function AnalyticsChartCard({ title, subtitle, children }) {
+  return (
+    <section className="premium-surface-card premium-chart-card">
+      <div className="premium-section-header">
+        <div>
+          <h2>{title}</h2>
+          <p>{subtitle}</p>
+        </div>
+      </div>
+      <div className="premium-chart-stage">{children}</div>
+    </section>
+  );
+}
 
 function AnalyticsView() {
+  const { isLoggedIn, user } = useAuth();
+  const location = useLocation();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    const fetchAnalytics = async () => {
+    if (!isLoggedIn || user?.role !== 'admin') {
+      setLoading(false);
+      return;
+    }
+
+    const loadAnalytics = async () => {
+      setLoading(true);
+      setError('');
+
       try {
-        const token = localStorage.getItem('token');
-        const response = await axios.get(`${API_BASE_URL}/api/orders/analytics/stats`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setData(response.data);
-      } catch (error) {
-        console.error('Analytics error:', error);
+        const analytics = await fetchAnalyticsStats();
+        setData(analytics);
+      } catch (fetchError) {
+        setError(fetchError?.response?.data?.message || fetchError?.message || 'Failed to load analytics.');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchAnalytics();
-  }, []);
+    loadAnalytics();
+  }, [isLoggedIn, user?.role]);
 
-  if (loading) return <div className="text-center p-20"><h2>Loading Analytics...</h2></div>;
-  if (!data) return <div className="text-center p-20"><h2>No data available.</h2></div>;
+  const summaryCards = useMemo(() => {
+    if (!data) {
+      return [];
+    }
 
-  const colors = ['#1a7a4a', '#22a05a', '#f0920a', '#1a6abf', '#e03a3a'];
+    return [
+      {
+        value: String(data.summary?.totalOrders || 0),
+        label: 'total orders',
+      },
+      {
+        value: currency(data.summary?.totalRevenue || 0),
+        label: 'all-time GMV',
+      },
+      {
+        value: currency(data.summary?.deliveredRevenue || 0),
+        label: 'delivered revenue',
+      },
+      {
+        value: String(data.summary?.pendingPayments || 0),
+        label: 'pending payments',
+      },
+    ];
+  }, [data]);
+
+  if (!isLoggedIn) {
+    return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+  }
+
+  if (user?.role !== 'admin') {
+    return (
+      <PremiumPageShell
+        eyebrow="Restricted"
+        title="Analytics is available only for admin users."
+        description="Sign in with the owner account to review revenue trends, status flow, and medicine demand."
+      >
+        <section className="premium-empty-state">
+          <div className="premium-empty-icon">A</div>
+          <h2>Access needed</h2>
+          <p>The analytics dashboard is protected because it contains business performance data.</p>
+        </section>
+      </PremiumPageShell>
+    );
+  }
 
   return (
-    <div className="main-content analytics-page">
-      <h2 className="section-title">Business Analytics</h2>
-
-      <div className="analytics-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '30px', marginBottom: '40px' }}>
-        <div className="form-card analytics-card" style={{ height: '400px' }}>
-          <h3 style={{ marginBottom: '20px', color: 'var(--green)' }}>Revenue Trend (Last 7 Days)</h3>
-          <ResponsiveContainer width="100%" height="90%">
-            <LineChart data={data.stats}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="_id" tick={{ fontSize: 10 }} />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Line type="monotone" dataKey="revenue" stroke="#1a7a4a" strokeWidth={3} activeDot={{ r: 8 }} name="Revenue (Rs.)" />
-            </LineChart>
-          </ResponsiveContainer>
+    <PremiumPageShell
+      eyebrow="Analytics"
+      title="Read the business in real time, not through a dated admin screen."
+      description="Revenue, order velocity, payment health, and top-selling medicines are surfaced in a cleaner operational dashboard designed to feel as premium as the customer experience."
+      stats={summaryCards}
+      sideContent={
+        <div className="premium-highlight-panel">
+          <h3>What changed</h3>
+          <ul className="premium-bullet-list">
+            <li>Analytics now uses the authenticated API helper instead of hand-rolled localStorage token logic.</li>
+            <li>The backend response includes summary cards, status distribution, and recent order context.</li>
+            <li>Every state now has better loading and error handling instead of a bare fallback screen.</li>
+          </ul>
         </div>
+      }
+    >
+      {loading ? (
+        <section className="premium-empty-state">
+          <div className="premium-empty-icon">...</div>
+          <h2>Loading analytics</h2>
+          <p>Pulling revenue trends, medicine demand, and order status distribution.</p>
+        </section>
+      ) : null}
 
-        <div className="form-card analytics-card" style={{ height: '400px' }}>
-          <h3 style={{ marginBottom: '20px', color: 'var(--green)' }}>Orders Distributed</h3>
-          <ResponsiveContainer width="100%" height="90%">
-            <BarChart data={data.stats}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="_id" tick={{ fontSize: 10 }} />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="count" fill="#22a05a" name="Total Orders" radius={[5, 5, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+      {!loading && error ? (
+        <section className="premium-note-banner is-danger">{error}</section>
+      ) : null}
 
-        <div className="form-card analytics-card analytics-wide-card" style={{ height: '400px', gridColumn: 'span 2' }}>
-          <h3 style={{ marginBottom: '20px', color: 'var(--green)' }}>Top 5 Medicines (by Quantity)</h3>
-          <div className="analytics-pie-layout" style={{ display: 'flex', alignItems: 'center', height: '90%' }}>
-            <ResponsiveContainer width="60%" height="100%">
-              <PieChart>
-                <Pie
-                  data={data.topMedicines}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={120}
-                  paddingAngle={5}
-                  dataKey="qty"
-                  nameKey="_id"
-                >
-                  {data.topMedicines.map((entry, index) => (
-                    <Cell key={`cell-${entry._id || index}`} fill={colors[index % colors.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="analytics-legend-list" style={{ padding: '20px', flex: 1 }}>
-              {data.topMedicines.map((medicine, index) => (
-                <div key={medicine._id || index} style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', marginBottom: '10px', fontSize: '0.9rem' }}>
-                  <span style={{ fontWeight: 700 }}>{medicine._id}</span>
-                  <span>{medicine.qty} sold</span>
-                </div>
-              ))}
-            </div>
+      {!loading && !error && data ? (
+        <>
+          <section className="premium-grid-three">
+            {(data.statusBreakdown || []).map((item, index) => (
+              <article key={item.status} className="premium-surface-card premium-ops-stat-card">
+                <span
+                  className="premium-ops-stat-accent"
+                  style={{ background: chartColors[index % chartColors.length] }}
+                />
+                <strong>{item.count}</strong>
+                <h3>{String(item.status || 'pending').replace(/\b\w/g, (char) => char.toUpperCase())}</h3>
+                <p>Orders currently in this stage.</p>
+              </article>
+            ))}
+          </section>
+
+          <div className="premium-grid-two premium-analytics-layout">
+            <AnalyticsChartCard
+              title="Revenue Trend"
+              subtitle="Last 7 days of recorded order revenue."
+            >
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={data.stats}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(88, 121, 181, 0.18)" />
+                  <XAxis dataKey="_id" stroke="#6880ae" tick={{ fontSize: 11 }} />
+                  <YAxis stroke="#6880ae" tick={{ fontSize: 11 }} />
+                  <Tooltip />
+                  <Legend />
+                  <Line
+                    type="monotone"
+                    dataKey="revenue"
+                    stroke="#467cff"
+                    strokeWidth={3}
+                    activeDot={{ r: 7 }}
+                    name="Revenue"
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </AnalyticsChartCard>
+
+            <AnalyticsChartCard
+              title="Order Volume"
+              subtitle="Daily order count across the last 7 days."
+            >
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={data.stats}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(88, 121, 181, 0.18)" />
+                  <XAxis dataKey="_id" stroke="#6880ae" tick={{ fontSize: 11 }} />
+                  <YAxis stroke="#6880ae" tick={{ fontSize: 11 }} />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="count" fill="#39d0c8" radius={[12, 12, 0, 0]} name="Orders" />
+                </BarChart>
+              </ResponsiveContainer>
+            </AnalyticsChartCard>
           </div>
-        </div>
-      </div>
-    </div>
+
+          <div className="premium-grid-two premium-analytics-layout">
+            <AnalyticsChartCard
+              title="Top Medicines"
+              subtitle="Highest quantity sold across all recorded orders."
+            >
+              <div className="premium-pie-layout">
+                <div className="premium-pie-stage">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={data.topMedicines}
+                        dataKey="qty"
+                        nameKey="_id"
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={70}
+                        outerRadius={112}
+                        paddingAngle={4}
+                      >
+                        {(data.topMedicines || []).map((entry, index) => (
+                          <Cell key={`${entry._id || 'medicine'}-${index}`} fill={chartColors[index % chartColors.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="premium-list-stack premium-chart-list">
+                  {(data.topMedicines || []).map((medicine, index) => (
+                    <article key={medicine._id || index} className="premium-support-card">
+                      <strong>{medicine._id}</strong>
+                      <span>{medicine.qty} sold</span>
+                    </article>
+                  ))}
+                </div>
+              </div>
+            </AnalyticsChartCard>
+
+            <section className="premium-surface-card">
+              <div className="premium-section-header">
+                <div>
+                  <h2>Recent Orders</h2>
+                  <p>Latest order activity for quick operational context.</p>
+                </div>
+              </div>
+
+              <div className="premium-list-stack">
+                {(data.recentOrders || []).map((order) => (
+                  <article key={order.id} className="premium-order-mini-card">
+                    <div className="premium-track-header">
+                      <strong>{getOrderReference(order)}</strong>
+                      <span className="premium-soft-badge">{order.status}</span>
+                    </div>
+                    <p className="premium-meta-copy">
+                      {order.customerName} • {new Date(order.createdAt).toLocaleString()}
+                    </p>
+                    <div className="premium-between-row">
+                      <span className="premium-muted">{order.paymentStatus}</span>
+                      <strong>{currency(order.totalPrice)}</strong>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </section>
+          </div>
+        </>
+      ) : null}
+    </PremiumPageShell>
   );
 }
 

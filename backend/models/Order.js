@@ -54,7 +54,7 @@ const orderSchema = mongoose.Schema(
         medicine: {
           type: mongoose.Schema.Types.ObjectId,
           ref: 'Medicine',
-          required: true,
+          required: false,
         },
       },
     ],

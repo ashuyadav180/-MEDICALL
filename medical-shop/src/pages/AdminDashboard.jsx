@@ -1,194 +1,278 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
+import PremiumPageShell from '../components/ui/PremiumPageShell';
 import { fetchMedicines, addMedicine, updateMedicine, deleteMedicine } from '../api/medicineApi';
 import { fetchOrders, updateOrderStatus, updateOrderPaymentStatus, assignOrder } from '../api/orderApi';
 import { fetchDeliveryPartners } from '../api/authApi';
+import { useAuth } from '../store/AuthContext';
 import socket from '../socket';
 import { getOrderReference } from '../utils/orderDisplay';
+import { buildPackLabel, getMedicineImage } from '../utils/medicineDisplay';
+
+const currency = (value) => `Rs.${Number(value || 0).toFixed(2)}`;
+const isFallbackProduct = (product) => String(product?.id || '').startsWith('fallback-');
 
 const NotificationPopup = ({ message, onClose }) => (
-  <div style={{ position: 'fixed', bottom: '20px', right: '20px', background: 'var(--green)', color: '#fff', padding: '15px 25px', borderRadius: '12px', boxShadow: '0 4px 15px rgba(0,0,0,0.2)', zIndex: 1000, display: 'flex', alignItems: 'center', gap: '15px' }}>
-    <div style={{ fontWeight: 800 }}>New Order</div>
-    <div style={{ fontSize: '0.86rem' }}>{message}</div>
-    <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}>x</button>
+  <div className="premium-toast">
+    <div>
+      <strong>New order received</strong>
+      <p>{message}</p>
+    </div>
+    <button type="button" onClick={onClose} aria-label="Close notification">
+      x
+    </button>
   </div>
 );
 
-const StatCards = ({ orders }) => {
-  const totalOrders = orders.length;
-  const pendingOrders = orders.filter((order) => order.status === 'pending').length;
-  const revenue = orders.filter((order) => order.status === 'delivered').reduce((sum, order) => sum + order.totalPrice, 0);
-
-  return (
-    <div className="stats-row admin-stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '15px', marginBottom: '30px' }}>
-      <div className="stat-card" style={{ background: 'var(--card)', border: '1.5px solid var(--border)', borderRadius: '15px', padding: '20px', textAlign: 'center' }}>
-        <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--green)' }}>{totalOrders}</div>
-        <div style={{ fontSize: '0.85rem', color: 'var(--muted)' }}>Total Orders</div>
-      </div>
-      <div className="stat-card" style={{ background: 'var(--card)', border: '1.5px solid var(--border)', borderRadius: '15px', padding: '20px', textAlign: 'center' }}>
-        <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--orange)' }}>{pendingOrders}</div>
-        <div style={{ fontSize: '0.85rem', color: 'var(--muted)' }}>Pending</div>
-      </div>
-      <div className="stat-card" style={{ background: 'var(--card)', border: '1.5px solid var(--border)', borderRadius: '15px', padding: '20px', textAlign: 'center' }}>
-        <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--green)' }}>Rs.{revenue.toFixed(2)}</div>
-        <div style={{ fontSize: '0.85rem', color: 'var(--muted)' }}>Revenue</div>
-      </div>
-    </div>
-  );
+const statusLabelMap = {
+  pending: 'Pending',
+  packing: 'Packing',
+  out: 'Out for delivery',
+  delivered: 'Delivered',
+  cancelled: 'Cancelled',
 };
 
-const ManageOrders = ({ orders, setOrders, partners }) => {
+function AdminStatCards({ orders, products, partners }) {
+  const deliveredRevenue = orders
+    .filter((order) => order.status === 'delivered')
+    .reduce((sum, order) => sum + Number(order.totalPrice || 0), 0);
+
+  const statCards = [
+    { value: String(orders.length), label: 'orders in system' },
+    { value: String(orders.filter((order) => order.status === 'pending').length), label: 'pending orders' },
+    { value: currency(deliveredRevenue), label: 'delivered revenue' },
+    { value: String(products.length), label: 'active medicines' },
+    { value: String(partners.length), label: 'delivery partners' },
+  ];
+
+  return (
+    <section className="premium-grid-three premium-admin-stat-grid">
+      {statCards.map((stat) => (
+        <article key={stat.label} className="premium-surface-card premium-ops-stat-card">
+          <strong>{stat.value}</strong>
+          <h3>{stat.label}</h3>
+          <p>Live operating snapshot from inventory and order data.</p>
+        </article>
+      ))}
+    </section>
+  );
+}
+
+function ManageOrders({ orders, setOrders, partners, setNotice, setDashboardError }) {
   const [currentFilter, setCurrentFilter] = useState('all');
 
-  const filteredOrders = currentFilter === 'all' ? orders : orders.filter((order) => order.status === currentFilter);
+  const filteredOrders = currentFilter === 'all'
+    ? orders
+    : orders.filter((order) => order.status === currentFilter);
 
   const handleUpdateStatus = async (id, newStatus) => {
     try {
       const updated = await updateOrderStatus(id, newStatus);
-      setOrders((prev) => prev.map((order) => (order.id === id ? { ...order, status: updated.status, paymentStatus: updated.paymentStatus } : order)));
-    } catch {
-      alert('Failed to update status.');
+      setOrders((current) =>
+        current.map((order) =>
+          order.id === id
+            ? { ...order, status: updated.status, paymentStatus: updated.paymentStatus, deliveredAt: updated.deliveredAt }
+            : order
+        )
+      );
+      setNotice(`Order ${getOrderReference(updated)} moved to ${statusLabelMap[updated.status] || updated.status}.`);
+      setDashboardError('');
+    } catch (error) {
+      setDashboardError(error?.response?.data?.message || error?.message || 'Failed to update order status.');
     }
   };
 
   const handleUpdatePayment = async (id, paymentStatus) => {
     try {
       const updated = await updateOrderPaymentStatus(id, paymentStatus);
-      setOrders((prev) => prev.map((order) => (order.id === id ? { ...order, paymentStatus: updated.paymentStatus, paidAt: updated.paidAt } : order)));
-    } catch {
-      alert('Failed to update payment status.');
+      setOrders((current) =>
+        current.map((order) =>
+          order.id === id
+            ? { ...order, paymentStatus: updated.paymentStatus, paidAt: updated.paidAt }
+            : order
+        )
+      );
+      setNotice(`Payment status updated for ${getOrderReference(updated)}.`);
+      setDashboardError('');
+    } catch (error) {
+      setDashboardError(error?.response?.data?.message || error?.message || 'Failed to update payment status.');
     }
   };
 
   const handleAssign = async (orderId, partnerId) => {
-    if (!partnerId) return;
+    if (!partnerId) {
+      return;
+    }
+
     try {
       const updated = await assignOrder(orderId, partnerId);
-      setOrders((prev) => prev.map((order) => (order.id === orderId ? { ...order, status: updated.status, deliveryPartner: updated.deliveryPartner } : order)));
-      alert('Delivery partner assigned.');
-    } catch {
-      alert('Failed to assign partner.');
+      setOrders((current) =>
+        current.map((order) =>
+          order.id === orderId
+            ? { ...order, status: updated.status, deliveryPartner: updated.deliveryPartner }
+            : order
+        )
+      );
+      const assignedPartner = partners.find((partner) => partner._id === partnerId)?.name || 'delivery partner';
+      setNotice(`Assigned ${getOrderReference(updated)} to ${assignedPartner}.`);
+      setDashboardError('');
+    } catch (error) {
+      setDashboardError(error?.response?.data?.message || error?.message || 'Failed to assign delivery partner.');
     }
   };
 
   const sendWhatsApp = (order) => {
     const ownerWhatsApp = '919371493956';
-    const itemLines = order.orderItems.map((item) => `  - ${item.name} x${item.quantity}`).join('\n');
-    const msg = encodeURIComponent(`Order ID: ${getOrderReference(order)}\nName: ${order.customerName}\nAddress: ${order.customerAddress}\nItems:\n${itemLines}\nTotal: Rs.${order.totalPrice.toFixed(2)}`);
-    window.open(`https://wa.me/${ownerWhatsApp}?text=${msg}`, '_blank');
+    const itemLines = order.orderItems
+      .map((item) => `- ${item.name} x${item.quantity}`)
+      .join('\n');
+    const msg = encodeURIComponent(
+      `Order ID: ${getOrderReference(order)}\nName: ${order.customerName}\nAddress: ${order.customerAddress}\nItems:\n${itemLines}\nTotal: ${currency(order.totalPrice)}`
+    );
+    window.open(`https://wa.me/${ownerWhatsApp}?text=${msg}`, '_blank', 'noopener,noreferrer');
   };
 
   const tabs = [
     { id: 'all', label: 'All' },
     { id: 'pending', label: 'Pending' },
     { id: 'packing', label: 'Packing' },
-    { id: 'out', label: 'Out for Delivery' },
+    { id: 'out', label: 'Out for delivery' },
     { id: 'delivered', label: 'Delivered' },
   ];
 
   return (
-    <div className="admin-section">
-      <div className="admin-tab-strip" style={{ display: 'flex', gap: '5px', background: 'var(--green-pale)', borderRadius: '12px', padding: '5px', marginBottom: '20px', overflowX: 'auto' }}>
+    <section className="premium-surface-card">
+      <div className="premium-section-header">
+        <div>
+          <h2>Manage Orders</h2>
+          <p>Review prescriptions, confirm payments, assign riders, and move orders through fulfillment.</p>
+        </div>
+      </div>
+
+      <div className="premium-filter-row">
         {tabs.map((tab) => (
-          <div
+          <button
             key={tab.id}
+            type="button"
+            className={`premium-filter-pill ${currentFilter === tab.id ? 'is-active' : ''}`}
             onClick={() => setCurrentFilter(tab.id)}
-            style={{
-              flex: 1,
-              padding: '10px',
-              textAlign: 'center',
-              fontSize: '0.85rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-              borderRadius: '10px',
-              whiteSpace: 'nowrap',
-              background: currentFilter === tab.id ? 'var(--green)' : 'transparent',
-              color: currentFilter === tab.id ? '#fff' : 'var(--text)',
-            }}
           >
             {tab.label}
-          </div>
+          </button>
         ))}
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-        {filteredOrders.length === 0 ? (
-          <div className="no-results">No orders found.</div>
-        ) : (
-          filteredOrders.map((order) => (
-            <div key={order.id} style={{ background: 'var(--card)', border: '1.5px solid var(--border)', borderRadius: '15px', padding: '20px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap', marginBottom: '14px' }}>
+      {filteredOrders.length === 0 ? (
+        <div className="premium-empty-state premium-empty-compact">
+          <div className="premium-empty-icon">0</div>
+          <h2>No orders found</h2>
+          <p>The current filter does not have matching orders yet.</p>
+        </div>
+      ) : (
+        <div className="premium-list-stack">
+          {filteredOrders.map((order) => (
+            <article key={order.id} className="premium-surface-card premium-admin-order-card">
+              <div className="premium-track-header">
                 <div>
-                  <div style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--green)' }}>{getOrderReference(order)}</div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>{new Date(order.createdAt).toLocaleString()}</div>
+                  <strong>{getOrderReference(order)}</strong>
+                  <p className="premium-meta-copy">{new Date(order.createdAt).toLocaleString()}</p>
                 </div>
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                  <span className={`status-${order.status}`} style={{ fontSize: '0.75rem', fontWeight: 800, padding: '4px 12px', borderRadius: '20px' }}>{order.status}</span>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 800, padding: '4px 12px', borderRadius: '20px', background: order.paymentStatus === 'received' ? 'var(--green-soft)' : '#fff7dd', color: order.paymentStatus === 'received' ? 'var(--green-dark)' : '#9a6700' }}>
-                    {order.paymentStatus === 'received' ? 'Payment Received' : 'Payment Pending'}
+                <div className="premium-inline-actions">
+                  <span className={`premium-soft-badge ${order.status === 'delivered' ? 'is-success' : 'is-warning'}`}>
+                    {statusLabelMap[order.status] || order.status}
+                  </span>
+                  <span className={`premium-soft-badge ${order.paymentStatus === 'received' ? 'is-success' : 'is-warning'}`}>
+                    {order.paymentStatus === 'received' ? 'Payment received' : 'Payment pending'}
                   </span>
                 </div>
               </div>
 
-              <div style={{ fontSize: '0.9rem', marginBottom: '8px' }}><strong>{order.customerName}</strong> • {order.customerPhone}</div>
-              <div style={{ fontSize: '0.85rem', color: 'var(--muted)', marginBottom: '10px' }}>{order.customerAddress}</div>
-
-              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '12px' }}>
-                {order.prescriptionImage && (
-                  <a href={order.prescriptionImage} target="_blank" rel="noreferrer" style={{ fontSize: '0.8rem', color: 'var(--blue)', fontWeight: 700, textDecoration: 'none' }}>
-                    View Prescription
-                  </a>
-                )}
-                {order.paymentScreenshot && (
-                  <a href={order.paymentScreenshot} target="_blank" rel="noreferrer" style={{ fontSize: '0.8rem', color: '#8a5a00', fontWeight: 700, textDecoration: 'none' }}>
-                    View Payment Screenshot
-                  </a>
-                )}
+              <div className="premium-admin-order-grid">
+                <div>
+                  <h3>{order.customerName}</h3>
+                  <p className="premium-meta-copy">{order.customerPhone}</p>
+                  <p className="premium-meta-copy">{order.customerAddress}</p>
+                </div>
+                <div className="premium-order-finance">
+                  <strong>{currency(order.totalPrice)}</strong>
+                  <span>{order.paymentMethod === 'cod' ? 'Cash on delivery' : 'UPI / QR payment'}</span>
+                  {order.paymentReference ? <span>Ref: {order.paymentReference}</span> : null}
+                </div>
               </div>
 
-              <div style={{ background: '#f9f9f9', padding: '12px', borderRadius: '10px', fontSize: '0.85rem', marginBottom: '15px' }}>
-                {order.orderItems.map((item, idx) => (
-                  <div key={idx}>• {item.name} x {item.quantity} - Rs.{(item.price * item.quantity).toFixed(2)}</div>
+              <div className="premium-item-summary-list">
+                {order.orderItems.map((item, index) => (
+                  <div key={`${order.id}-${index}`} className="premium-item-summary-row">
+                    <span>{item.name}</span>
+                    <span>{item.quantity} x {currency(item.price)}</span>
+                  </div>
                 ))}
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
-                <div>
-                  <div style={{ fontWeight: 800, color: 'var(--green)' }}>Total: Rs.{order.totalPrice.toFixed(2)}</div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>{order.paymentMethod === 'cod' ? 'Cash on Delivery' : 'UPI / QR'}</div>
-                  {order.paymentReference && <div style={{ fontSize: '0.72rem', color: 'var(--muted)', marginTop: '4px' }}>Ref: {order.paymentReference}</div>}
-                  {order.status === 'packing' && (
-                    <div style={{ marginTop: '10px' }}>
-                      <select onChange={(event) => handleAssign(order.id, event.target.value)} style={{ fontSize: '0.75rem', padding: '4px', borderRadius: '5px', border: '1px solid var(--border)' }} defaultValue="">
-                        <option value="" disabled>Assign Partner</option>
-                        {partners.map((partner) => (
-                          <option key={partner._id} value={partner._id}>{partner.name}</option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
-                </div>
-
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                  <button onClick={() => sendWhatsApp(order)} style={{ background: '#e7fbe9', color: '#1a7a4a', padding: '6px 12px', borderRadius: '8px', border: 'none', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer' }}>WhatsApp</button>
-                  {order.paymentStatus !== 'received' ? (
-                    <button onClick={() => handleUpdatePayment(order.id, 'received')} style={{ background: '#fff3cd', color: '#8a5a00', padding: '6px 12px', borderRadius: '8px', border: 'none', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer' }}>Mark Paid</button>
-                  ) : (
-                    <button onClick={() => handleUpdatePayment(order.id, 'pending')} style={{ background: '#f1f5f9', color: '#475569', padding: '6px 12px', borderRadius: '8px', border: 'none', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer' }}>Reset Payment</button>
-                  )}
-                  {order.status === 'pending' && <button onClick={() => handleUpdateStatus(order.id, 'packing')} style={{ background: '#cce5ff', color: '#004085', padding: '6px 12px', borderRadius: '8px', border: 'none', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer' }}>Pack</button>}
-                  {order.status === 'packing' && <button onClick={() => handleUpdateStatus(order.id, 'out')} style={{ background: '#d4edda', color: '#155724', padding: '6px 12px', borderRadius: '8px', border: 'none', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer' }}>Send Out</button>}
-                  {order.status === 'out' && <button onClick={() => handleUpdateStatus(order.id, 'delivered')} style={{ background: 'var(--green-pale)', color: 'var(--green)', padding: '6px 12px', borderRadius: '8px', border: 'none', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer' }}>Delivered</button>}
-                </div>
+              <div className="premium-inline-actions">
+                {order.prescriptionImage ? (
+                  <a href={order.prescriptionImage} target="_blank" rel="noreferrer" className="premium-secondary-btn">
+                    View Prescription
+                  </a>
+                ) : null}
+                {order.paymentScreenshot ? (
+                  <a href={order.paymentScreenshot} target="_blank" rel="noreferrer" className="premium-secondary-btn">
+                    View Payment Proof
+                  </a>
+                ) : null}
+                <button type="button" className="premium-ghost-btn" onClick={() => sendWhatsApp(order)}>
+                  Send WhatsApp
+                </button>
+                {order.paymentStatus !== 'received' ? (
+                  <button type="button" className="premium-ghost-btn" onClick={() => handleUpdatePayment(order.id, 'received')}>
+                    Mark Paid
+                  </button>
+                ) : (
+                  <button type="button" className="premium-ghost-btn" onClick={() => handleUpdatePayment(order.id, 'pending')}>
+                    Reset Payment
+                  </button>
+                )}
+                {order.status === 'pending' ? (
+                  <button type="button" className="premium-cta" onClick={() => handleUpdateStatus(order.id, 'packing')}>
+                    Move to Packing
+                  </button>
+                ) : null}
+                {order.status === 'packing' ? (
+                  <>
+                    <select
+                      className="premium-select premium-inline-select"
+                      defaultValue=""
+                      onChange={(event) => handleAssign(order.id, event.target.value)}
+                    >
+                      <option value="" disabled>
+                        Assign Partner
+                      </option>
+                      {partners.map((partner) => (
+                        <option key={partner._id} value={partner._id}>
+                          {partner.name}
+                        </option>
+                      ))}
+                    </select>
+                    <button type="button" className="premium-cta" onClick={() => handleUpdateStatus(order.id, 'out')}>
+                      Send Out
+                    </button>
+                  </>
+                ) : null}
+                {order.status === 'out' ? (
+                  <button type="button" className="premium-cta" onClick={() => handleUpdateStatus(order.id, 'delivered')}>
+                    Mark Delivered
+                  </button>
+                ) : null}
               </div>
-            </div>
-          ))
-        )}
-      </div>
-    </div>
+            </article>
+          ))}
+        </div>
+      )}
+    </section>
   );
-};
+}
 
-const ManageProductsLayout = ({ products, setProducts }) => {
+function ManageProductsLayout({ products, setProducts, setNotice, setDashboardError }) {
   const [isEditing, setIsEditing] = useState(null);
   const [form, setForm] = useState({});
   const [selectedFile, setSelectedFile] = useState(null);
@@ -204,26 +288,75 @@ const ManageProductsLayout = ({ products, setProducts }) => {
     packUnit: value.packUnit ?? '',
   });
 
-  const handleChange = (event) => setForm({ ...form, [event.target.name]: event.target.value });
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setForm((current) => ({ ...current, [name]: value }));
+  };
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
-    if (file) {
-      setSelectedFile(file);
-      setPreviewUrl(URL.createObjectURL(file));
+    if (!file) {
+      return;
     }
+
+    setSelectedFile(file);
+    setPreviewUrl(URL.createObjectURL(file));
   };
 
   const handleEdit = (product) => {
     setForm(normalizeForm(product));
     setIsEditing(product.id);
     setSelectedFile(null);
-    setPreviewUrl(product.imageUrl);
+    setPreviewUrl(product.imageUrl || getMedicineImage(product));
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const resetEditor = () => {
+    setIsEditing(null);
+    setForm(normalizeForm({}));
+    setSelectedFile(null);
+    setPreviewUrl(null);
+  };
+
+  const buildMedicineFormData = (medicine) => {
+    const formData = new FormData();
+    [
+      'name',
+      'price',
+      'description',
+      'manufacturer',
+      'sourceName',
+      'sourceUrl',
+      'imageUrl',
+      'dosage',
+      'packQuantity',
+      'packUnit',
+      'category',
+      'stock',
+    ].forEach((key) => {
+      const value = medicine[key];
+      if (value !== undefined && value !== null) {
+        formData.append(key, value);
+      }
+    });
+
+    return formData;
+  };
+
+  const handleCreateFromFallback = async (product) => {
+    try {
+      const added = await addMedicine(buildMedicineFormData(product));
+      setProducts((current) => current.map((item) => (item.id === product.id ? added : item)));
+      setNotice(`${added.name} is now saved in backend inventory.`);
+      setDashboardError('');
+    } catch (error) {
+      setDashboardError(error?.response?.data?.message || error?.message || 'Error saving fallback medicine to backend.');
+    }
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+
     try {
       const formData = new FormData();
       Object.keys(form).forEach((key) => {
@@ -238,169 +371,374 @@ const ManageProductsLayout = ({ products, setProducts }) => {
 
       if (isEditing) {
         const updated = await updateMedicine(isEditing, formData);
-        setProducts(products.map((product) => (product.id === updated.id ? updated : product)));
+        setProducts((current) => current.map((product) => (product.id === updated.id ? updated : product)));
+        setNotice(`Updated ${updated.name}.`);
       } else {
         const added = await addMedicine(formData);
-        setProducts([...products, added]);
+        setProducts((current) => [...current, added]);
+        setNotice(`Added ${added.name} to inventory.`);
       }
 
-      setIsEditing(null);
-      setForm(normalizeForm({}));
-      setSelectedFile(null);
-      setPreviewUrl(null);
+      setDashboardError('');
+      resetEditor();
     } catch (error) {
-      console.error(error);
-      alert('Error saving medicine.');
+      setDashboardError(error?.response?.data?.message || error?.message || 'Error saving medicine.');
     }
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure?')) return;
+    if (!window.confirm('Delete this medicine from inventory?')) {
+      return;
+    }
+
     try {
       await deleteMedicine(id);
-      setProducts(products.filter((product) => product.id !== id));
-    } catch {
-      alert('Error deleting medicine.');
+      setProducts((current) => current.filter((product) => product.id !== id));
+      setNotice('Medicine removed from inventory.');
+      setDashboardError('');
+    } catch (error) {
+      setDashboardError(error?.response?.data?.message || error?.message || 'Error deleting medicine.');
     }
   };
 
   return (
-    <div className="admin-section">
-      <h3 className="section-title">{isEditing ? `Edit Product: ${form.name}` : 'Add New Product'}</h3>
-      <form onSubmit={handleSubmit} className="admin-product-form" style={{ background: 'var(--card)', padding: '20px', borderRadius: '15px', border: '1.5px solid var(--border)', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '15px' }}>
-        <input name="name" placeholder="Medicine Name" value={form.name || ''} onChange={handleChange} required style={{ padding: '12px', borderRadius: '10px', border: '1.5px solid var(--border)' }} />
-        <input name="price" type="number" step="0.01" placeholder="Price" value={form.price || ''} onChange={handleChange} required style={{ padding: '12px', borderRadius: '10px', border: '1.5px solid var(--border)' }} />
-        <input name="stock" type="number" placeholder="Stock Qty" value={form.stock || ''} onChange={handleChange} required style={{ padding: '12px', borderRadius: '10px', border: '1.5px solid var(--border)' }} />
-        <select name="category" value={form.category || ''} onChange={handleChange} required style={{ padding: '12px', borderRadius: '10px', border: '1.5px solid var(--border)' }}>
-          <option value="">Select Category</option>
-          <option value="tablet">Tablet</option>
-          <option value="syrup">Syrup</option>
-          <option value="capsule">Capsule</option>
-          <option value="cream">Cream</option>
-          <option value="drops">Drops</option>
-          <option value="injection">Injection</option>
-          <option value="other">Other</option>
-        </select>
-        <input name="dosage" placeholder="Strength / Dosage" value={form.dosage || ''} onChange={handleChange} style={{ padding: '12px', borderRadius: '10px', border: '1.5px solid var(--border)' }} />
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--muted)' }}>Medicine Image</label>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{ position: 'relative', width: '60px', height: '60px', borderRadius: '10px', overflow: 'hidden', border: '1.5px solid var(--border)', background: '#f7fbf8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              {previewUrl ? <img src={previewUrl} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <span style={{ fontSize: '1.2rem' }}>IMG</span>}
-            </div>
-            <label style={{ flex: 1, padding: '10px', borderRadius: '10px', border: '1.5px dashed var(--green)', textAlign: 'center', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 700, color: 'var(--green)', background: 'var(--green-pale)' }}>
-              {selectedFile ? 'Change Image' : 'Upload Image'}
-              <input type="file" accept="image/*" onChange={handleFileChange} style={{ display: 'none' }} />
-            </label>
+    <section className="premium-grid-two premium-admin-inventory-layout">
+      <section className="premium-form-panel">
+        <div className="premium-section-header">
+          <div>
+            <h2>{isEditing ? `Edit ${form.name}` : 'Add New Medicine'}</h2>
+            <p>Manage pricing, stock, pack details, and polished medicine imagery from one place.</p>
           </div>
         </div>
 
-        <input name="packQuantity" type="number" min="0" placeholder="Pack Quantity" value={form.packQuantity || ''} onChange={handleChange} style={{ padding: '12px', borderRadius: '10px', border: '1.5px solid var(--border)' }} />
-        <input name="packUnit" placeholder="Pack Unit" value={form.packUnit || ''} onChange={handleChange} style={{ padding: '12px', borderRadius: '10px', border: '1.5px solid var(--border)' }} />
-        <textarea name="description" placeholder="Description / Use" value={form.description || ''} onChange={handleChange} required style={{ gridColumn: 'span 2', padding: '12px', borderRadius: '10px', border: '1.5px solid var(--border)', minHeight: '80px' }} />
-        <button type="submit" className="add-btn" style={{ gridColumn: 'span 2', padding: '15px' }}>{isEditing ? 'Save Changes' : 'Add Product'}</button>
-      </form>
-
-      <div style={{ marginTop: '24px', display: 'grid', gap: '14px' }}>
-        {products.map((product) => (
-          <div key={product.id} className="admin-product-row" style={{ display: 'grid', gridTemplateColumns: '96px 1fr auto', gap: '16px', alignItems: 'center', background: '#fff', border: '1px solid var(--border)', borderRadius: '16px', padding: '14px' }}>
-            <img src={product.imageUrl} alt={product.name} style={{ width: '96px', height: '96px', objectFit: 'cover', borderRadius: '14px', background: '#f7fbf8', border: '1px solid var(--border)' }} />
-            <div>
-              <div style={{ fontWeight: 800, color: 'var(--green-dark)' }}>{product.name}</div>
-              <div style={{ fontSize: '0.88rem', color: 'var(--muted)', marginTop: '4px' }}>
-                {product.packQuantity ? `${product.packQuantity} ${product.packUnit || 'units'}` : (product.dosage || product.category)}
-              </div>
+        <form onSubmit={handleSubmit} className="premium-form-grid">
+          <div className="premium-form-split">
+            <div className="premium-field">
+              <label htmlFor="product-name">Medicine Name</label>
+              <input id="product-name" name="name" value={form.name || ''} onChange={handleChange} required className="premium-input" />
             </div>
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <button type="button" onClick={() => handleEdit(product)} className="med-link-btn">Edit</button>
-              <button type="button" onClick={() => handleDelete(product.id)} style={{ background: '#fee2e2', color: '#b91c1c', border: 'none', borderRadius: '14px', padding: '10px 14px', fontWeight: 800 }}>Delete</button>
+            <div className="premium-field">
+              <label htmlFor="product-category">Category</label>
+              <select id="product-category" name="category" value={form.category || ''} onChange={handleChange} required className="premium-select">
+                <option value="">Select Category</option>
+                <option value="tablet">Tablet</option>
+                <option value="syrup">Syrup</option>
+                <option value="capsule">Capsule</option>
+                <option value="cream">Cream</option>
+                <option value="drops">Drops</option>
+                <option value="injection">Injection</option>
+                <option value="other">Other</option>
+              </select>
             </div>
           </div>
-        ))}
-      </div>
-    </div>
+
+          <div className="premium-form-split">
+            <div className="premium-field">
+              <label htmlFor="product-price">Price</label>
+              <input id="product-price" name="price" type="number" step="0.01" value={form.price || ''} onChange={handleChange} required className="premium-input" />
+            </div>
+            <div className="premium-field">
+              <label htmlFor="product-stock">Stock Quantity</label>
+              <input id="product-stock" name="stock" type="number" value={form.stock || ''} onChange={handleChange} required className="premium-input" />
+            </div>
+          </div>
+
+          <div className="premium-form-split">
+            <div className="premium-field">
+              <label htmlFor="product-dosage">Strength / Dosage</label>
+              <input id="product-dosage" name="dosage" value={form.dosage || ''} onChange={handleChange} className="premium-input" />
+            </div>
+            <div className="premium-field">
+              <label htmlFor="product-pack-quantity">Pack Quantity</label>
+              <input id="product-pack-quantity" name="packQuantity" type="number" min="0" value={form.packQuantity || ''} onChange={handleChange} className="premium-input" />
+            </div>
+          </div>
+
+          <div className="premium-form-split">
+            <div className="premium-field">
+              <label htmlFor="product-pack-unit">Pack Unit</label>
+              <input id="product-pack-unit" name="packUnit" value={form.packUnit || ''} onChange={handleChange} className="premium-input" />
+            </div>
+            <div className="premium-field">
+              <label htmlFor="product-image">Medicine Image</label>
+              <label className="premium-upload-panel premium-upload-inline" htmlFor="product-image">
+                <span>{selectedFile ? selectedFile.name : 'Upload image from your device'}</span>
+                <input id="product-image" type="file" accept="image/*" onChange={handleFileChange} hidden />
+              </label>
+            </div>
+          </div>
+
+          <div className="premium-field">
+            <label htmlFor="product-description">Description / Use</label>
+            <textarea id="product-description" name="description" value={form.description || ''} onChange={handleChange} required className="premium-textarea" />
+          </div>
+
+          <div className="premium-inline-actions">
+            <button type="submit" className="premium-cta">
+              {isEditing ? 'Save Changes' : 'Add Medicine'}
+            </button>
+            {isEditing ? (
+              <button type="button" className="premium-secondary-btn" onClick={resetEditor}>
+                Cancel Edit
+              </button>
+            ) : null}
+          </div>
+        </form>
+
+        <div className="premium-upload-preview">
+          <div className="premium-upload-preview-media">
+            <img src={previewUrl || getMedicineImage(form)} alt={form.name || 'Medicine preview'} />
+          </div>
+          <div>
+            <strong>{form.name || 'Preview'}</strong>
+            <p className="premium-meta-copy">{buildPackLabel(form)}</p>
+          </div>
+        </div>
+      </section>
+
+      <section className="premium-surface-card">
+        <div className="premium-section-header">
+          <div>
+            <h2>Inventory Library</h2>
+            <p>Review the live catalog with richer fallback imagery for tablets, syrups, capsules, and more.</p>
+          </div>
+        </div>
+
+        <div className="premium-list-stack premium-admin-product-list">
+          {products.map((product) => (
+            <article key={product.id} className="premium-admin-product-row">
+              <div className="premium-admin-product-media">
+                <img
+                  src={getMedicineImage(product)}
+                  alt={product.name}
+                  onError={(event) => {
+                    event.currentTarget.onerror = null;
+                    event.currentTarget.src = getMedicineImage({ ...product, imageUrl: '' });
+                  }}
+                />
+              </div>
+
+              <div className="premium-admin-product-copy">
+                <strong>{product.name}</strong>
+                <p className="premium-meta-copy">{buildPackLabel(product)}</p>
+                <div className="premium-inline-actions">
+                  <span className="premium-pill">{product.category || 'other'}</span>
+                  <span className="premium-pill">{currency(product.price)}</span>
+                  <span className="premium-pill">{product.stock} in stock</span>
+                </div>
+          </div>
+
+          <div className="premium-inline-actions">
+                {isFallbackProduct(product) ? (
+                  <button type="button" className="premium-cta" onClick={() => handleCreateFromFallback(product)}>
+                    Add to Backend
+                  </button>
+                ) : (
+                  <>
+                    <button type="button" className="premium-secondary-btn" onClick={() => handleEdit(product)}>
+                      Edit
+                    </button>
+                    <button type="button" className="premium-ghost-btn premium-danger-btn" onClick={() => handleDelete(product.id)}>
+                      Delete
+                    </button>
+                  </>
+                )}
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+    </section>
   );
-};
+}
 
 function AdminDashboard() {
+  const { isLoggedIn, user } = useAuth();
+  const location = useLocation();
   const [activeView, setActiveView] = useState('summary');
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
   const [partners, setPartners] = useState([]);
   const [loading, setLoading] = useState(true);
   const [notification, setNotification] = useState(null);
+  const [dashboardError, setDashboardError] = useState('');
+  const [notice, setNotice] = useState('');
   const audioRef = useRef(new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3'));
 
   useEffect(() => {
+    if (!isLoggedIn || user?.role !== 'admin') {
+      setLoading(false);
+      return undefined;
+    }
+
     const loadDashboardData = async () => {
       setLoading(true);
+      setDashboardError('');
+
       try {
-        const [productData, orderData, partnerData] = await Promise.all([
+        const [productResult, orderResult, partnerResult] = await Promise.allSettled([
           fetchMedicines(),
           fetchOrders(),
           fetchDeliveryPartners(),
         ]);
-        setProducts(productData);
-        setOrders(orderData);
-        setPartners(partnerData);
+
+        if (productResult.status === 'fulfilled') {
+          setProducts(productResult.value);
+        }
+
+        if (orderResult.status === 'fulfilled') {
+          setOrders(orderResult.value);
+        }
+
+        if (partnerResult.status === 'fulfilled') {
+          setPartners(partnerResult.value);
+        }
+
+        if (productResult.status === 'rejected' || orderResult.status === 'rejected' || partnerResult.status === 'rejected') {
+          setDashboardError(
+            orderResult.reason?.response?.data?.message ||
+            productResult.reason?.response?.data?.message ||
+            partnerResult.reason?.response?.data?.message ||
+            orderResult.reason?.message ||
+            productResult.reason?.message ||
+            partnerResult.reason?.message ||
+            'Failed to load part of the admin dashboard.'
+          );
+        }
       } catch (error) {
-        console.error('Dashboard error:', error);
+        setDashboardError(error?.response?.data?.message || error?.message || 'Failed to load dashboard.');
       } finally {
         setLoading(false);
       }
     };
+
     loadDashboardData();
 
     socket.connect();
     socket.emit('join_admin_room');
 
-    socket.on('new_order', (order) => {
+    const handleNewOrder = (order) => {
       audioRef.current.play().catch(() => {});
-      setOrders((prev) => [{ ...order, id: order.id, status: 'pending' }, ...prev]);
-      setNotification(`${order.customerName} placed Rs.${order.totalPrice.toFixed(2)} order.`);
+      setOrders((current) => [{ ...order, id: order.id, status: order.status || 'pending' }, ...current]);
+      setNotification(`${order.customerName} placed an order worth ${currency(order.totalPrice)}.`);
       setTimeout(() => setNotification(null), 5000);
-    });
+    };
 
-    socket.on('order_status_changed', ({ id, status }) => {
-      setOrders((prev) => prev.map((order) => (order.id === id ? { ...order, status } : order)));
-    });
+    const handleStatusChanged = ({ id, status }) => {
+      setOrders((current) => current.map((order) => (order.id === id ? { ...order, status } : order)));
+    };
 
-    socket.on('order_payment_changed', ({ id, paymentStatus }) => {
-      setOrders((prev) => prev.map((order) => (order.id === id ? { ...order, paymentStatus } : order)));
-    });
+    const handlePaymentChanged = ({ id, paymentStatus }) => {
+      setOrders((current) => current.map((order) => (order.id === id ? { ...order, paymentStatus } : order)));
+    };
+
+    socket.on('new_order', handleNewOrder);
+    socket.on('order_status_changed', handleStatusChanged);
+    socket.on('order_payment_changed', handlePaymentChanged);
 
     return () => {
       socket.disconnect();
-      socket.off('new_order');
-      socket.off('order_status_changed');
-      socket.off('order_payment_changed');
+      socket.off('new_order', handleNewOrder);
+      socket.off('order_status_changed', handleStatusChanged);
+      socket.off('order_payment_changed', handlePaymentChanged);
     };
-  }, []);
+  }, [isLoggedIn, user?.role]);
 
-  if (loading) {
-    return <div className="text-center p-20"><h2>Loading Dashboard...</h2></div>;
+  const heroStats = useMemo(() => ([
+    { value: String(orders.length), label: 'orders managed' },
+    { value: String(products.length), label: 'medicines tracked' },
+    { value: String(partners.length), label: 'partners available' },
+  ]), [orders.length, partners.length, products.length]);
+
+  if (!isLoggedIn) {
+    return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+  }
+
+  if (user?.role !== 'admin') {
+    return (
+      <PremiumPageShell
+        eyebrow="Restricted"
+        title="Only admin users can access the owner dashboard."
+        description="Sign in with the owner account to manage medicines, payments, delivery assignment, and real-time orders."
+      >
+        <section className="premium-empty-state">
+          <div className="premium-empty-icon">A</div>
+          <h2>Owner access only</h2>
+          <p>This workspace contains protected business controls and live operational data.</p>
+        </section>
+      </PremiumPageShell>
+    );
   }
 
   return (
-    <div className="main-content">
-      {notification && <NotificationPopup message={notification} onClose={() => setNotification(null)} />}
+    <PremiumPageShell
+      eyebrow="Owner Dashboard"
+      title="Run the store with the same precision and polish customers feel on the storefront."
+      description="Inventory, payments, fulfillment, and new order activity now live inside one cleaner operational layer instead of scattered legacy panels."
+      stats={heroStats}
+      sideContent={
+        <div className="premium-highlight-panel">
+          <h3>Operational upgrade</h3>
+          <ul className="premium-bullet-list">
+            <li>Live socket notifications still fire for new orders, status changes, and payment updates.</li>
+            <li>Order management and inventory editing now share the same premium form and card system.</li>
+            <li>Medicine previews use the upgraded fallback artwork so missing images no longer look broken.</li>
+          </ul>
+        </div>
+      }
+    >
+      {notification ? <NotificationPopup message={notification} onClose={() => setNotification(null)} /> : null}
+      {notice ? <section className="premium-note-banner is-success">{notice}</section> : null}
+      {dashboardError ? <section className="premium-note-banner is-danger">{dashboardError}</section> : null}
 
-      <h2 className="section-title" style={{ border: 'none', padding: 0, fontSize: '1.8rem' }}>Owner Dashboard</h2>
-      <div style={{ fontSize: '0.9rem', color: 'var(--muted)', marginBottom: '30px' }}>Manage your shop orders and inventory</div>
+      {loading ? (
+        <section className="premium-empty-state">
+          <div className="premium-empty-icon">...</div>
+          <h2>Loading owner dashboard</h2>
+          <p>Syncing inventory, orders, and delivery partner availability.</p>
+        </section>
+      ) : (
+        <>
+          <AdminStatCards orders={orders} products={products} partners={partners} />
 
-      <StatCards orders={orders} />
+          <section className="premium-surface-card">
+            <div className="premium-filter-row">
+              <button
+                type="button"
+                className={`premium-filter-pill ${activeView === 'summary' ? 'is-active' : ''}`}
+                onClick={() => setActiveView('summary')}
+              >
+                Manage Orders
+              </button>
+              <button
+                type="button"
+                className={`premium-filter-pill ${activeView === 'inventory' ? 'is-active' : ''}`}
+                onClick={() => setActiveView('inventory')}
+              >
+                Inventory
+              </button>
+            </div>
+          </section>
 
-      <div className="admin-view-tabs" style={{ display: 'flex', gap: '15px', marginBottom: '20px', borderBottom: '2px solid var(--border)' }}>
-        <button onClick={() => setActiveView('summary')} style={{ background: 'none', border: 'none', padding: '10px 0', marginRight: '20px', fontWeight: 800, cursor: 'pointer', color: activeView === 'summary' ? 'var(--green)' : 'var(--muted)', borderBottom: activeView === 'summary' ? '3px solid var(--green)' : 'none' }}>Manage Orders</button>
-        <button onClick={() => setActiveView('inventory')} style={{ background: 'none', border: 'none', padding: '10px 0', fontWeight: 800, cursor: 'pointer', color: activeView === 'inventory' ? 'var(--green)' : 'var(--muted)', borderBottom: activeView === 'inventory' ? '3px solid var(--green)' : 'none' }}>Inventory</button>
-      </div>
-
-      <div className="admin-content">
-        {activeView === 'summary' && <ManageOrders orders={orders} setOrders={setOrders} partners={partners} />}
-        {activeView === 'inventory' && <ManageProductsLayout products={products} setProducts={setProducts} />}
-      </div>
-    </div>
+          {activeView === 'summary' ? (
+            <ManageOrders
+              orders={orders}
+              setOrders={setOrders}
+              partners={partners}
+              setNotice={setNotice}
+              setDashboardError={setDashboardError}
+            />
+          ) : (
+            <ManageProductsLayout
+              products={products}
+              setProducts={setProducts}
+              setNotice={setNotice}
+              setDashboardError={setDashboardError}
+            />
+          )}
+        </>
+      )}
+    </PremiumPageShell>
   );
 }
 
