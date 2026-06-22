@@ -4,8 +4,8 @@ import { FALLBACK_MEDICINES } from '../data/fallbackMedicines';
 import { withAuthRetry } from './authSession';
 
 const API_URL = `${API_BASE_URL}/api/medicines`;
-const MEDICINES_CACHE_KEY = 'medicines_cache_v2';
-const MEDICINE_CACHE_PREFIX = 'medicine_cache_v1:';
+const MEDICINES_CACHE_KEY = 'medicines_cache_v3';
+const MEDICINE_CACHE_PREFIX = 'medicine_cache_v2:';
 const CACHE_TTL_MS = 5 * 60 * 1000;
 let medicinesMemoryCache = null;
 const medicineMemoryCache = new Map();

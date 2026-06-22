@@ -10,6 +10,37 @@ const CATEGORY_FALLBACKS = {
   default: { label: 'MEDICINE', unit: 'units', accent: '#1a7a4a', secondary: '#5ed59a', glow: '#dff5e7' },
 };
 
+const SEED_IMAGES = {
+  tablet: [
+    'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=640&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1576073719710-0a1b51853db5?q=80&w=640&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1471864190281-ad5f9fb072b2?q=80&w=640&auto=format&fit=crop',
+  ],
+  capsule: [
+    'https://images.unsplash.com/photo-1550572017-0bed8c807fb5?q=80&w=640&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1587854692152-cbe660dbbb88?q=80&w=640&auto=format&fit=crop',
+  ],
+  syrup: [
+    'https://images.unsplash.com/photo-1628771065518-0d82f593ed33?q=80&w=640&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?q=80&w=640&auto=format&fit=crop',
+  ],
+  cream: [
+    'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?q=80&w=640&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1556228720-195a672e8a03?q=80&w=640&auto=format&fit=crop',
+  ],
+  drops: [
+    'https://images.unsplash.com/photo-1584362946551-7890f507b941?q=80&w=640&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?q=80&w=640&auto=format&fit=crop',
+  ],
+  injection: [
+    'https://images.unsplash.com/photo-1615461066841-6116e61058f4?q=80&w=640&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?q=80&w=640&auto=format&fit=crop',
+  ],
+  other: [
+    'https://images.unsplash.com/photo-1585435557343-3b092031a831?q=80&w=640&auto=format&fit=crop',
+  ],
+};
+
 const escapeXml = (value) =>
   String(value || '')
     .replace(/&/g, '&amp;')
@@ -184,6 +215,18 @@ export const getMedicineImage = (medicine) => {
     if (imageUrl.startsWith('/')) return `${API_BASE_URL}${imageUrl}`;
     if (/^https?:\/\//i.test(imageUrl)) return optimizeRemoteImageUrl(imageUrl);
     return `${API_BASE_URL}/${imageUrl.replace(/^\/+/, '')}`;
+  }
+
+  /* Try to provide a category-based seed image from our local mapper */
+  const cat = String(medicine?.category || '').toLowerCase();
+  const pool = SEED_IMAGES[cat] || SEED_IMAGES.other;
+  if (pool && pool.length > 0) {
+    // Deterministic index based on medicine name
+    const name = String(medicine?.name || '').toLowerCase();
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) hash = ((hash << 5) - hash + name.charCodeAt(i)) | 0;
+    const index = Math.abs(hash) % pool.length;
+    return pool[index];
   }
 
   /* Always fall back to clean SVG illustration */
