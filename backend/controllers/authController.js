@@ -32,7 +32,8 @@ const getSafeErrorMessage = (error, fallbackMessage = 'Server Error') => {
   if (
     error.message.includes('Brevo API error') ||
     error.message.includes('A valid email is required') ||
-    error.message.includes('missing API key')
+    error.message.includes('missing API key') ||
+    error.message.includes('Email service misconfigured')
   ) {
     return error.message;
   }

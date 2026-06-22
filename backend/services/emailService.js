@@ -8,8 +8,7 @@ const sendTransactionalEmail = async ({ to, toName, subject, textContent, htmlCo
   const senderName = process.env.BREVO_SENDER_NAME || 'Bablu Medical Store';
 
   if (!apiKey || !senderEmail) {
-    console.warn('Brevo email skipped: missing API key or sender email.');
-    return { skipped: true, reason: 'missing_config' };
+    throw new Error('Email service misconfigured: missing API key or sender email on server.');
   }
 
   const response = await fetch(BREVO_API_URL, {
