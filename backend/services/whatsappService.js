@@ -100,6 +100,42 @@ const sendNewOrderWhatsApp = async ({ order, backendBaseUrl }) => {
   return { sent: true, count: results.length, results };
 };
 
+const sendOtpWhatsApp = async ({ phone, otp }) => {
+  const accessToken = process.env.WHATSAPP_ACCESS_TOKEN;
+  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+  const graphVersion = process.env.WHATSAPP_GRAPH_VERSION || 'v23.0';
+
+  if (!accessToken || !phoneNumberId) {
+    console.warn('WhatsApp OTP skipped: missing Cloud API configuration.');
+    return { skipped: true, reason: 'missing_config' };
+  }
+
+  const response = await fetch(`https://graph.facebook.com/${graphVersion}/${phoneNumberId}/messages`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      messaging_product: 'whatsapp',
+      recipient_type: 'individual',
+      to: phone,
+      type: 'text',
+      text: {
+        body: `Your Bablu Medical verification code is ${otp}. It expires in 5 minutes.`,
+      },
+    }),
+  });
+
+  const responseText = await response.text();
+  if (!response.ok) {
+    throw new Error(`WhatsApp OTP API error ${response.status}: ${responseText}`);
+  }
+
+  return JSON.parse(responseText);
+};
+
 module.exports = {
   sendNewOrderWhatsApp,
+  sendOtpWhatsApp,
 };

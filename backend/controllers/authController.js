@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const { sendOtpEmail } = require('../services/emailService');
+const { sendOtpWhatsApp } = require('../services/whatsappService');
 
 const generateAccessToken = (id) => jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '15m' });
 const generateRefreshToken = (id) =>
@@ -271,8 +272,17 @@ const requestOTP = async (req, res) => {
     await user.save();
 
     console.log(`OTP for ${normalizedPhone}: Your Bablu Medical OTP is ${otp}`);
-    return res.json({ message: 'OTP generated for mobile login', channel: 'phone' });
+
+    try {
+      await sendOtpWhatsApp({ phone: normalizedPhone, otp });
+    } catch (wsError) {
+      console.error('WhatsApp OTP Error:', wsError.message);
+      // We don't fail the whole request if WhatsApp fails, as we still logged it for dev
+    }
+
+    return res.json({ message: 'OTP generated and sent via WhatsApp', channel: 'phone' });
   } catch (error) {
+    console.error('OTP Request Error:', error);
     return res.status(500).json({ message: getSafeErrorMessage(error) });
   }
 };
