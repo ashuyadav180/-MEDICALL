@@ -121,24 +121,52 @@ export const primeMedicineCache = (medicine) => {
     writeCache(`${MEDICINE_CACHE_PREFIX}${medicine.id}`, medicine);
 };
 
-// Fetch all medicines
+// Fetch all medicines or paginated subset
 export const fetchMedicines = async (options = {}) => {
-    const { forceRefresh = false } = options;
-    const cachedMedicines = getCachedMedicines();
-    if (!forceRefresh && cachedMedicines.length) {
-        return cachedMedicines;
+    const { forceRefresh = false, page = 0, limit = 0, q = '', category = 'all' } = options;
+
+    // Memory cache only for non-paginated or search base requests
+    const isBaseRequest = !page && !limit && !q && category === 'all';
+
+    if (!forceRefresh && isBaseRequest) {
+        const cachedMedicines = getCachedMedicines();
+        if (cachedMedicines.length) {
+            return cachedMedicines;
+        }
     }
 
     try {
-        const response = await axios.get(API_URL);
-        const medicines = response.data.map(normalizeMedicine);
-        const catalog = medicines.length ? medicines : fallbackMedicines;
-        cacheMedicineList(catalog);
-        return catalog;
+        const params = {};
+        if (page) params.page = page;
+        if (limit) params.limit = limit;
+        if (q) params.q = q;
+        if (category && category !== 'all') params.category = category;
+
+        const response = await axios.get(API_URL, { params });
+
+        let data;
+        if (response.data.medicines) {
+            // Paginated response
+            data = {
+                ...response.data,
+                medicines: response.data.medicines.map(normalizeMedicine)
+            };
+            // We don't cache the full list for paginated requests to avoid inconsistency
+        } else {
+            // Full list response
+            const medicines = response.data.map(normalizeMedicine);
+            data = medicines.length ? medicines : fallbackMedicines;
+            if (isBaseRequest) cacheMedicineList(data);
+        }
+
+        return data;
     } catch (error) {
         console.error('Error fetching medicines:', error);
-        cacheMedicineList(fallbackMedicines);
-        return fallbackMedicines;
+        if (isBaseRequest) {
+            cacheMedicineList(fallbackMedicines);
+            return fallbackMedicines;
+        }
+        throw error;
     }
 };
 

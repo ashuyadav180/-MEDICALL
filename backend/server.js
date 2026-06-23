@@ -5,12 +5,14 @@ const { Server } = require('socket.io');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
+const compression = require('compression');
 const connectDB = require('./config/db');
 
 dotenv.config();
 connectDB();
 
 const app = express();
+app.use(compression());
 const server = http.createServer(app);
 const fallbackOrigins = [
   'http://localhost:5173',

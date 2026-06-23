@@ -106,8 +106,12 @@ function Medicines() {
   const { t } = useTranslation();
   const { addItem } = useCart();
   const [searchParams] = useSearchParams();
-  const [medicines, setMedicines] = useState(() => getCachedMedicines());
-  const [loading, setLoading] = useState(() => getCachedMedicines().length === 0);
+  const [medicines, setMedicines] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [moreLoading, setMoreLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
   const [searchQuery, setSearchQuery] = useState(() => searchParams.get('q') || '');
   const [activeCat, setActiveCat] = useState('all');
   const [sortBy, setSortBy] = useState('name');
@@ -115,17 +119,58 @@ function Medicines() {
   const [addedIds, setAddedIds] = useState(new Set());
   const dq = useDeferredValue(searchQuery);
 
+  const ITEMS_PER_PAGE = 20;
+
   useEffect(() => {
     const load = async () => {
-      const cached = getCachedMedicines();
-      if (cached.length) { setMedicines(cached); setLoading(false); }
+      setLoading(true);
       try {
-        const data = await fetchMedicines({ forceRefresh: cached.length > 0 });
-        setMedicines(data);
-      } catch { /* keep cache */ } finally { setLoading(false); }
+        const data = await fetchMedicines({
+          page: 1,
+          limit: ITEMS_PER_PAGE,
+          q: dq,
+          category: activeCat
+        });
+
+        if (data.medicines) {
+          setMedicines(data.medicines);
+          setTotalPages(data.pages);
+          setPage(1);
+        } else {
+          setMedicines(data);
+          setTotalPages(1);
+        }
+      } catch (err) {
+        console.error('Initial load failed:', err);
+      } finally {
+        setLoading(false);
+      }
     };
     load();
-  }, []);
+  }, [dq, activeCat]);
+
+  const loadMore = async () => {
+    if (page >= totalPages || moreLoading) return;
+    setMoreLoading(true);
+    try {
+      const nextPage = page + 1;
+      const data = await fetchMedicines({
+        page: nextPage,
+        limit: ITEMS_PER_PAGE,
+        q: dq,
+        category: activeCat
+      });
+
+      if (data.medicines) {
+        setMedicines(prev => [...prev, ...data.medicines]);
+        setPage(nextPage);
+      }
+    } catch (err) {
+      console.error('Load more failed:', err);
+    } finally {
+      setMoreLoading(false);
+    }
+  };
 
   const handleAdd = (med) => {
     addItem({ ...med, quantity: 1 });
@@ -133,22 +178,19 @@ function Medicines() {
     setTimeout(() => setAddedIds(prev => { const s = new Set(prev); s.delete(med.id); return s; }), 2000);
   };
 
-  const filtered = useMemo(() => {
-    const q = dq.trim().toLowerCase();
+  const sortedAndFiltered = useMemo(() => {
+    // Note: Search and Category filtering are now handled by the backend
+    // but we still do Stock filtering and Sorting here for snappiness
+    // unless we decide to move them to backend too.
     return medicines
-      .filter(m => {
-        const matchQ = !q || m.name.toLowerCase().includes(q) || (m.manufacturer || '').toLowerCase().includes(q);
-        const matchCat = activeCat === 'all' || m.category === activeCat;
-        const matchSt = !inStockOnly || m.stock > 0;
-        return matchQ && matchCat && matchSt;
-      })
+      .filter(m => !inStockOnly || m.stock > 0)
       .sort((a, b) => {
         if (sortBy === 'priceLow') return a.price - b.price;
         if (sortBy === 'priceHigh') return b.price - a.price;
         if (sortBy === 'stock') return b.stock - a.stock;
         return a.name.localeCompare(b.name);
       });
-  }, [medicines, dq, activeCat, sortBy, inStockOnly]);
+  }, [medicines, sortBy, inStockOnly]);
 
   return (
     <div className="pharma-page" style={{ paddingBottom: 60 }}>
@@ -264,9 +306,9 @@ function Medicines() {
 
       {/* ── Products Grid ── */}
       <div style={{ maxWidth: 1200, margin: '28px auto', padding: '0 20px' }}>
-        {loading && medicines.length === 0 ? (
+        {loading ? (
           <SkeletonGrid />
-        ) : filtered.length === 0 ? (
+        ) : sortedAndFiltered.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '80px 20px' }}>
             <div style={{ fontSize: '3rem', marginBottom: 16 }}>🔍</div>
             <p style={{ fontSize: '1.1rem', color: '#6b7280', marginBottom: 20 }}>
@@ -284,16 +326,50 @@ function Medicines() {
             </button>
           </div>
         ) : (
-          <div className="ph-prod-grid">
-            {filtered.map(med => (
-              <MedCard
-                key={med.id}
-                medicine={med}
-                onAdd={handleAdd}
-                isAdded={addedIds.has(med.id)}
-              />
-            ))}
-          </div>
+          <>
+            <div className="ph-prod-grid">
+              {sortedAndFiltered.map(med => (
+                <MedCard
+                  key={med.id}
+                  medicine={med}
+                  onAdd={handleAdd}
+                  isAdded={addedIds.has(med.id)}
+                />
+              ))}
+            </div>
+
+            {/* Load More */}
+            {page < totalPages && (
+              <div style={{ textAlign: 'center', marginTop: 40 }}>
+                <button
+                  onClick={loadMore}
+                  disabled={moreLoading}
+                  className="ph-load-more-btn"
+                  style={{
+                    padding: '12px 36px',
+                    borderRadius: 999,
+                    background: '#fff',
+                    color: '#0F9D58',
+                    border: '2px solid #0F9D58',
+                    fontWeight: 700,
+                    cursor: moreLoading ? 'not-allowed' : 'pointer',
+                    fontSize: '0.95rem',
+                    transition: 'all 0.2s',
+                    opacity: moreLoading ? 0.7 : 1,
+                  }}
+                >
+                  {moreLoading ? (
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <svg className="ph-spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="12" y1="2" x2="12" y2="6" /><line x1="12" y1="18" x2="12" y2="22" /><line x1="4.93" y1="4.93" x2="7.76" y2="7.76" /><line x1="16.24" y1="16.24" x2="19.07" y2="19.07" /><line x1="2" y1="12" x2="6" y2="12" /><line x1="18" y1="12" x2="22" y2="12" /><line x1="4.93" y1="19.07" x2="7.76" y2="16.24" /><line x1="16.24" y1="7.76" x2="19.07" y2="4.93" />
+                      </svg>
+                      Loading...
+                    </span>
+                  ) : 'Load More Products'}
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

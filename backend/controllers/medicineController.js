@@ -16,30 +16,63 @@ const hasFreshMedicineCache = () => (
   medicinesListCache && medicinesListCacheExpiry > Date.now()
 );
 
-// @desc    Fetch all medicines
+// @desc    Fetch and search medicines
 // @route   GET /api/medicines
 // @access  Public
 const getMedicines = async (req, res) => {
   try {
-    if (hasFreshMedicineCache()) {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 0; // 0 means all for backward compatibility
+    const skip = (page - 1) * limit;
+
+    // Use memory cache only if no pagination/filter parameters are present
+    const isBaseRequest = !req.query.page && !req.query.limit && !req.query.q && !req.query.category;
+
+    if (isBaseRequest && hasFreshMedicineCache()) {
       res.set('Cache-Control', 'public, max-age=60');
       return res.json(medicinesListCache);
     }
 
-    let medicines = await Medicine.find({})
+    const query = {};
+    if (req.query.category && req.query.category !== 'all') {
+      query.category = req.query.category;
+    }
+
+    if (req.query.q) {
+      query.name = { $regex: req.query.q, $options: 'i' };
+    }
+
+    const total = await Medicine.countDocuments(query);
+
+    let dbQuery = Medicine.find(query)
       .select('name price description manufacturer sourceName sourceUrl imageUrl dosage packQuantity packUnit category stock createdAt updatedAt')
       .sort({ name: 1 })
       .lean();
 
-    if (!medicines.length) {
-      medicines = fallbackMedicines;
+    if (limit > 0) {
+      dbQuery = dbQuery.skip(skip).limit(limit);
     }
 
-    medicinesListCache = medicines;
-    medicinesListCacheExpiry = Date.now() + MEDICINES_CACHE_TTL_MS;
+    let medicines = await dbQuery;
+
+    if (!medicines.length && isBaseRequest) {
+      medicines = fallbackMedicines;
+      // Note: total is not strictly accurate here but fine for fallbacks
+    }
+
+    const response = limit > 0
+      ? { medicines, total, page, pages: Math.ceil(total / limit) }
+      : medicines;
+
+    if (isBaseRequest) {
+      medicinesListCache = response;
+      medicinesListCacheExpiry = Date.now() + MEDICINES_CACHE_TTL_MS;
+    }
+
     res.set('Cache-Control', 'public, max-age=60');
-    res.json(medicines);
+    res.json(response);
   } catch (error) {
+    console.error('getMedicines Error:', error);
     res.status(500).json({ message: 'Server Error' });
   }
 };
@@ -144,7 +177,7 @@ const updateMedicine = async (req, res) => {
       } else if (req.body.imageUrl !== undefined) {
         medicine.imageUrl = req.body.imageUrl;
       }
-      
+
       medicine.name = name ?? medicine.name;
       medicine.price = price ?? medicine.price;
       medicine.description = description ?? medicine.description;

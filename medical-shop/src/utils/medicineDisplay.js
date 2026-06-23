@@ -110,7 +110,7 @@ const optimizeRemoteImageUrl = (imageUrl) => {
     if (parsedUrl.hostname.includes('images.unsplash.com')) {
       parsedUrl.searchParams.set('auto', 'format');
       parsedUrl.searchParams.set('fit', 'crop');
-      parsedUrl.searchParams.set('w', '640');
+      parsedUrl.searchParams.set('w', '400');
       parsedUrl.searchParams.set('q', '70');
     }
 
