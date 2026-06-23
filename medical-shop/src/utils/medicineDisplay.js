@@ -207,6 +207,11 @@ const buildProductBoxSvg = (medicine) => {
 </svg>`;
 };
 
+export const getMedicineSvgFallback = (medicine) => {
+  const svg = buildProductBoxSvg(medicine || {});
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+};
+
 export const getMedicineImage = (medicine) => {
   const imageUrl = String(medicine?.imageUrl || '').trim();
 
@@ -238,6 +243,5 @@ export const getMedicineImage = (medicine) => {
   }
 
   /* Always fall back to clean SVG illustration */
-  const svg = buildProductBoxSvg(medicine || {});
-  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+  return getMedicineSvgFallback(medicine);
 };

@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { fetchMedicines, getCachedMedicines, primeMedicineCache } from '../api/medicineApi';
 import { useCart } from '../store/CartContext';
-import { getMedicineImage, getMedicineTheme } from '../utils/medicineDisplay';
+import { getMedicineImage, getMedicineTheme, getMedicineSvgFallback } from '../utils/medicineDisplay';
 import '../styles/pharma-premium.css';
 
 const fmtPrice = (v) => `₹${Number(v || 0).toFixed(0)}`;
@@ -48,7 +48,7 @@ function MedCard({ medicine, onAdd, isAdded, isPriority }) {
           className="ph-prod-img"
           loading={isPriority ? "eager" : "lazy"}
           {...(isPriority ? { fetchpriority: "high" } : {})}
-          onError={e => { e.target.onerror = null; e.target.src = getMedicineImage({ ...medicine, imageUrl: '' }); }}
+          onError={e => { e.target.onerror = null; e.target.src = getMedicineSvgFallback(medicine); }}
         />
       </Link>
 

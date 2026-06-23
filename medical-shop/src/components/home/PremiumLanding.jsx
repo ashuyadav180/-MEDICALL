@@ -1,38 +1,38 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { fetchMedicines, getCachedMedicines, primeMedicineCache } from '../../api/medicineApi';
-import { getMedicineImage, getMedicineTheme } from '../../utils/medicineDisplay';
+import { getMedicineImage, getMedicineTheme, getMedicineSvgFallback } from '../../utils/medicineDisplay';
 import { useCart } from '../../store/CartContext';
 import { useAuth } from '../../store/AuthContext';
 import { placeOrder } from '../../api/orderApi';
 import '../../styles/pharma-premium.css';
 
 /* ── helpers ── */
-const fmtPrice  = (v) => `₹${Number(v || 0).toFixed(0)}`;
-const getDisc   = (stock) => stock > 20 ? 18 : stock > 10 ? 14 : stock > 0 ? 9 : 0;
-const getMrp    = (price, stock) => {
+const fmtPrice = (v) => `₹${Number(v || 0).toFixed(0)}`;
+const getDisc = (stock) => stock > 20 ? 18 : stock > 10 ? 14 : stock > 0 ? 9 : 0;
+const getMrp = (price, stock) => {
   const d = getDisc(stock);
   return d > 0 ? Math.round(price / (1 - d / 100)) : price;
 };
 
 /* ── Category tabs config ── */
 const TABS = [
-  { id: 'all',       label: 'Medicine',    emoji: '💊' },
-  { id: 'healthcare',label: 'Healthcare',  emoji: '🏥' },
-  { id: 'tablet',    label: 'Tablets',     emoji: '🔵' },
-  { id: 'capsule',   label: 'Capsules',    emoji: '🟡' },
-  { id: 'syrup',     label: 'Syrups',      emoji: '🧴' },
-  { id: 'cream',     label: 'Skin Care',   emoji: '🫙' },
-  { id: 'drops',     label: 'Drops',       emoji: '💧' },
-  { id: 'injection', label: 'Injections',  emoji: '💉' },
+  { id: 'all', label: 'Medicine', emoji: '💊' },
+  { id: 'healthcare', label: 'Healthcare', emoji: '🏥' },
+  { id: 'tablet', label: 'Tablets', emoji: '🔵' },
+  { id: 'capsule', label: 'Capsules', emoji: '🟡' },
+  { id: 'syrup', label: 'Syrups', emoji: '🧴' },
+  { id: 'cream', label: 'Skin Care', emoji: '🫙' },
+  { id: 'drops', label: 'Drops', emoji: '💧' },
+  { id: 'injection', label: 'Injections', emoji: '💉' },
 ];
 
 /* ── Promo cards config ── */
 const PROMOS = [
   { emoji: '💊', label: 'Vitamins & Supplements', tag: 'Up to 40% OFF', bg: '#ECFDF3', border: '#A7F3D0' },
-  { emoji: '🧴', label: 'Personal Care',           tag: 'Starting ₹99',  bg: '#EFF6FF', border: '#BFDBFE' },
-  { emoji: '🩺', label: 'Diabetes Care',           tag: 'Best Sellers',  bg: '#FFF7ED', border: '#FED7AA' },
-  { emoji: '👁️', label: 'Eye Drops & Ear',        tag: 'Fast Delivery',  bg: '#FDF2F8', border: '#F9A8D4' },
+  { emoji: '🧴', label: 'Personal Care', tag: 'Starting ₹99', bg: '#EFF6FF', border: '#BFDBFE' },
+  { emoji: '🩺', label: 'Diabetes Care', tag: 'Best Sellers', bg: '#FFF7ED', border: '#FED7AA' },
+  { emoji: '👁️', label: 'Eye Drops & Ear', tag: 'Fast Delivery', bg: '#FDF2F8', border: '#F9A8D4' },
 ];
 
 /* ── Health Tips ── */
@@ -45,9 +45,9 @@ const TIPS = [
 /* ── Product Card ── */
 function PharmaProductCard({ medicine, onAdd, isAdded, isDark }) {
   const [wished, setWished] = useState(false);
-  const disc  = getDisc(medicine.stock);
-  const mrp   = getMrp(medicine.price, medicine.stock);
-  const save  = mrp - medicine.price;
+  const disc = getDisc(medicine.stock);
+  const mrp = getMrp(medicine.price, medicine.stock);
+  const save = mrp - medicine.price;
   const theme = getMedicineTheme(medicine.category);
   const inStock = medicine.stock > 0;
 
@@ -75,7 +75,7 @@ function PharmaProductCard({ medicine, onAdd, isAdded, isDark }) {
           alt={medicine.name}
           className="ph-prod-img"
           loading="lazy"
-          onError={e => { e.target.onerror = null; e.target.src = getMedicineImage({ ...medicine, imageUrl: '' }); }}
+          onError={e => { e.target.onerror = null; e.target.src = getMedicineSvgFallback(medicine); }}
         />
       </Link>
 
@@ -168,15 +168,15 @@ function ProductRow({ title, subtitle, medicines, onAdd, addedIds, isDark }) {
 
 /* ── Main Landing ── */
 function PremiumLanding() {
-  const navigate  = useNavigate();
-  const location  = useLocation();
+  const navigate = useNavigate();
+  const location = useLocation();
   const { addItem } = useCart();
   const [medicines, setMedicines] = useState(() => getCachedMedicines());
-  const [loading, setLoading]     = useState(() => getCachedMedicines().length === 0);
+  const [loading, setLoading] = useState(() => getCachedMedicines().length === 0);
   const [searchVal, setSearchVal] = useState('');
   const [activeTab, setActiveTab] = useState('all');
-  const [addedIds, setAddedIds]   = useState(new Set());
-  const [dark, setDark]           = useState(false);
+  const [addedIds, setAddedIds] = useState(new Set());
+  const [dark, setDark] = useState(false);
 
   const { user, isLoggedIn } = useAuth();
   const [isRxModalOpen, setIsRxModalOpen] = useState(false);
@@ -257,7 +257,7 @@ function PremiumLanding() {
       const formData = new FormData();
       formData.append('customerName', shippingDetails.fullName);
       formData.append('customerPhone', shippingDetails.mobile);
-      
+
       const fullAddress = `${shippingDetails.addressLine1}, ${shippingDetails.city}, ${shippingDetails.state} - ${shippingDetails.pincode}`;
       formData.append('customerAddress', fullAddress);
       formData.append(
@@ -324,13 +324,13 @@ function PremiumLanding() {
     activeTab === 'all' || activeTab === 'healthcare'
       ? medicines
       : medicines.filter(m => (m.category || '').toLowerCase() === activeTab),
-  [medicines, activeTab]);
+    [medicines, activeTab]);
 
-  const trending  = useMemo(() => [...filtered].sort((a,b) => b.stock - a.stock).slice(0, 18), [filtered]);
-  const topDeals  = useMemo(() => [...medicines].filter(m => m.stock > 20).sort((a,b) => b.stock - a.stock).slice(0, 18), [medicines]);
-  const tablets   = useMemo(() => medicines.filter(m => m.category === 'tablet').slice(0, 16), [medicines]);
-  const syrups    = useMemo(() => medicines.filter(m => m.category === 'syrup').slice(0, 16), [medicines]);
-  const capsules  = useMemo(() => medicines.filter(m => m.category === 'capsule').slice(0, 16), [medicines]);
+  const trending = useMemo(() => [...filtered].sort((a, b) => b.stock - a.stock).slice(0, 18), [filtered]);
+  const topDeals = useMemo(() => [...medicines].filter(m => m.stock > 20).sort((a, b) => b.stock - a.stock).slice(0, 18), [medicines]);
+  const tablets = useMemo(() => medicines.filter(m => m.category === 'tablet').slice(0, 16), [medicines]);
+  const syrups = useMemo(() => medicines.filter(m => m.category === 'syrup').slice(0, 16), [medicines]);
+  const capsules = useMemo(() => medicines.filter(m => m.category === 'capsule').slice(0, 16), [medicines]);
 
   const QUICK_SEARCHES = ['Paracetamol', 'Vitamin D3', 'Cough Syrup', 'Antacid', 'Pain Relief'];
 
@@ -347,7 +347,7 @@ function PremiumLanding() {
           <form className="ph-search-box" onSubmit={handleSearch}>
             <div className="ph-search-icon-wrap">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
               </svg>
             </div>
             <input
