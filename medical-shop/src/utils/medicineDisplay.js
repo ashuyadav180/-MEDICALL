@@ -210,11 +210,19 @@ const buildProductBoxSvg = (medicine) => {
 export const getMedicineImage = (medicine) => {
   const imageUrl = String(medicine?.imageUrl || '').trim();
 
+  const normalizePath = (path) => path.replace(/\\/g, '/').replace(/^\/+/, '');
+
   if (imageUrl) {
     if (/^(data|blob):/i.test(imageUrl)) return imageUrl;
-    if (imageUrl.startsWith('/')) return `${API_BASE_URL}${imageUrl}`;
-    if (/^https?:\/\//i.test(imageUrl)) return optimizeRemoteImageUrl(imageUrl);
-    return `${API_BASE_URL}/${imageUrl.replace(/^\/+/, '')}`;
+
+    if (/^https?:\/\//i.test(imageUrl)) {
+      return optimizeRemoteImageUrl(imageUrl);
+    }
+
+    // Construct local URL ensuring no double slashes or backslashes
+    const cleanPath = normalizePath(imageUrl);
+    const baseUrl = (API_BASE_URL || '').replace(/\/+$/, '');
+    return `${baseUrl}/${cleanPath}`;
   }
 
   /* Try to provide a category-based seed image from our local mapper */
@@ -231,5 +239,5 @@ export const getMedicineImage = (medicine) => {
 
   /* Always fall back to clean SVG illustration */
   const svg = buildProductBoxSvg(medicine || {});
-  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 };
