@@ -21,7 +21,7 @@ const CATS = [
 ];
 
 /* ── Premium Card (reuse ph-prod-card) ── */
-function MedCard({ medicine, onAdd, isAdded }) {
+function MedCard({ medicine, onAdd, isAdded, isPriority }) {
   const [wished, setWished] = useState(false);
   const disc = getDisc(medicine.stock);
   const mrp = getMrp(medicine.price, medicine.stock);
@@ -46,7 +46,8 @@ function MedCard({ medicine, onAdd, isAdded }) {
           src={getMedicineImage(medicine)}
           alt={medicine.name}
           className="ph-prod-img"
-          loading="lazy"
+          loading={isPriority ? "eager" : "lazy"}
+          {...(isPriority ? { fetchpriority: "high" } : {})}
           onError={e => { e.target.onerror = null; e.target.src = getMedicineImage({ ...medicine, imageUrl: '' }); }}
         />
       </Link>
@@ -328,12 +329,13 @@ function Medicines() {
         ) : (
           <>
             <div className="ph-prod-grid">
-              {sortedAndFiltered.map(med => (
+              {sortedAndFiltered.map((med, idx) => (
                 <MedCard
                   key={med.id}
                   medicine={med}
                   onAdd={handleAdd}
                   isAdded={addedIds.has(med.id)}
+                  isPriority={idx < 8}
                 />
               ))}
             </div>
