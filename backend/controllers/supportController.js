@@ -30,13 +30,21 @@ const submitSupportMessage = async (req, res) => {
       process.env.ORDER_NOTIFICATION_EMAIL ||
       process.env.BREVO_SENDER_EMAIL;
 
-    const emailResult = await sendSupportMessageEmail({
-      to: supportInbox,
-      name,
-      email,
-      subject,
-      message,
-    });
+    let emailResult = { skipped: false };
+    try {
+      emailResult = await sendSupportMessageEmail({
+        to: supportInbox,
+        name,
+        email,
+        subject,
+        message,
+      });
+    } catch (emailError) {
+      console.warn('⚠️ sendSupportMessageEmail failed:', emailError.message);
+      if (process.env.NODE_ENV === 'production') {
+        throw emailError;
+      }
+    }
 
     return res.status(201).json({
       message: 'Support request submitted successfully.',

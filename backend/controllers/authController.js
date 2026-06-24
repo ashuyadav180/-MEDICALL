@@ -247,7 +247,17 @@ const requestOTP = async (req, res) => {
       user.otpExpires = expires;
       await user.save();
 
-      await sendOtpEmail({ email: normalizedEmail, name: user.name, otp });
+      try {
+        await sendOtpEmail({ email: normalizedEmail, name: user.name, otp });
+      } catch (emailError) {
+        console.warn('⚠️ sendOtpEmail failed:', emailError.message);
+        if (process.env.NODE_ENV === 'production') {
+          throw emailError;
+        }
+        console.log(`\n==================================================`);
+        console.log(`[DEV MODE] OTP CODE for ${normalizedEmail}: ${otp}`);
+        console.log(`==================================================\n`);
+      }
       return res.json({ message: 'OTP sent to email', channel: 'email' });
     }
 
@@ -351,7 +361,17 @@ const forgotPassword = async (req, res) => {
     user.otpExpires = new Date(Date.now() + 5 * 60 * 1000);
     await user.save();
 
-    await sendOtpEmail({ email, name: user.name, otp });
+    try {
+      await sendOtpEmail({ email, name: user.name, otp });
+    } catch (emailError) {
+      console.warn('⚠️ sendOtpEmail failed for forgotPassword:', emailError.message);
+      if (process.env.NODE_ENV === 'production') {
+        throw emailError;
+      }
+      console.log(`\n==================================================`);
+      console.log(`[DEV MODE] forgotPassword OTP CODE for ${email}: ${otp}`);
+      console.log(`==================================================\n`);
+    }
     return res.json({ message: 'Password reset OTP sent to email' });
   } catch (error) {
     return res.status(500).json({ message: getSafeErrorMessage(error) });
