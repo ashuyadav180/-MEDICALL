@@ -2,7 +2,7 @@
 // Run: node backend/gen_fallback_from_db.js
 export const FALLBACK_MEDICINES = [
   {
-    id: '6a392fef9669b4e382c3720e',
+    id: '6a3b5549822c3efd7a002dcd',
     name: 'Amoxicillin 500mg',
     price: 65,
     description: '1 INDICATIONS AND USAGE Amoxicillin and Clavulanate Potassium is indicated for the treatment of infections in adults and pediatric patients, due to susceptible isolates of the designated bacteria in the conditions lis...',
@@ -17,7 +17,7 @@ export const FALLBACK_MEDICINES = [
     stock: 45,
   },
   {
-    id: '6a392fef9669b4e382c3721a',
+    id: '6a3b5549822c3efd7a002dd9',
     name: 'Atomoxetine 40mg',
     price: 110,
     description: '1 INDICATIONS AND USAGE Atomoxetine capsule is a selective norepinephrine reuptake inhibitor indicated for the treatment of Attention-Deficit/Hyperactivity Disorder (ADHD). ( 1.1 ) 1.1 Attention-Deficit/Hyperactivity...',
@@ -32,7 +32,7 @@ export const FALLBACK_MEDICINES = [
     stock: 10,
   },
   {
-    id: '6a392fef9669b4e382c3721e',
+    id: '6a3b5549822c3efd7a002ddd',
     name: 'Azithromycin Capsule 250mg',
     price: 95,
     description: '1 INDICATIONS AND USAGE Azithromycin is a macrolide antibacterial drug indicated for the treatment of patients with mild to moderate infections caused by susceptible strains of the designated microorganisms in the spe...',
@@ -47,7 +47,7 @@ export const FALLBACK_MEDICINES = [
     stock: 25,
   },
   {
-    id: '6a392fef9669b4e382c37212',
+    id: '6a3b5549822c3efd7a002dd1',
     name: 'Celecoxib 200mg',
     price: 75,
     description: '1. INDICATIONS AND USAGE Celecoxib is indicated Celecoxib is a nonsteroidal anti-inflammatory drug indicated for: Osteoarthritis (OA) ( 1.1 ) Rheumatoid Arthritis (RA) ( 1.2 ) Juvenile Rheumatoid Arthritis (JRA) in pa...',
@@ -62,7 +62,7 @@ export const FALLBACK_MEDICINES = [
     stock: 25,
   },
   {
-    id: '6a392fef9669b4e382c3721d',
+    id: '6a3b5549822c3efd7a002ddc',
     name: 'Cephalexin 500mg',
     price: 38,
     description: '1 INDICATIONS AND USAGE Cephalexin capsules are a cephalosporin antibacterial drug indicated for the treatment of the following infections caused by susceptible isolates of designated bacteria: Respiratory tract infec...',
@@ -77,7 +77,7 @@ export const FALLBACK_MEDICINES = [
     stock: 70,
   },
   {
-    id: '6a392fef9669b4e382c37214',
+    id: '6a3b5549822c3efd7a002dd3',
     name: 'Clindamycin 300mg',
     price: 82,
     description: 'INDICATIONS AND USAGE Clindamycin phosphate topical lotion is indicated in the treatment of acne vulgaris. In view of the potential for diarrhea, bloody diarrhea and pseudomembranous colitis, the physician should cons...',
@@ -92,7 +92,7 @@ export const FALLBACK_MEDICINES = [
     stock: 20,
   },
   {
-    id: '6a392fef9669b4e382c37213',
+    id: '6a3b5549822c3efd7a002dd2',
     name: 'Doxycycline 100mg',
     price: 45,
     description: 'INDICATIONS AND USAGE To reduce the development of drug-resistant bacteria and maintain effectiveness of doxycycline and other antibacterial drugs, doxycycline should be used only to treat or prevent infections that a...',
@@ -107,7 +107,7 @@ export const FALLBACK_MEDICINES = [
     stock: 60,
   },
   {
-    id: '6a392fef9669b4e382c37210',
+    id: '6a3b5549822c3efd7a002dcf',
     name: 'Duloxetine 30mg',
     price: 58,
     description: '1 INDICATIONS AND USAGE Duloxetine delayed-release capsules is indicated for the treatment of: Major depressive disorder in adults Generalized anxiety disorder in adults and pediatric patients 7 years of age and older...',
@@ -122,7 +122,7 @@ export const FALLBACK_MEDICINES = [
     stock: 40,
   },
   {
-    id: '6a392fef9669b4e382c3721b',
+    id: '6a3b5549822c3efd7a002dda',
     name: 'Fluconazole 150mg',
     price: 45,
     description: 'INDICATIONS AND USAGE Fluconazole tablets are indicated for the treatment of: Vaginal candidiasis (vaginal yeast infections due to Candida ). Oropharyngeal and esophageal candidiasis. In open noncomparative studies of...',
@@ -137,7 +137,7 @@ export const FALLBACK_MEDICINES = [
     stock: 90,
   },
   {
-    id: '6a392fef9669b4e382c3720f',
+    id: '6a3b5549822c3efd7a002dce',
     name: 'Fluoxetine 20mg',
     price: 35,
     description: '1 INDICATIONS AND USAGE Fluoxetine is indicated for the treatment of: Acute and maintenance treatment of Major Depressive Disorder [see Clinical Studies (14.1) ] . Acute and maintenance treatment of obsessions and com...',
@@ -152,7 +152,7 @@ export const FALLBACK_MEDICINES = [
     stock: 80,
   },
   {
-    id: '6a392fef9669b4e382c37215',
+    id: '6a3b5549822c3efd7a002dd4',
     name: 'Gabapentin Capsule 300mg',
     price: 55,
     description: '1 INDICATIONS AND USAGE Gabapentin Capsules, USP are indicated for: Management of postherpetic neuralgia in adults Adjunctive therapy in the treatment of partial onset seizures, with and without secondary generalizati...',
@@ -167,7 +167,7 @@ export const FALLBACK_MEDICINES = [
     stock: 50,
   },
   {
-    id: '6a392fef9669b4e382c3721f',
+    id: '6a3b5549822c3efd7a002dde',
     name: 'Itraconazole 100mg',
     price: 125,
     description: 'INDICATIONS AND USAGE Itraconazole capsules are indicated for the treatment of the following fungal infections in immunocompromised and non-immunocompromised patients: 1. Blastomycosis, pulmonary and extrapulmonary 2....',
@@ -182,7 +182,7 @@ export const FALLBACK_MEDICINES = [
     stock: 15,
   },
   {
-    id: '6a392fef9669b4e382c3721c',
+    id: '6a3b5549822c3efd7a002ddb',
     name: 'Lansoprazole 30mg',
     price: 52,
     description: '1 INDICATIONS AND USAGE Lansoprazole delayed-release capsules are a proton pump inhibitor (PPI) indicated for the: Treatment of active duodenal ulcer in adults ( 1.1 ) Eradication of H. pylori to reduce the risk of du...',
@@ -197,7 +197,7 @@ export const FALLBACK_MEDICINES = [
     stock: 55,
   },
   {
-    id: '6a392fef9669b4e382c37218',
+    id: '6a3b5549822c3efd7a002dd7',
     name: 'Minocycline 50mg',
     price: 92,
     description: 'INDICATIONS AND USAGE Minocycline hydrochloride capsules USP are indicated in the treatment of the following infections due to susceptible strains of the designated microorganisms: Rocky Mountain spotted fever, typhus...',
@@ -212,7 +212,7 @@ export const FALLBACK_MEDICINES = [
     stock: 15,
   },
   {
-    id: '6a392fef9669b4e382c37217',
+    id: '6a3b5549822c3efd7a002dd6',
     name: 'Nitrofurantoin 100mg',
     price: 68,
     description: '1 INDICATIONS & USAGE Nitrofurantoin is indicated in adults and pediatric patients 1 month of age and older for the treatment of urinary tract infections due to susceptible strains of Escherichia coli , Enterococcus s...',
@@ -227,7 +227,7 @@ export const FALLBACK_MEDICINES = [
     stock: 30,
   },
   {
-    id: '6a392fef9669b4e382c3720d',
+    id: '6a3b5549822c3efd7a002dcc',
     name: 'Omeprazole 20mg',
     price: 48,
     description: 'Use(s) treats frequent heartburn (occurs 2 or more days a week) not intended for immediate relief of heartburn; this drug may take 1 to 4 days for full effect',
@@ -242,7 +242,7 @@ export const FALLBACK_MEDICINES = [
     stock: 60,
   },
   {
-    id: '6a392fef9669b4e382c37219',
+    id: '6a3b5549822c3efd7a002dd8',
     name: 'Pregabalin 75mg',
     price: 72,
     description: '1 INDICATIONS AND USAGE Pregabalin capsules are indicated for: Management of neuropathic pain associated with diabetic peripheral neuropathy Management of postherpetic neuralgia Adjunctive therapy for the treatment of...',
@@ -257,7 +257,7 @@ export const FALLBACK_MEDICINES = [
     stock: 40,
   },
   {
-    id: '6a392fef9669b4e382c37216',
+    id: '6a3b5549822c3efd7a002dd5',
     name: 'Tamsulosin Capsule 0.4mg',
     price: 58,
     description: '1 INDICATIONS AND USAGE Tamsulosin hydrochloride capsules are indicated for the treatment of the signs and symptoms of benign prostatic hyperplasia (BPH) [see Clinical Studies (14)]. Tamsulosin hydrochloride capsules...',
@@ -272,7 +272,7 @@ export const FALLBACK_MEDICINES = [
     stock: 45,
   },
   {
-    id: '6a392fef9669b4e382c37211',
+    id: '6a3b5549822c3efd7a002dd0',
     name: 'Venlafaxine 75mg',
     price: 62,
     description: 'INDICATIONS AND USAGE Venlafaxine tablets, USP are indicated for the treatment of major depressive disorder. The efficacy of venlafaxine tablets, USP in the treatment of major depressive disorder was established in 6...',
@@ -287,7 +287,7 @@ export const FALLBACK_MEDICINES = [
     stock: 35,
   },
   {
-    id: '6a392fef9669b4e382c37220',
+    id: '6a3b5549822c3efd7a002ddf',
     name: 'Vitamin D3 60K',
     price: 30,
     description: 'INDICATIONS AND USAGE Ergocalciferol is indicated for use in the treatment of hypoparathyroidism, refractory rickets, also known as vitamin D resistant rickets, and familial hypophosphatemia.',
@@ -302,7 +302,7 @@ export const FALLBACK_MEDICINES = [
     stock: 200,
   },
   {
-    id: '6a392fef9669b4e382c3723a',
+    id: '6a3b5549822c3efd7a002df9',
     name: 'Adapalene Gel 0.1%',
     price: 210,
     description: '1 INDICATIONS AND USAGE Adapalene and benzoyl peroxide gel 0.1% / 2.5% is indicated for the topical treatment of acne vulgaris in patients 9 years of age and older. Adapalene and benzoyl peroxide gel 0.1% / 2.5% is a...',
@@ -317,7 +317,7 @@ export const FALLBACK_MEDICINES = [
     stock: 20,
   },
   {
-    id: '6a392fef9669b4e382c37245',
+    id: '6a3b5549822c3efd7a002e04',
     name: 'Antiseptic Ointment',
     price: 65,
     description: 'Uses First aid to help prevent infection in minor cuts scrapes burns',
@@ -332,7 +332,7 @@ export const FALLBACK_MEDICINES = [
     stock: 120,
   },
   {
-    id: '6a392fef9669b4e382c37243',
+    id: '6a3b5549822c3efd7a002e02',
     name: 'Beclomethasone Dipropionate',
     price: 45,
     description: '1 INDICATIONS AND USAGE QVAR REDIHALER is indicated in the maintenance treatment of asthma as prophylactic therapy in adults and pediatric patients 4 years of age and older. Limitations of Use: QVAR REDIHALER is not i...',
@@ -347,7 +347,7 @@ export const FALLBACK_MEDICINES = [
     stock: 110,
   },
   {
-    id: '6a392fef9669b4e382c3723b',
+    id: '6a3b5549822c3efd7a002dfa',
     name: 'Benzoyl Peroxide Gel 5%',
     price: 125,
     description: 'Uses For the treatment and management of acne Penetrates pores to eliminate most acne and blemishes Helps prevent development of new acne blemishes and blackheads',
@@ -362,7 +362,7 @@ export const FALLBACK_MEDICINES = [
     stock: 45,
   },
   {
-    id: '6a392fef9669b4e382c3723c',
+    id: '6a3b5549822c3efd7a002dfb',
     name: 'Betamethasone Skin Cream',
     price: 38,
     description: '1 INDICATIONS AND USAGE Betamethasone dipropionate cream (augmented) is a corticosteroid indicated for the relief of the inflammatory and pruritic manifestations of corticosteroid-responsive dermatoses in patients 13...',
@@ -377,7 +377,7 @@ export const FALLBACK_MEDICINES = [
     stock: 90,
   },
   {
-    id: '6a392fef9669b4e382c37247',
+    id: '6a3b5549822c3efd7a002e06',
     name: 'Calamine Lotion',
     price: 88,
     description: 'Uses temporarily relieves pain and itching associated with: insect bites rashes minor skin irritations minor cuts dries the oozing and weeping of poison ivy, poison oak and poison sumac',
@@ -392,7 +392,7 @@ export const FALLBACK_MEDICINES = [
     stock: 85,
   },
   {
-    id: '6a392fef9669b4e382c37244',
+    id: '6a3b5549822c3efd7a002e03',
     name: 'Clobetasol Propionate Ointment',
     price: 58,
     description: 'INDICATIONS AND USAGE Clobetasol propionate ointment USP, 0.05% is super-high potency corticosteroid formulations indicated for the relief of the inflammatory and pruritic manifestations of corticosteroid-responsive d...',
@@ -407,7 +407,7 @@ export const FALLBACK_MEDICINES = [
     stock: 95,
   },
   {
-    id: '6a392fef9669b4e382c37235',
+    id: '6a3b5549822c3efd7a002df4',
     name: 'Clotrimazole Cream',
     price: 68,
     description: 'Uses Cures athlete’s foot (tinea pedis), jock itch (tinea cruris), ringworm (tinea corporis). Relieves the itching, irritation, redness, scaling and discomfort which can accompany these conditions.',
@@ -422,7 +422,7 @@ export const FALLBACK_MEDICINES = [
     stock: 40,
   },
   {
-    id: '6a392fef9669b4e382c3723d',
+    id: '6a3b5549822c3efd7a002dfc',
     name: 'Fusidic Acid Cream',
     price: 155,
     description: 'Commonly used fusidic acid medication. Consult a pharmacist before use.',
@@ -437,7 +437,7 @@ export const FALLBACK_MEDICINES = [
     stock: 30,
   },
   {
-    id: '6a392fef9669b4e382c37237',
+    id: '6a3b5549822c3efd7a002df6',
     name: 'Hydrocortisone Cream 1%',
     price: 42,
     description: 'Uses • temporarily relieves itching associated with minor skin irritations, inflammation, and rashes due to: • eczema • psoriasis • poison ivy, oak, sumac • insect bites • detergents • jewelry • cosmetics • soaps • se...',
@@ -452,7 +452,7 @@ export const FALLBACK_MEDICINES = [
     stock: 100,
   },
   {
-    id: '6a392fef9669b4e382c37239',
+    id: '6a3b5549822c3efd7a002df8',
     name: 'Ketoconazole Cream 2%',
     price: 115,
     description: 'INDICATIONS & USAGE Ketoconazole shampoo, 2% is indicated for the treatment of tinea (pityriasis) versicolor caused by or presumed to be caused by Pityrosporum orbiculare (also known as Malassezia furfur or M. orbicul...',
@@ -467,7 +467,7 @@ export const FALLBACK_MEDICINES = [
     stock: 35,
   },
   {
-    id: '6a392fef9669b4e382c37241',
+    id: '6a3b5549822c3efd7a002e00',
     name: 'Miconazole Nitrate Cream',
     price: 72,
     description: 'Uses for the treatment of most athlete\'s foot (tinea pedis), jock itch (tinea cruris), ringworm (tinea corporis) relieves most itching, scaling, cracking, burning, redness, soreness, irritation, discomfort and chafing...',
@@ -482,7 +482,7 @@ export const FALLBACK_MEDICINES = [
     stock: 75,
   },
   {
-    id: '6a392fef9669b4e382c37238',
+    id: '6a3b5549822c3efd7a002df7',
     name: 'Mupirocin Ointment',
     price: 145,
     description: '1 INDICATIONS AND USAGE Mupirocin cream is indicated for the treatment of secondarily infected traumatic skin lesions (up to 10 cm in length or 100 cm 2 in area) due to susceptible isolates of Staphylococcus aureus (S...',
@@ -497,7 +497,7 @@ export const FALLBACK_MEDICINES = [
     stock: 25,
   },
   {
-    id: '6a392fef9669b4e382c37236',
+    id: '6a3b5549822c3efd7a002df5',
     name: 'Pain Relief Gel',
     price: 85,
     description: 'Uses for the temporary relief of arthritis pain ONLY in the following areas: hand, wrist, elbow (upper body areas) foot, ankle, knee (lower body areas) this product may take up to 7 days to work for arthritis pain; it...',
@@ -512,7 +512,7 @@ export const FALLBACK_MEDICINES = [
     stock: 55,
   },
   {
-    id: '6a392fef9669b4e382c3723f',
+    id: '6a3b5549822c3efd7a002dfe',
     name: 'Permethrin Cream 5%',
     price: 95,
     description: 'Use treats head lice',
@@ -527,7 +527,7 @@ export const FALLBACK_MEDICINES = [
     stock: 60,
   },
   {
-    id: '6a392fef9669b4e382c37240',
+    id: '6a3b5549822c3efd7a002dff',
     name: 'Silver Sulfadiazine Burn Cream',
     price: 110,
     description: 'INDICATIONS AND USAGE Silver sulfadiazine cream, USP 1% is a topical antimicrobial drug indicated as an adjunct for the prevention and treatment of wound sepsis in patients with second and third degree burns.',
@@ -542,7 +542,7 @@ export const FALLBACK_MEDICINES = [
     stock: 50,
   },
   {
-    id: '6a392fef9669b4e382c37248',
+    id: '6a3b5549822c3efd7a002e07',
     name: 'Soothing Aloe Vera Gel',
     price: 120,
     description: 'Uses reduces underarm wetness',
@@ -557,7 +557,7 @@ export const FALLBACK_MEDICINES = [
     stock: 70,
   },
   {
-    id: '6a392fef9669b4e382c3723e',
+    id: '6a3b5549822c3efd7a002dfd',
     name: 'Terbinafine Cream 1%',
     price: 135,
     description: '1 INDICATIONS AND USAGE Terbinafine tablets are indicated for the treatment of onychomycosis of the toenail or fingernail due to dermatophytes (tinea unguium). Prior to initiating treatment, appropriate nail specimens...',
@@ -572,7 +572,7 @@ export const FALLBACK_MEDICINES = [
     stock: 40,
   },
   {
-    id: '6a392fef9669b4e382c37246',
+    id: '6a3b5549822c3efd7a002e05',
     name: 'Thrombophob Gel',
     price: 142,
     description: '1 INDICATIONS AND USAGE Heparin Sodium Injection is indicated for: Prophylaxis and treatment of venous thrombosis and pulmonary embolism; Prevention of postoperative deep venous thrombosis and pulmonary embolism in pa...',
@@ -587,7 +587,7 @@ export const FALLBACK_MEDICINES = [
     stock: 30,
   },
   {
-    id: '6a392fef9669b4e382c37242',
+    id: '6a3b5549822c3efd7a002e01',
     name: 'Tretinoin Cream 0.025%',
     price: 185,
     description: '1 INDICATIONS AND USAGE Tretinoin capsules are indicated for the induction of remission in adults and pediatric patients 1 year of age and older with acute promyelocytic leukemia (APL) characterized by the presence of...',
@@ -602,7 +602,7 @@ export const FALLBACK_MEDICINES = [
     stock: 25,
   },
   {
-    id: '6a392fef9669b4e382c3725a',
+    id: '6a3b5549822c3efd7a002e19',
     name: 'Antiseptic Eye Wash',
     price: 78,
     description: 'Uses ● Antimicrobial action: Effectively targets and eliminates harmful bacteria to maintain natural balance. ● UTI Defense: Actively helps to prevent urinary tract infections. ● Odor Control: Neutralizes odors, leavi...',
@@ -617,7 +617,7 @@ export const FALLBACK_MEDICINES = [
     stock: 60,
   },
   {
-    id: '6a392fef9669b4e382c3724d',
+    id: '6a3b5549822c3efd7a002e0c',
     name: 'Brimonidine Eye Drops 0.2%',
     price: 210,
     description: 'Use relieves redness of the eye due to minor eye irritations',
@@ -632,7 +632,7 @@ export const FALLBACK_MEDICINES = [
     stock: 25,
   },
   {
-    id: '6a392fef9669b4e382c3724b',
+    id: '6a3b5549822c3efd7a002e0a',
     name: 'Cipro Ear/Eye Drops',
     price: 35,
     description: 'INDICATIONS AND USAGE Ciprofloxacin Ophthalmic Solution is indicated for the treatment of infections caused by susceptible strains of the designated microorganisms in the conditions listed below: Corneal Ulcers: Pseud...',
@@ -647,7 +647,7 @@ export const FALLBACK_MEDICINES = [
     stock: 150,
   },
   {
-    id: '6a392fef9669b4e382c37257',
+    id: '6a3b5549822c3efd7a002e16',
     name: 'Dorzolamide Eye Drops',
     price: 255,
     description: '1 INDICATIONS AND USAGE Dorzolamide Hydrochloride Ophthalmic Solution is indicated in the treatment of elevated intraocular pressure in patients with ocular hypertension or open-angle glaucoma. Dorzolamide Hydrochlori...',
@@ -662,7 +662,7 @@ export const FALLBACK_MEDICINES = [
     stock: 20,
   },
   {
-    id: '6a392fef9669b4e382c3725b',
+    id: '6a3b5549822c3efd7a002e1a',
     name: 'Ear Relief Drops',
     price: 110,
     description: 'INDICATIONS AND USAGE Fluocinolone Acetonide Topical Solution is indicated for the relief of the inflammatory and pruritic manifestations of corticosteroid-responsive dermatoses.',
@@ -677,7 +677,7 @@ export const FALLBACK_MEDICINES = [
     stock: 40,
   },
   {
-    id: '6a392fef9669b4e382c37259',
+    id: '6a3b5549822c3efd7a002e18',
     name: 'Ear Wax Dissolvent Drops',
     price: 65,
     description: 'Uses Cures athlete’s foot (tinea pedis), jock itch (tinea cruris), ringworm (tinea corporis). Relieves the itching, irritation, redness, scaling and discomfort which can accompany these conditions.',
@@ -692,7 +692,7 @@ export const FALLBACK_MEDICINES = [
     stock: 85,
   },
   {
-    id: '6a392fef9669b4e382c37255',
+    id: '6a3b5549822c3efd7a002e14',
     name: 'Flurbiprofen Eye Drops',
     price: 115,
     description: 'INDICATIONS AND USAGE Flurbiprofen sodium ophthalmic solution is indicated for the inhibition of intraoperative miosis.',
@@ -707,7 +707,7 @@ export const FALLBACK_MEDICINES = [
     stock: 35,
   },
   {
-    id: '6a392fef9669b4e382c37254',
+    id: '6a3b5549822c3efd7a002e13',
     name: 'Gentamicin Eye/Ear Drops',
     price: 22,
     description: 'INDICATIONS AND USAGE: To reduce the development of drug-resistant bacteria and maintain the effectiveness of Gentamicin Injection, USP and other antibacterial drugs, Gentamicin Injection, USP should be used only to t...',
@@ -722,7 +722,7 @@ export const FALLBACK_MEDICINES = [
     stock: 180,
   },
   {
-    id: '6a392fef9669b4e382c3724e',
+    id: '6a3b5549822c3efd7a002e0d',
     name: 'Loteprednol Eye Drops',
     price: 345,
     description: 'INDICATIONS AND USAGE Loteprednol etabonate is indicated for the treatment of steroid responsive inflammatory conditions of the palpebral and bulbar conjunctiva, cornea and anterior segment of the globe such as allerg...',
@@ -737,7 +737,7 @@ export const FALLBACK_MEDICINES = [
     stock: 15,
   },
   {
-    id: '6a392fef9669b4e382c37249',
+    id: '6a3b5549822c3efd7a002e08',
     name: 'Lubricating Eye Drops',
     price: 145,
     description: 'Uses For the temporary relief of burning and irritation due to dryness of the eye. For the temporary relief of discomfort due to minor irritations of the eye or from exposure to wind and sun. For use as a lubricant to...',
@@ -752,7 +752,7 @@ export const FALLBACK_MEDICINES = [
     stock: 50,
   },
   {
-    id: '6a392fef9669b4e382c3724f',
+    id: '6a3b5549822c3efd7a002e0e',
     name: 'Moxifloxacin Eye Drops',
     price: 125,
     description: '1 INDICATIONS AND USAGE Moxifloxacin tablets are a fluoroquinolone antibacterial indicated for treating infections in adults 18 years of age and older caused by designated susceptible bacteria, in the conditions liste...',
@@ -767,7 +767,7 @@ export const FALLBACK_MEDICINES = [
     stock: 65,
   },
   {
-    id: '6a392fef9669b4e382c3724c',
+    id: '6a3b5549822c3efd7a002e0b',
     name: 'Naphazoline Eye Drops',
     price: 48,
     description: 'Uses relieves redness of the eye due to minor eye irritations for use as a protectant against further irritation or to relieve dryness of the eye for the temporary relief of burning and irritation due to dryness of th...',
@@ -782,7 +782,7 @@ export const FALLBACK_MEDICINES = [
     stock: 120,
   },
   {
-    id: '6a392fef9669b4e382c37250',
+    id: '6a3b5549822c3efd7a002e0f',
     name: 'Nasal Decongestant Drops',
     price: 55,
     description: 'Adults and children 7 years and older: Spray into the nose 3 times a day',
@@ -797,7 +797,7 @@ export const FALLBACK_MEDICINES = [
     stock: 95,
   },
   {
-    id: '6a392fef9669b4e382c37252',
+    id: '6a3b5549822c3efd7a002e11',
     name: 'Ofloxacin Ear Drops',
     price: 42,
     description: 'INDICATIONS AND USAGE Ofloxacin Otic Solution 0.3% is indicated for the treatment of infections caused by susceptible isolates of the designated microorganisms in the specific conditions listed below: Otitis Externa i...',
@@ -812,7 +812,7 @@ export const FALLBACK_MEDICINES = [
     stock: 110,
   },
   {
-    id: '6a392fef9669b4e382c37256',
+    id: '6a3b5549822c3efd7a002e15',
     name: 'Olopatadine Eye Drops',
     price: 195,
     description: 'Uses temporarily relieves itchy and red eyes due to pollen, ragweed, grass, animal hair and dander',
@@ -827,7 +827,7 @@ export const FALLBACK_MEDICINES = [
     stock: 30,
   },
   {
-    id: '6a392fef9669b4e382c37253',
+    id: '6a3b5549822c3efd7a002e12',
     name: 'Prednisolone Eye Drops',
     price: 85,
     description: 'INDICATIONS AND USAGE PRED FORTE ® is indicated for the treatment of steroid-responsive inflammation of the palpebral and bulbar conjunctiva, cornea, and anterior segment of the globe.',
@@ -842,7 +842,7 @@ export const FALLBACK_MEDICINES = [
     stock: 55,
   },
   {
-    id: '6a392fef9669b4e382c3725c',
+    id: '6a3b5549822c3efd7a002e1b',
     name: 'Premium Tear Substitute',
     price: 420,
     description: 'Uses reduces underarm wetness',
@@ -857,7 +857,7 @@ export const FALLBACK_MEDICINES = [
     stock: 20,
   },
   {
-    id: '6a392fef9669b4e382c37251',
+    id: '6a3b5549822c3efd7a002e10',
     name: 'Saline Nasal Drops',
     price: 28,
     description: 'INDICATIONS AND USAGE This sterile, nonpyrogenic electrolyte solution is indicated for all general irrigation, washing, rinsing and dilution purposes including blood cell washing (when used in conjunction with automat...',
@@ -872,7 +872,7 @@ export const FALLBACK_MEDICINES = [
     stock: 200,
   },
   {
-    id: '6a392fef9669b4e382c3724a',
+    id: '6a3b5549822c3efd7a002e09',
     name: 'Timolol Eye Drops 0.5%',
     price: 92,
     description: '1 INDICATIONS & USAGE Dorzolamide hydrochloride and timolol maleate ophthalmic solution is indicated for the reduction of elevated intraocular pressure (IOP) in patients with open-angle glaucoma or ocular hypertension...',
@@ -887,7 +887,7 @@ export const FALLBACK_MEDICINES = [
     stock: 40,
   },
   {
-    id: '6a392fef9669b4e382c37258',
+    id: '6a3b5549822c3efd7a002e17',
     name: 'Tobramycin Eye Drops',
     price: 135,
     description: 'INDICATIONS AND USAGE Tobramycin injection is indicated for the treatment of serious bacterial infections caused by susceptible strains of the designated microorganisms in the diseases listed below: Septicemia in the...',
@@ -902,7 +902,7 @@ export const FALLBACK_MEDICINES = [
     stock: 45,
   },
   {
-    id: '6a392fef9669b4e382c3726a',
+    id: '6a3b5549822c3efd7a002e29',
     name: 'Atropine Sulphate',
     price: 14,
     description: '1 INDICATIONS & USAGE Atropine Sulfate Injection, USP, is indicated for temporary blockade of severe or life threatening muscarinic effects, e.g., as an antisialagogue, an antivagal agent, an antidote for organophosph...',
@@ -917,7 +917,7 @@ export const FALLBACK_MEDICINES = [
     stock: 150,
   },
   {
-    id: '6a392fef9669b4e382c3725e',
+    id: '6a3b5549822c3efd7a002e1d',
     name: 'Ceftriaxone Injection 1g',
     price: 65,
     description: 'INDICATIONS AND USAGE Before instituting treatment with ceftriaxone, appropriate specimens should be obtained for isolation of the causative organism and for determination of its susceptibility to the drug. Therapy ma...',
@@ -932,7 +932,7 @@ export const FALLBACK_MEDICINES = [
     stock: 45,
   },
   {
-    id: '6a392fef9669b4e382c37263',
+    id: '6a3b5549822c3efd7a002e22',
     name: 'Clindamycin Injection',
     price: 125,
     description: 'INDICATIONS AND USAGE Clindamycin phosphate topical lotion is indicated in the treatment of acne vulgaris. In view of the potential for diarrhea, bloody diarrhea and pseudomembranous colitis, the physician should cons...',
@@ -947,7 +947,7 @@ export const FALLBACK_MEDICINES = [
     stock: 35,
   },
   {
-    id: '6a392fef9669b4e382c37266',
+    id: '6a3b5549822c3efd7a002e25',
     name: 'Dexamethasone Injection',
     price: 10,
     description: 'INDICATIONS AND USAGE A l l ergic States: Control of severe or incapacitating a llergic conditions intractable to adequate trials of conventional treatment in asthma, atopic dermatitis, contact dermatitis, drug hypers...',
@@ -962,7 +962,7 @@ export const FALLBACK_MEDICINES = [
     stock: 300,
   },
   {
-    id: '6a392fef9669b4e382c3725f',
+    id: '6a3b5549822c3efd7a002e1e',
     name: 'Diclofenac Injection',
     price: 15,
     description: 'Uses for the temporary relief of arthritis pain ONLY in the following areas: hand, wrist, elbow (upper body areas) foot, ankle, knee (lower body areas) this product may take up to 7 days to work for arthritis pain; it...',
@@ -977,7 +977,7 @@ export const FALLBACK_MEDICINES = [
     stock: 200,
   },
   {
-    id: '6a392fef9669b4e382c37262',
+    id: '6a3b5549822c3efd7a002e21',
     name: 'Enoxaparin Prefilled Syringe',
     price: 580,
     description: '1 INDICATIONS AND USAGE Enoxaparin sodium injection is a low molecular weight heparin (LMWH) indicated for: Prophylaxis of deep vein thrombosis (DVT) in abdominal surgery, hip replacement surgery, knee replacement sur...',
@@ -992,7 +992,7 @@ export const FALLBACK_MEDICINES = [
     stock: 12,
   },
   {
-    id: '6a392fef9669b4e382c37264',
+    id: '6a3b5549822c3efd7a002e23',
     name: 'Furosemide Injection',
     price: 12,
     description: 'INDICATIONS AND USAGE Edema Furosemide tablets are indicated in adults and pediatric patients for the treatment of edema associated with congestive heart failure, cirrhosis of the liver, and renal disease, including t...',
@@ -1007,7 +1007,7 @@ export const FALLBACK_MEDICINES = [
     stock: 250,
   },
   {
-    id: '6a392fef9669b4e382c37268',
+    id: '6a3b5549822c3efd7a002e27',
     name: 'Gentamicin Injection 80mg',
     price: 15,
     description: 'INDICATIONS AND USAGE: To reduce the development of drug-resistant bacteria and maintain the effectiveness of Gentamicin Injection, USP and other antibacterial drugs, Gentamicin Injection, USP should be used only to t...',
@@ -1022,7 +1022,7 @@ export const FALLBACK_MEDICINES = [
     stock: 220,
   },
   {
-    id: '6a392fef9669b4e382c37269',
+    id: '6a3b5549822c3efd7a002e28',
     name: 'Heparin Sodium Injection',
     price: 245,
     description: '1 INDICATIONS AND USAGE Heparin Sodium Injection is indicated for: Prophylaxis and treatment of venous thrombosis and pulmonary embolism; Prevention of postoperative deep venous thrombosis and pulmonary embolism in pa...',
@@ -1037,7 +1037,7 @@ export const FALLBACK_MEDICINES = [
     stock: 30,
   },
   {
-    id: '6a392fef9669b4e382c3725d',
+    id: '6a3b5549822c3efd7a002e1c',
     name: 'Insulin Glargine',
     price: 450,
     description: '1 INDICATIONS AND USAGE BASAGLAR ® is indicated to improve glycemic control in adults and pediatric patients with type 1 diabetes mellitus and in adults with type 2 diabetes mellitus. BASAGLAR ® is a long-acting human...',
@@ -1052,7 +1052,7 @@ export const FALLBACK_MEDICINES = [
     stock: 18,
   },
   {
-    id: '6a392fef9669b4e382c37265',
+    id: '6a3b5549822c3efd7a002e24',
     name: 'Iron Sucrose Injection',
     price: 320,
     description: '1 INDICATIONS AND USAGE Iron sucrose injection is indicated for the treatment of iron deficiency anemia (IDA) in patients with chronic kidney disease (CKD). Iron sucrose injection is an iron replacement product indica...',
@@ -1067,7 +1067,7 @@ export const FALLBACK_MEDICINES = [
     stock: 25,
   },
   {
-    id: '6a392fef9669b4e382c3726f',
+    id: '6a3b5549822c3efd7a002e2e',
     name: 'Levofloxacin Intravenous',
     price: 185,
     description: '1 INDICATIONS & USAGE Levofloxacin is a fluoroquinolone antibacterial indicated in adults (18 years of age and older) with infections caused by designated, susceptible bacteria and in pediatric patients where indicate...',
@@ -1082,7 +1082,7 @@ export const FALLBACK_MEDICINES = [
     stock: 30,
   },
   {
-    id: '6a392fef9669b4e382c3726c',
+    id: '6a3b5549822c3efd7a002e2b',
     name: 'Meropenem Injection 1g',
     price: 850,
     description: '1 INDICATIONS AND USAGE Meropenem for Injection, USP is a penem antibacterial indicated for the treatment of: Complicated skin and skin structure infections (adult patients and pediatric patients 3 months of age and o...',
@@ -1097,7 +1097,7 @@ export const FALLBACK_MEDICINES = [
     stock: 8,
   },
   {
-    id: '6a392fef9669b4e382c3726e',
+    id: '6a3b5549822c3efd7a002e2d',
     name: 'Metoclopramide Injection',
     price: 12,
     description: 'INDICATIONS AND USAGE The use of Metoclopramide Oral Solution is recommended for adults only. Therapy should not exceed 12 weeks in duration. Symptomatic Gastroesophageal Reflux Metoclopramide Oral Solution is indicat...',
@@ -1112,7 +1112,7 @@ export const FALLBACK_MEDICINES = [
     stock: 180,
   },
   {
-    id: '6a392fef9669b4e382c37267',
+    id: '6a3b5549822c3efd7a002e26',
     name: 'Ondansetron Injection',
     price: 18,
     description: '1 INDICATIONS AND USAGE Ondansetron tablets are indicated for the prevention of nausea and vomiting associated with: highly emetogenic cancer chemotherapy, including cisplatin greater than or equal to 50 mg/m 2 . init...',
@@ -1127,7 +1127,7 @@ export const FALLBACK_MEDICINES = [
     stock: 180,
   },
   {
-    id: '6a392fef9669b4e382c37260',
+    id: '6a3b5549822c3efd7a002e1f',
     name: 'Pantoprazole Injection',
     price: 62,
     description: '1 INDICATIONS AND USAGE Pantoprazole Sodium for Injection is indicated for treatment of: gastroesophageal reflux disease (GERD) and a history of erosive esophagitis (EE) for up to 10 days in adults. pathological hyper...',
@@ -1142,7 +1142,7 @@ export const FALLBACK_MEDICINES = [
     stock: 80,
   },
   {
-    id: '6a392fef9669b4e382c3726d',
+    id: '6a3b5549822c3efd7a002e2c',
     name: 'Piperacillin Tazobactam',
     price: 420,
     description: '1 INDICATIONS AND USAGE Piperacillin and tazobactam for injection, for intravenous use is a combination of piperacillin, a penicillin-class antibacterial and tazobactam, a β-lactamase inhibitor indicated for the treat...',
@@ -1157,7 +1157,7 @@ export const FALLBACK_MEDICINES = [
     stock: 20,
   },
   {
-    id: '6a392fef9669b4e382c37270',
+    id: '6a3b5549822c3efd7a002e2f',
     name: 'Tetanus Vaccine',
     price: 35,
     description: 'Commonly used tetanus toxoid medication. Consult a pharmacist before use.',
@@ -1172,7 +1172,7 @@ export const FALLBACK_MEDICINES = [
     stock: 100,
   },
   {
-    id: '6a392fef9669b4e382c3726b',
+    id: '6a3b5549822c3efd7a002e2a',
     name: 'Tranexamic Acid Injection',
     price: 95,
     description: '1 INDICATIONS AND USAGE Tranexamic acid injection, USP is indicated in patients with hemophilia for short-term use (2 to 8 days) to reduce or prevent hemorrhage and reduce the need for replacement therapy during and f...',
@@ -1187,7 +1187,7 @@ export const FALLBACK_MEDICINES = [
     stock: 55,
   },
   {
-    id: '6a392fef9669b4e382c37261',
+    id: '6a3b5549822c3efd7a002e20',
     name: 'Vit B12 (Methylcobalamin)',
     price: 28,
     description: 'INDICATIONS: PNV-DHA is a multivitamin/multimineral nutritional supplement indicated for use in the dietary management of patients with nutritional deficiencies or are in need of nutritional supplementation.',
@@ -1202,7 +1202,7 @@ export const FALLBACK_MEDICINES = [
     stock: 150,
   },
   {
-    id: '6a392fef9669b4e382c37231',
+    id: '6a3b5549822c3efd7a002df0',
     name: 'Albendazole Oral Suspension',
     price: 28,
     description: '1 INDICATIONS AND USAGE Albendazole is an anthelmintic drug indicated for: Treatment of parenchymal neurocysticercosis due to active lesions caused by larval forms of the pork tapeworm, Taenia solium . ( 1.1 ) Treatme...',
@@ -1217,7 +1217,7 @@ export const FALLBACK_MEDICINES = [
     stock: 150,
   },
   {
-    id: '6a392fef9669b4e382c3722c',
+    id: '6a3b5549822c3efd7a002deb',
     name: 'Alkalizer Syrup',
     price: 92,
     description: '1 INDICATIONS AND USAGE Potassium citrate extended-release tablets are a citrate salt of potassium indicated for the management of: Renal tubular acidosis (RTA) with calcium stones (1.1) Hypocitraturic calcium oxalate...',
@@ -1232,7 +1232,7 @@ export const FALLBACK_MEDICINES = [
     stock: 70,
   },
   {
-    id: '6a392fef9669b4e382c37223',
+    id: '6a3b5549822c3efd7a002de2',
     name: 'Ambroxol Syrup 30mg/5ml',
     price: 78,
     description: 'Commonly used ambroxol medication. Consult a pharmacist before use.',
@@ -1247,7 +1247,7 @@ export const FALLBACK_MEDICINES = [
     stock: 50,
   },
   {
-    id: '6a392fef9669b4e382c3722d',
+    id: '6a3b5549822c3efd7a002dec',
     name: 'Appetite Stimulant Syrup',
     price: 105,
     description: 'INDICATIONS AND USAGE: Perennial and seasonal allergic rhinitis, Vasomotor rhinitis, Allergic conjunctivitis due to inhalant allergens and foods. Mild, uncomplicated allergic skin manifestations of urticaria and angio...',
@@ -1262,7 +1262,7 @@ export const FALLBACK_MEDICINES = [
     stock: 40,
   },
   {
-    id: '6a392fef9669b4e382c37229',
+    id: '6a3b5549822c3efd7a002de8',
     name: 'Ayurvedic Cough Syrup',
     price: 110,
     description: 'Uses Uses: temporarily relieves cough due to minor throat and bronchial irritation as may occur with a cold helps loosen phlegm (mucus) and thin bronchial secretions to drain bronchial tubes.',
@@ -1277,7 +1277,7 @@ export const FALLBACK_MEDICINES = [
     stock: 45,
   },
   {
-    id: '6a392fef9669b4e382c37233',
+    id: '6a3b5549822c3efd7a002df2',
     name: 'B-Complex Syrup',
     price: 88,
     description: 'INDICATIONS Thiamine hydrochloride injection is effective for the treatment of thiamine deficiency or beriberi whether of the dry (major symptoms related to the nervous system) or wet (major symptoms related to the ca...',
@@ -1292,7 +1292,7 @@ export const FALLBACK_MEDICINES = [
     stock: 110,
   },
   {
-    id: '6a392fef9669b4e382c3722b',
+    id: '6a3b5549822c3efd7a002dea',
     name: 'Calcium Syrup with Vit D3',
     price: 135,
     description: 'Uses relieves acid indigestion heartburn sour stomach upset stomach associated with these symptoms',
@@ -1307,7 +1307,7 @@ export const FALLBACK_MEDICINES = [
     stock: 55,
   },
   {
-    id: '6a392fef9669b4e382c37221',
+    id: '6a3b5549822c3efd7a002de0',
     name: 'Cough Relief Syrup',
     price: 95,
     description: 'Uses temporarily relieves these symptoms due to a cold minor aches and pains headache nasal and sinus congestion sore throat cough due to minor throat and bronchial irritation temporarily reduces fever',
@@ -1322,7 +1322,7 @@ export const FALLBACK_MEDICINES = [
     stock: 35,
   },
   {
-    id: '6a392fef9669b4e382c37230',
+    id: '6a3b5549822c3efd7a002def',
     name: 'Domperidone Suspension',
     price: 55,
     description: 'Commonly used domperidone medication. Consult a pharmacist before use.',
@@ -1337,7 +1337,7 @@ export const FALLBACK_MEDICINES = [
     stock: 85,
   },
   {
-    id: '6a392fef9669b4e382c3722a',
+    id: '6a3b5549822c3efd7a002de9',
     name: 'Iron & Folic Acid Syrup',
     price: 175,
     description: 'Uses: See symptoms on front panel. Relieves hot flashes with headaches *',
@@ -1352,7 +1352,7 @@ export const FALLBACK_MEDICINES = [
     stock: 30,
   },
   {
-    id: '6a392fef9669b4e382c3722e',
+    id: '6a3b5549822c3efd7a002ded',
     name: 'Lactulose Oral Solution',
     price: 210,
     description: 'INDICATIONS AND USAGE For the prevention and treatment of portal-systemic encephalopathy, including the stages of hepatic pre-coma and coma. Controlled studies have shown that lactulose solution therapy reduces the bl...',
@@ -1367,7 +1367,7 @@ export const FALLBACK_MEDICINES = [
     stock: 20,
   },
   {
-    id: '6a392fef9669b4e382c37225',
+    id: '6a3b5549822c3efd7a002de4',
     name: 'Levocetirizine Syrup',
     price: 62,
     description: 'Uses temporarily relieves these symptoms due to hay fever or other respiratory allergies: runny nose sneezing itchy, watery eyes itching of the nose or throat',
@@ -1382,7 +1382,7 @@ export const FALLBACK_MEDICINES = [
     stock: 65,
   },
   {
-    id: '6a392fef9669b4e382c37232',
+    id: '6a3b5549822c3efd7a002df1',
     name: 'Metronidazole Suspension',
     price: 42,
     description: 'INDICATIONS AND USAGE Symptomatic Trichomoniasis. Metronidazole tablets are indicated for the treatment of T. vaginalis infection in females and males when the presence of the trichomonad has been confirmed by appropr...',
@@ -1397,7 +1397,7 @@ export const FALLBACK_MEDICINES = [
     stock: 95,
   },
   {
-    id: '6a392fef9669b4e382c37228',
+    id: '6a3b5549822c3efd7a002de7',
     name: 'Milk of Magnesia',
     price: 85,
     description: 'Uses relieves occasional constipation (irregularity) generally produces bowel movement in 1/2 to 6 hours',
@@ -1412,7 +1412,7 @@ export const FALLBACK_MEDICINES = [
     stock: 60,
   },
   {
-    id: '6a392fef9669b4e382c37234',
+    id: '6a3b5549822c3efd7a002df3',
     name: 'Mint Antacid Liquid',
     price: 75,
     description: 'Uses relieves heartburn sour stomach acid indigestion the symptoms referred to as gas',
@@ -1427,7 +1427,7 @@ export const FALLBACK_MEDICINES = [
     stock: 130,
   },
   {
-    id: '6a392fef9669b4e382c37227',
+    id: '6a3b5549822c3efd7a002de6',
     name: 'Multivitamin Health Tonic',
     price: 150,
     description: 'Indications and Usage: Folcyteine™ is indicated to provide vitamin supplement to men and women. Folic acid is effective in the treatment of megaloblastic anemias due to a deficiency of folic acid (as may be seen in tr...',
@@ -1442,7 +1442,7 @@ export const FALLBACK_MEDICINES = [
     stock: 40,
   },
   {
-    id: '6a392fef9669b4e382c3722f',
+    id: '6a3b5549822c3efd7a002dee',
     name: 'Ondansetron Drops',
     price: 48,
     description: '1 INDICATIONS AND USAGE Ondansetron tablets are indicated for the prevention of nausea and vomiting associated with: highly emetogenic cancer chemotherapy, including cisplatin greater than or equal to 50 mg/m 2 . init...',
@@ -1457,7 +1457,7 @@ export const FALLBACK_MEDICINES = [
     stock: 100,
   },
   {
-    id: '6a392fef9669b4e382c37222',
+    id: '6a3b5549822c3efd7a002de1',
     name: 'Paracetamol Pediatric Syrup',
     price: 45,
     description: 'Uses temporarily relieves minor aches and pains due to: headache the common cold backache minor pain of arthritis toothache muscular aches premenstrual and menstrual cramps temporarily reduces fever',
@@ -1472,7 +1472,7 @@ export const FALLBACK_MEDICINES = [
     stock: 120,
   },
   {
-    id: '6a392fef9669b4e382c37224',
+    id: '6a3b5549822c3efd7a002de3',
     name: 'Salbutamol Syrup',
     price: 35,
     description: '1 INDICATIONS AND USAGE Albuterol Sulfate HFA is a beta 2 -adrenergic agonist indicated for: Treatment or prevention of bronchospasm in adult and pediatric patients aged 4 years and older with reversible obstructive a...',
@@ -1487,7 +1487,7 @@ export const FALLBACK_MEDICINES = [
     stock: 80,
   },
   {
-    id: '6a392fef9669b4e382c37226',
+    id: '6a3b5549822c3efd7a002de5',
     name: 'Sucralfate Suspension',
     price: 120,
     description: 'INDICATIONS AND USAGE Sucralfate tablets are indicated in: Short-term treatment (up to 8 weeks) of active duodenal ulcer. While healing with sucralfate may occur during the first week or two, treatment should be conti...',
@@ -1502,7 +1502,7 @@ export const FALLBACK_MEDICINES = [
     stock: 25,
   },
   {
-    id: '6a392fef9669b4e382c37202',
+    id: '6a3b5549822c3efd7a002dc1',
     name: 'Albuterol Tablet 4mg',
     price: 28,
     description: '1 INDICATIONS AND USAGE Albuterol Sulfate HFA is a beta 2 -adrenergic agonist indicated for: Treatment or prevention of bronchospasm in adult and pediatric patients aged 4 years and older with reversible obstructive a...',
@@ -1517,7 +1517,7 @@ export const FALLBACK_MEDICINES = [
     stock: 50,
   },
   {
-    id: '6a392fef9669b4e382c371fd',
+    id: '6a3b5549822c3efd7a002dbc',
     name: 'Amlodipine 5mg',
     price: 40,
     description: '1 INDICATIONS AND USAGE Amlodipine besylate tablets are calcium channel blocker and may be used alone or in combination with other antihypertensive and antianginal agents for the treatment of: •Hypertension ( 1.1 ) о...',
@@ -1532,7 +1532,7 @@ export const FALLBACK_MEDICINES = [
     stock: 90,
   },
   {
-    id: '6a392fef9669b4e382c37205',
+    id: '6a3b5549822c3efd7a002dc4',
     name: 'Amoxicillin Tablet 500mg',
     price: 35,
     description: '1 INDICATIONS AND USAGE Amoxicillin and Clavulanate Potassium is indicated for the treatment of infections in adults and pediatric patients, due to susceptible isolates of the designated bacteria in the conditions lis...',
@@ -1547,7 +1547,7 @@ export const FALLBACK_MEDICINES = [
     stock: 100,
   },
   {
-    id: '6a392fef9669b4e382c371ff',
+    id: '6a3b5549822c3efd7a002dbe',
     name: 'Atorvastatin 20mg',
     price: 55,
     description: '1 INDICATIONS AND USAGE Atorvastatin calcium tablets are indicated: To reduce the risk of: Myocardial infarction (MI), stroke, revascularization procedures, and angina in adults with multiple risk factors for coronary...',
@@ -1562,7 +1562,7 @@ export const FALLBACK_MEDICINES = [
     stock: 65,
   },
   {
-    id: '6a392fef9669b4e382c371fb',
+    id: '6a3b5549822c3efd7a002dba',
     name: 'Cetirizine 10mg',
     price: 22,
     description: 'Uses temporarily relieves these symptoms due to hay fever or other upper respiratory allergies: runny nose sneezing itchy, watery eyes itching of the nose or throat',
@@ -1577,7 +1577,7 @@ export const FALLBACK_MEDICINES = [
     stock: 120,
   },
   {
-    id: '6a392fef9669b4e382c3720b',
+    id: '6a3b5549822c3efd7a002dca',
     name: 'Clopidogrel 75mg',
     price: 48,
     description: '1 INDICATIONS AND USAGE Clopidogrel tablets are a P2Y 12 platelet inhibitor indicated for: Acute coronary syndrome – For patients with non–ST-segment elevation ACS (unstable angina [UA]/non–ST-elevation myocardial inf...',
@@ -1592,7 +1592,7 @@ export const FALLBACK_MEDICINES = [
     stock: 60,
   },
   {
-    id: '6a392fef9669b4e382c3720a',
+    id: '6a3b5549822c3efd7a002dc9',
     name: 'Furosemide 40mg',
     price: 18,
     description: 'INDICATIONS AND USAGE Edema Furosemide tablets are indicated in adults and pediatric patients for the treatment of edema associated with congestive heart failure, cirrhosis of the liver, and renal disease, including t...',
@@ -1607,7 +1607,7 @@ export const FALLBACK_MEDICINES = [
     stock: 130,
   },
   {
-    id: '6a392fef9669b4e382c37204',
+    id: '6a3b5549822c3efd7a002dc3',
     name: 'Gabapentin 300mg',
     price: 60,
     description: '1 INDICATIONS AND USAGE Gabapentin Capsules, USP are indicated for: Management of postherpetic neuralgia in adults Adjunctive therapy in the treatment of partial onset seizures, with and without secondary generalizati...',
@@ -1622,7 +1622,7 @@ export const FALLBACK_MEDICINES = [
     stock: 40,
   },
   {
-    id: '6a392fef9669b4e382c371fa',
+    id: '6a3b5549822c3efd7a002db9',
     name: 'Ibuprofen 400mg',
     price: 32,
     description: 'Uses temporarily relieves minor aches and pains due to: headache toothache backache menstrual cramps the common cold muscular aches minor pain of arthritis temporarily reduces fever',
@@ -1637,7 +1637,7 @@ export const FALLBACK_MEDICINES = [
     stock: 75,
   },
   {
-    id: '6a392fef9669b4e382c37200',
+    id: '6a3b5549822c3efd7a002dbf',
     name: 'Levothyroxine 100mcg',
     price: 38,
     description: '1 INDICATIONS AND USAGE Hypothyroidism Levothyroxine sodium tablets are indicated in adult and pediatric patients, including neonates, as a replacement therapy in primary (thyroidal), secondary (pituitary), and tertia...',
@@ -1652,7 +1652,7 @@ export const FALLBACK_MEDICINES = [
     stock: 110,
   },
   {
-    id: '6a392fef9669b4e382c371fe',
+    id: '6a3b5549822c3efd7a002dbd',
     name: 'Lisinopril 10mg',
     price: 45,
     description: 'INDICATIONS AND USAGE Lisinopril and hydrochlorothiazide tablets are indicated for the treatment of hypertension, to lower blood pressure. Lowering blood pressure lowers the risk of fatal and non-fatal cardiovascular...',
@@ -1667,7 +1667,7 @@ export const FALLBACK_MEDICINES = [
     stock: 80,
   },
   {
-    id: '6a392fef9669b4e382c37201',
+    id: '6a3b5549822c3efd7a002dc0',
     name: 'Losartan 50mg',
     price: 42,
     description: '1 INDICATIONS AND USAGE Losartan potassium tablets are an angiotensin II receptor blocker (ARB) indicated for: • Treatment of hypertension, to lower blood pressure in adults and children greater than 6 years old. Lowe...',
@@ -1682,7 +1682,7 @@ export const FALLBACK_MEDICINES = [
     stock: 70,
   },
   {
-    id: '6a392fef9669b4e382c37208',
+    id: '6a3b5549822c3efd7a002dc7',
     name: 'Meloxicam 15mg',
     price: 24,
     description: '1 INDICATIONS AND USAGE Meloxicam tablet USP is a non-steroidal anti-inflammatory drug indicated for: Osteoarthritis (OA) ( 1.1 ) Rheumatoid Arthritis (RA) ( 1.2 ) Juvenile Rheumatoid Arthritis (JRA) in patients who w...',
@@ -1697,7 +1697,7 @@ export const FALLBACK_MEDICINES = [
     stock: 95,
   },
   {
-    id: '6a392fef9669b4e382c371fc',
+    id: '6a3b5549822c3efd7a002dbb',
     name: 'Metformin 500mg',
     price: 30,
     description: '1 INDICATIONS AND USAGE ZITUVIMET is a combination of sitagliptin, a dipeptidyl peptidase-4 (DPP-4) inhibitor, and metformin hydrochloride (HCl), a biguanide, indicated as an adjunct to diet and exercise to improve gl...',
@@ -1712,7 +1712,7 @@ export const FALLBACK_MEDICINES = [
     stock: 90,
   },
   {
-    id: '6a392fef9669b4e382c37207',
+    id: '6a3b5549822c3efd7a002dc6',
     name: 'Montelukast 10mg',
     price: 33,
     description: '1 INDICATIONS AND USAGE Montelukast sodium chewable tablets are a leukotriene receptor antagonist indicated for: • Prophylaxis and chronic treatment of asthma in patients 2 years of age and older ( 1.1 ). • Acute prev...',
@@ -1727,7 +1727,7 @@ export const FALLBACK_MEDICINES = [
     stock: 85,
   },
   {
-    id: '6a392fef9669b4e382c37209',
+    id: '6a3b5549822c3efd7a002dc8',
     name: 'Pantoprazole 40mg',
     price: 39,
     description: '1 INDICATIONS AND USAGE Pantoprazole Sodium for Injection is indicated for treatment of: gastroesophageal reflux disease (GERD) and a history of erosive esophagitis (EE) for up to 10 days in adults. pathological hyper...',
@@ -1742,7 +1742,7 @@ export const FALLBACK_MEDICINES = [
     stock: 75,
   },
   {
-    id: '6a392fef9669b4e382c371f9',
+    id: '6a3b5549822c3efd7a002db8',
     name: 'Paracetamol / Acetaminophen 500mg',
     price: 25,
     description: 'Uses temporarily relieves minor aches and pains due to: headache the common cold backache minor pain of arthritis toothache muscular aches premenstrual and menstrual cramps temporarily reduces fever',
@@ -1757,7 +1757,7 @@ export const FALLBACK_MEDICINES = [
     stock: 100,
   },
   {
-    id: '6a392fef9669b4e382c37203',
+    id: '6a3b5549822c3efd7a002dc2',
     name: 'Prednisone 5mg',
     price: 15,
     description: 'INDICATIONS Prednisone tablets are indicated in the following conditions: 1. Endocrine Disorders Primary or secondary adrenocortical insufficiency (hydrocortisone or cortisone is the first choice; synthetic analogs ma...',
@@ -1772,7 +1772,7 @@ export const FALLBACK_MEDICINES = [
     stock: 150,
   },
   {
-    id: '6a392fef9669b4e382c37206',
+    id: '6a3b5549822c3efd7a002dc5',
     name: 'Sertraline 50mg',
     price: 50,
     description: 'INDICATIONS AND USAGE Major Depressive Disorder – Sertraline hydrochloride is indicated for the treatment of major depressive disorder in adults. The efficacy of Sertraline hydrochloride in the treatment of a major de...',
@@ -1787,7 +1787,7 @@ export const FALLBACK_MEDICINES = [
     stock: 55,
   },
   {
-    id: '6a392fef9669b4e382c3720c',
+    id: '6a3b5549822c3efd7a002dcb',
     name: 'Tamsulosin 0.4mg',
     price: 52,
     description: '1 INDICATIONS AND USAGE Tamsulosin hydrochloride capsules are indicated for the treatment of the signs and symptoms of benign prostatic hyperplasia (BPH) [see Clinical Studies (14)]. Tamsulosin hydrochloride capsules...',
