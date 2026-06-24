@@ -286,7 +286,7 @@ function Medicines() {
               background: '#E6F7EE', color: '#0F9D58', borderRadius: 999,
               padding: '5px 12px', fontSize: '0.78rem', fontWeight: 700, whiteSpace: 'nowrap',
             }}>
-              {filtered.length} items
+              {sortedAndFiltered.length} items
             </span>
           </div>
         </div>
