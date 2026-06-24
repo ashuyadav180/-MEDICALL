@@ -1,3 +1,5 @@
+const { UNIQUE_IMAGE_IDS } = require('./uniqueImageIds');
+
 const MEDICINE_QUERIES = [
   // ──────────────────────────────────────────────────────────────────────────
   // TABLETS (20)
@@ -215,6 +217,14 @@ const getStableIndexFromKey = (key, listLength) => {
 };
 
 const getSeedImageForMedicine = (medicine = {}) => {
+  const name = String(medicine.name || medicine.displayName || '').toLowerCase().trim();
+  const queryIndex = MEDICINE_QUERIES.findIndex(q => String(q.displayName || '').toLowerCase().trim() === name);
+
+  if (queryIndex >= 0 && queryIndex < UNIQUE_IMAGE_IDS.length) {
+    const photoId = UNIQUE_IMAGE_IDS[queryIndex];
+    return `https://images.unsplash.com/photo-${photoId}?q=80&w=800&auto=format&fit=crop`;
+  }
+
   const images = getImagePoolForCategory(medicine.category);
   const seedKey = buildImageSeedKey(medicine);
   return images[getStableIndexFromKey(seedKey, images.length)] || '';

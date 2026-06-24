@@ -2074,7 +2074,7 @@ form select {
     padding: 12px 0;
   }
 
-  >>>>>>>5aa644c (Fix upload prescription redirect flow, correct modal positioning, and resolve global mobile responsiveness bugs) .logo-container {
+  .logo-container {
     flex: 1 1 auto;
     min-width: 0;
   }
@@ -2266,7 +2266,6 @@ form select {
     .toolbar-select,
     .stock-toggle {
       width: 100%;
-      >>>>>>>5aa644c (Fix upload prescription redirect flow, correct modal positioning, and resolve global mobile responsiveness bugs)
     }
 
     .logo-container {
@@ -2467,8 +2466,9 @@ form select {
       flex-wrap: wrap;
     }
   }
+}
 
-  @media (max-width: 420px) {
+@media (max-width: 420px) {
     .header-inner {
       gap: 10px;
     }
@@ -2608,7 +2608,7 @@ form select {
       border-radius: 16px;
     }
 
-    >>>>>>>5aa644c (Fix upload prescription redirect flow, correct modal positioning, and resolve global mobile responsiveness bugs) .category-tabs {
+    .category-tabs {
       flex-wrap: wrap;
       gap: 8px;
     }
